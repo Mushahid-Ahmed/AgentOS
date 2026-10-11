@@ -1,0 +1,158 @@
+{
+  "base": "http://localhost:3000",
+  "at": "2026-10-09T06:10:26.649Z",
+  "shots": [
+    {
+      "name": "landing-1440",
+      "file": "landing-1440.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "webgl2"
+      },
+      "hoverEvidence": null
+    },
+    {
+      "name": "landing-1440-nav-hover",
+      "file": "landing-1440-nav-hover.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "webgl2"
+      },
+      "hoverEvidence": {
+        "sel": "header a[href*=\"login\"], nav a[href*=\"login\"]",
+        "bg": "rgb(28, 28, 33)",
+        "color": "rgb(242, 242, 245)",
+        "borderColor": "rgb(38, 38, 44)",
+        "borderWidth": "1px",
+        "boxShadow": "none",
+        "transform": "none",
+        "cursor": "pointer",
+        "borderAnimations": []
+      }
+    },
+    {
+      "name": "landing-1440-cta-hover",
+      "file": "landing-1440-cta-hover.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "webgl2"
+      },
+      "hoverEvidence": {
+        "sel": "main section:has(h1) a[href=\"/signup\"]",
+        "bg": "rgb(117, 144, 255)",
+        "color": "rgb(10, 10, 11)",
+        "borderColor": "rgb(10, 10, 11)",
+        "borderWidth": "0px",
+        "boxShadow": "none",
+        "transform": "none",
+        "cursor": "pointer",
+        "borderAnimations": []
+      }
+    },
+    {
+      "name": "login-1440-cta-hover",
+      "file": "login-1440-cta-hover.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "no canvas"
+      },
+      "hoverEvidence": {
+        "sel": "form button[type=\"submit\"]",
+        "bg": "rgb(117, 144, 255)",
+        "color": "rgb(10, 10, 11)",
+        "borderColor": "rgb(10, 10, 11)",
+        "borderWidth": "0px",
+        "boxShadow": "oklab(0.627427 -0.00259292 -0.190928 / 0.26) 0px 10px 26px 0",
+        "transform": "matrix(1.012, 0, 0, 1.012, 0, -1)",
+        "cursor": "default",
+        "borderAnimations": []
+      }
+    },
+    {
+      "name": "signup-1440-cta-hover",
+      "file": "signup-1440-cta-hover.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "no canvas"
+      },
+      "hoverEvidence": {
+        "sel": "form button[type=\"submit\"]",
+        "bg": "rgb(117, 144, 255)",
+        "color": "rgb(10, 10, 11)",
+        "borderColor": "rgb(10, 10, 11)",
+        "borderWidth": "0px",
+        "boxShadow": "oklab(0.627427 -0.00259292 -0.190928 / 0.259977) 0px 9.9991p",
+        "transform": "matrix(1.012, 0, 0, 1.012, 0, -0.99991)",
+        "cursor": "default",
+        "borderAnimations": []
+      }
+    },
+    {
+      "name": "landing-1440-cta-outline-hover",
+      "file": "landing-1440-cta-outline-hover.png",
+      "vp": "1440x900",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "webgl2"
+      },
+      "hoverEvidence": {
+        "sel": "main section:has(h1) a[href=\"/login\"]",
+        "bg": "rgb(28, 28, 33)",
+        "color": "rgb(242, 242, 245)",
+        "borderColor": "rgb(38, 38, 44)",
+        "borderWidth": "1px",
+        "boxShadow": "none",
+        "transform": "none",
+        "cursor": "pointer",
+        "borderAnimations": []
+      }
+    },
+    {
+      "name": "landing-375",
+      "file": "landing-375.png",
+      "vp": "375x812",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "webgl2"
+      },
+      "hoverEvidence": null
+    },
+    {
+      "name": "login-375",
+      "file": "login-375.png",
+      "vp": "375x812",
+      "state": {
+        "reticleNode": false,
+        "bodyCursor": "auto",
+        "cursorNoneStyles": 0,
+        "canvasLive": "no canvas"
+      },
+      "hoverEvidence": null
+    }
+  ],
+  "console": [
+    "landing-1440 [warning] [.WebGL-0x29ac05f36a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "landing-1440 [warning] [.WebGL-0x29ac05f36a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "landing-1440 [warning] [.WebGL-0x29ac05f36a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "landing-1440 [warning] [.WebGL-0x29ac05f36a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}

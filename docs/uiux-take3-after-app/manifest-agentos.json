@@ -1,0 +1,245 @@
+{
+  "mode": "after",
+  "milestone": "agentos",
+  "base": "http://localhost:3100",
+  "at": "2026-10-09T20:40:45.089Z",
+  "shots": [
+    {
+      "name": "agentos-1440-hero",
+      "file": "agentos-1440-hero.png",
+      "vp": "1440x900",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 10237
+      }
+    },
+    {
+      "name": "agentos-1440-replay-top",
+      "file": "agentos-1440-replay-top.png",
+      "vp": "1440x900",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": "#81 completed Should a mid-size e-commerce c",
+        "resultChars": 2791,
+        "panels": 6,
+        "tried": [
+          {
+            "label": "#81 completed Should a mid-size e-commerce c",
+            "chars": 2791
+          }
+        ]
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 13599
+      }
+    },
+    {
+      "name": "agentos-1440-replay-report",
+      "file": "agentos-1440-replay-report.png",
+      "vp": "1440x900",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": "#81 completed Should a mid-size e-commerce c",
+        "resultChars": 2791,
+        "panels": 6,
+        "tried": [
+          {
+            "label": "#81 completed Should a mid-size e-commerce c",
+            "chars": 2791
+          }
+        ]
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 820,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 13599
+      }
+    },
+    {
+      "name": "agentos-375-empty",
+      "file": "agentos-375-empty.png",
+      "vp": "375x812",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 10187
+      }
+    },
+    {
+      "name": "agentos-375-replay",
+      "file": "agentos-375-replay.png",
+      "vp": "375x812",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": "#81 completed Should a mid-size e-commerce c",
+        "resultChars": 2791,
+        "panels": 6,
+        "tried": [
+          {
+            "label": "#81 completed Should a mid-size e-commerce c",
+            "chars": 2791
+          }
+        ]
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 13549
+      }
+    },
+    {
+      "name": "agentos-375-replay-report",
+      "file": "agentos-375-replay-report.png",
+      "vp": "375x812",
+      "route": "/agentos",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": "#81 completed Should a mid-size e-commerce c",
+        "resultChars": 2791,
+        "panels": 6,
+        "tried": [
+          {
+            "label": "#81 completed Should a mid-size e-commerce c",
+            "chars": 2791
+          }
+        ]
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 1500,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 13549
+      }
+    }
+  ],
+  "console": []
+}

@@ -1,0 +1,389 @@
+{
+	"version": 1,
+	"meta": {
+		"labelingMethod": "Each prompt's `expected` label is the model whose routing criteria best match the task's dominant demand. The criteria are the SAME ones both routers are given (ROUTE_CRITERIA in src/server/ai/jev.ts): claude = long-form writing, careful reasoning, nuanced analysis, and code that needs explanation; gpt = general-purpose questions, structured/technical tasks, instruction-following, and data transformation; gemini = fast factual lookups, short answers, latency-sensitive or simple classification requests. Where two plausibly fit, the tie breaks toward gpt (the balanced default).",
+		"caveat": "These labels are a defensible ground truth for measuring router accuracy and Jev-vs-judge agreement, not an absolute claim that exactly one model can do the task. The honest report shows where each router disagrees with this ground truth AND with each other, including where the judge wins.",
+		"categories": ["coding", "creative", "long-doc", "math", "casual", "multilingual"],
+		"promptCount": 54
+	},
+	"prompts": [
+		{
+			"id": "coding-01",
+			"category": "coding",
+			"prompt": "Explain what this recursive quicksort implementation does line by line, and why the choice of pivot affects its worst-case complexity.",
+			"expected": "claude",
+			"rationale": "Code that needs detailed explanation plus careful reasoning about complexity."
+		},
+		{
+			"id": "coding-02",
+			"category": "coding",
+			"prompt": "Write a Python function that returns true if a string is a palindrome, ignoring case and punctuation.",
+			"expected": "gpt",
+			"rationale": "A self-contained, structured technical task with clear requirements."
+		},
+		{
+			"id": "coding-03",
+			"category": "coding",
+			"prompt": "Refactor this 200-line God class to use dependency injection, and justify each change you make.",
+			"expected": "claude",
+			"rationale": "Nuanced restructuring where the reasoning behind each change matters."
+		},
+		{
+			"id": "coding-04",
+			"category": "coding",
+			"prompt": "What is the time complexity of binary search?",
+			"expected": "gemini",
+			"rationale": "Fast factual lookup with a short answer."
+		},
+		{
+			"id": "coding-05",
+			"category": "coding",
+			"prompt": "My React useEffect fires twice on mount in development. Walk me through why that happens and how StrictMode relates to it.",
+			"expected": "claude",
+			"rationale": "Careful reasoning and an explanatory answer, not just a fix."
+		},
+		{
+			"id": "coding-06",
+			"category": "coding",
+			"prompt": "Convert this JSON array of objects into a CSV string in JavaScript, handling commas inside values.",
+			"expected": "gpt",
+			"rationale": "Data transformation with a structured, well-specified output."
+		},
+		{
+			"id": "coding-07",
+			"category": "coding",
+			"prompt": "Design a REST API for a library system with books, members, and loans, and explain the trade-offs in your endpoint design.",
+			"expected": "claude",
+			"rationale": "Design reasoning where justifying trade-offs is the point."
+		},
+		{
+			"id": "coding-08",
+			"category": "coding",
+			"prompt": "Rename the variable `x` to something meaningful in this three-line snippet.",
+			"expected": "gemini",
+			"rationale": "Trivial, latency-sensitive edit with a short answer."
+		},
+		{
+			"id": "coding-09",
+			"category": "coding",
+			"prompt": "Write unit tests for a function that parses dates in ISO, US, and European formats.",
+			"expected": "gpt",
+			"rationale": "Structured technical task, instruction-following across clear cases."
+		},
+		{
+			"id": "creative-01",
+			"category": "creative",
+			"prompt": "Write a short story about a lighthouse keeper who finds a message in a bottle washed ashore.",
+			"expected": "claude",
+			"rationale": "Long-form creative writing where prose quality matters most."
+		},
+		{
+			"id": "creative-02",
+			"category": "creative",
+			"prompt": "Write a haiku about autumn rain.",
+			"expected": "gemini",
+			"rationale": "Very short-form output; speed favors gemini under the short-answer criterion."
+		},
+		{
+			"id": "creative-03",
+			"category": "creative",
+			"prompt": "Brainstorm ten catchy names for a podcast about home cooking.",
+			"expected": "gpt",
+			"rationale": "Structured list generation following an explicit count and topic."
+		},
+		{
+			"id": "creative-04",
+			"category": "creative",
+			"prompt": "Compose a heartfelt eulogy for a beloved high-school teacher.",
+			"expected": "claude",
+			"rationale": "Nuanced, emotionally careful long-form prose."
+		},
+		{
+			"id": "creative-05",
+			"category": "creative",
+			"prompt": "Rewrite this plain product description so it sounds more luxurious and aspirational.",
+			"expected": "claude",
+			"rationale": "Writing craft and tone, where word choice nuance is the value."
+		},
+		{
+			"id": "creative-06",
+			"category": "creative",
+			"prompt": "Give me a random creative gamer username.",
+			"expected": "gemini",
+			"rationale": "Short, low-stakes, latency-sensitive single-token answer."
+		},
+		{
+			"id": "creative-07",
+			"category": "creative",
+			"prompt": "Describe a fantasy world's magic system in detail, including its rules, costs, and limits.",
+			"expected": "claude",
+			"rationale": "Long-form, internally consistent worldbuilding requiring nuance."
+		},
+		{
+			"id": "creative-08",
+			"category": "creative",
+			"prompt": "Write a two-line jingle for a toothpaste brand.",
+			"expected": "gemini",
+			"rationale": "Very short creative output; speed is the dominant factor."
+		},
+		{
+			"id": "creative-09",
+			"category": "creative",
+			"prompt": "Write a limerick about a programmer who can't find their bug.",
+			"expected": "gemini",
+			"rationale": "Short, playful, fixed-form verse; a quick low-complexity answer."
+		},
+		{
+			"id": "longdoc-01",
+			"category": "long-doc",
+			"prompt": "Summarize this 50-page research paper and critique the soundness of its methodology.",
+			"expected": "claude",
+			"rationale": "Long-document comprehension plus careful critical reasoning."
+		},
+		{
+			"id": "longdoc-02",
+			"category": "long-doc",
+			"prompt": "Extract every action item and its owner from this long meeting transcript into a table.",
+			"expected": "gpt",
+			"rationale": "Structured extraction into a specified tabular format."
+		},
+		{
+			"id": "longdoc-03",
+			"category": "long-doc",
+			"prompt": "Compare and contrast the central arguments of these three lengthy essays.",
+			"expected": "claude",
+			"rationale": "Nuanced comparative analysis across long sources."
+		},
+		{
+			"id": "longdoc-04",
+			"category": "long-doc",
+			"prompt": "Give me a one-sentence TL;DR of this 2000-word article.",
+			"expected": "gemini",
+			"rationale": "Compressed to a single short answer; speed-favorable."
+		},
+		{
+			"id": "longdoc-05",
+			"category": "long-doc",
+			"prompt": "Based on this long contract, what exactly does the termination clause allow and require?",
+			"expected": "claude",
+			"rationale": "Careful reasoning over dense long-form legal text."
+		},
+		{
+			"id": "longdoc-06",
+			"category": "long-doc",
+			"prompt": "Split this long document into logical sections and give each a concise heading.",
+			"expected": "gpt",
+			"rationale": "Structured transformation following an explicit output shape."
+		},
+		{
+			"id": "longdoc-07",
+			"category": "long-doc",
+			"prompt": "Find every mention of quarterly revenue in this long report and list the figures in order.",
+			"expected": "gpt",
+			"rationale": "Structured data extraction with an ordered, well-defined result."
+		},
+		{
+			"id": "longdoc-08",
+			"category": "long-doc",
+			"prompt": "Write an executive summary of this annual report for a non-technical board member.",
+			"expected": "claude",
+			"rationale": "Long-form synthesis tailored to an audience, needing nuance."
+		},
+		{
+			"id": "longdoc-09",
+			"category": "long-doc",
+			"prompt": "Classify the sentiment of each paragraph in this long product review as positive, neutral, or negative.",
+			"expected": "gemini",
+			"rationale": "Simple repeated classification, high-volume and latency-sensitive."
+		},
+		{
+			"id": "math-01",
+			"category": "math",
+			"prompt": "Prove that the square root of 2 is irrational.",
+			"expected": "claude",
+			"rationale": "Careful step-by-step mathematical reasoning and proof."
+		},
+		{
+			"id": "math-02",
+			"category": "math",
+			"prompt": "What is 15% of 240?",
+			"expected": "gemini",
+			"rationale": "Fast arithmetic with a single short answer."
+		},
+		{
+			"id": "math-03",
+			"category": "math",
+			"prompt": "Solve for x: 3x + 7 = 22.",
+			"expected": "gemini",
+			"rationale": "Simple, short, latency-sensitive computation."
+		},
+		{
+			"id": "math-04",
+			"category": "math",
+			"prompt": "Explain the intuition behind gradient descent, including the relevant calculus.",
+			"expected": "claude",
+			"rationale": "Careful reasoning plus explanatory prose about a concept."
+		},
+		{
+			"id": "math-05",
+			"category": "math",
+			"prompt": "Compute the derivative of x^3 * sin(x) with respect to x.",
+			"expected": "gpt",
+			"rationale": "A structured technical computation following a known procedure."
+		},
+		{
+			"id": "math-06",
+			"category": "math",
+			"prompt": "A train leaves city A at 60 mph while another leaves city B, 300 miles away, at 45 mph toward it. When and where do they meet?",
+			"expected": "gpt",
+			"rationale": "Multi-step structured word problem with a defined method."
+		},
+		{
+			"id": "math-07",
+			"category": "math",
+			"prompt": "Roughly how many euros is 100 US dollars?",
+			"expected": "gemini",
+			"rationale": "Fast approximate factual lookup, short answer."
+		},
+		{
+			"id": "math-08",
+			"category": "math",
+			"prompt": "Walk me through a two-column proof of the Pythagorean theorem.",
+			"expected": "claude",
+			"rationale": "Careful reasoning presented as an explanatory proof."
+		},
+		{
+			"id": "math-09",
+			"category": "math",
+			"prompt": "What is the greatest common divisor of 48 and 18?",
+			"expected": "gemini",
+			"rationale": "Fast factual computation with a single short answer."
+		},
+		{
+			"id": "casual-01",
+			"category": "casual",
+			"prompt": "Hey, what's up?",
+			"expected": "gemini",
+			"rationale": "Trivial short conversational reply; latency-sensitive."
+		},
+		{
+			"id": "casual-02",
+			"category": "casual",
+			"prompt": "Thanks so much for your help, that fixed it!",
+			"expected": "gemini",
+			"rationale": "Short social acknowledgment, minimal answer."
+		},
+		{
+			"id": "casual-03",
+			"category": "casual",
+			"prompt": "Can you help me plan a productive day around work, exercise, and errands?",
+			"expected": "gpt",
+			"rationale": "General-purpose planning with a helpful structured default."
+		},
+		{
+			"id": "casual-04",
+			"category": "casual",
+			"prompt": "What can I make for dinner with chicken, rice, and frozen peas?",
+			"expected": "gpt",
+			"rationale": "General-purpose question with a reliable balanced answer."
+		},
+		{
+			"id": "casual-05",
+			"category": "casual",
+			"prompt": "Tell me a fun fact about octopuses.",
+			"expected": "gemini",
+			"rationale": "Fast factual lookup, short answer."
+		},
+		{
+			"id": "casual-06",
+			"category": "casual",
+			"prompt": "I've been feeling really burned out by work lately. Do you have any thoughtful advice?",
+			"expected": "claude",
+			"rationale": "Nuanced, empathetic response where careful prose matters."
+		},
+		{
+			"id": "casual-07",
+			"category": "casual",
+			"prompt": "What's the weather usually like in Paris in the spring?",
+			"expected": "gemini",
+			"rationale": "Fast general-knowledge lookup, short answer."
+		},
+		{
+			"id": "casual-08",
+			"category": "casual",
+			"prompt": "Recommend a simple beginner workout routine for three days a week.",
+			"expected": "gpt",
+			"rationale": "General-purpose structured recommendation."
+		},
+		{
+			"id": "casual-09",
+			"category": "casual",
+			"prompt": "lol that's hilarious",
+			"expected": "gemini",
+			"rationale": "Trivial short conversational turn."
+		},
+		{
+			"id": "multilingual-01",
+			"category": "multilingual",
+			"prompt": "Translate 'Where is the nearest train station?' into Japanese.",
+			"expected": "gpt",
+			"rationale": "Reliable structured translation of a short, well-defined phrase."
+		},
+		{
+			"id": "multilingual-02",
+			"category": "multilingual",
+			"prompt": "Translate this short sentence into Spanish: 'Good morning, how are you today?'",
+			"expected": "gemini",
+			"rationale": "Very short, common translation; speed-favorable."
+		},
+		{
+			"id": "multilingual-03",
+			"category": "multilingual",
+			"prompt": "Translate and localize this full marketing page into German, preserving the brand's playful tone.",
+			"expected": "claude",
+			"rationale": "Long-form, nuanced localization where tone and craft matter."
+		},
+		{
+			"id": "multilingual-04",
+			"category": "multilingual",
+			"prompt": "How do you say 'computer' in French?",
+			"expected": "gemini",
+			"rationale": "Fast single-word factual lookup."
+		},
+		{
+			"id": "multilingual-05",
+			"category": "multilingual",
+			"prompt": "Explain the difference between the Japanese particles は and が, with examples.",
+			"expected": "claude",
+			"rationale": "Nuanced linguistic explanation requiring careful reasoning."
+		},
+		{
+			"id": "multilingual-06",
+			"category": "multilingual",
+			"prompt": "Write a formal business email in Chinese politely declining a job offer.",
+			"expected": "claude",
+			"rationale": "Long-form writing with register and cultural nuance."
+		},
+		{
+			"id": "multilingual-07",
+			"category": "multilingual",
+			"prompt": "Transliterate this Russian paragraph into the Latin alphabet.",
+			"expected": "gpt",
+			"rationale": "Structured transformation following a defined transliteration scheme."
+		},
+		{
+			"id": "multilingual-08",
+			"category": "multilingual",
+			"prompt": "What does the German idiom 'Ich verstehe nur Bahnhof' mean?",
+			"expected": "gemini",
+			"rationale": "Fast factual lookup with a short answer."
+		},
+		{
+			"id": "multilingual-09",
+			"category": "multilingual",
+			"prompt": "Summarize this French news article in English, keeping the key facts and nuance.",
+			"expected": "claude",
+			"rationale": "Long-document comprehension plus cross-language synthesis with nuance."
+		}
+	]
+}

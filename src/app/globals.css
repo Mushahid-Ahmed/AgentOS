@@ -1,0 +1,1675 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 is CSS-first — no tailwind.config.js. Static tokens (nothing
+   that needs to change with color scheme) live directly in @theme, which
+   both declares them as real CSS variables and generates the matching
+   Tailwind utilities (e.g. --radius-lg below gives you `rounded-lg`,
+   --ease-out-soft gives you `ease-out-soft`). See docs/DESIGN.md. */
+@theme {
+	/* Type pairing (UI/UX run, UX-D2): ONE neo-grotesque family (Inter, variable
+	   100-900) is the display AND text face across all six surfaces — heavy weights
+	   with tight negative tracking for display, 400 for body — plus IBM Plex Mono
+	   for terminal/code/measured numbers. This matches the references' character
+	   (Lusion Aeonik / DownBeat Instrument Sans) without copying their proprietary
+	   files. The former editorial serif (EB Garamond) is retired; --font-serif is
+	   kept only as an alias so existing `font-serif` usages flip to the grotesque. */
+	--font-display:
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: var(--font-ibm-plex-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+	/* Alias so legacy `font-serif` consumers resolve to the single grotesque. */
+	--font-serif: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+	--radius-sm: 6px;
+	--radius-control: 8px;
+	--radius: 10px;
+	--radius-lg: 16px;
+	--radius-xl: 24px;
+
+	/* Easings generate `ease-*` utilities. `expo` is the site's SIGNATURE ease
+	   (the long expo-out the references use for line/scene reveals, measured off
+	   DownBeat's cubic-bezier(0.16,1,0.3,1)); `out-soft` is the default decel;
+	   `spring` backs magnetic/route-pulse; `in-out` for sheen. */
+	--ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Motion durations as plain vars (used by keyframes + inline styles; they
+   don't need generated utilities). Kept next to the palette so the whole
+   motion vocabulary is tunable in one place. All motion that uses these is
+   disabled under prefers-reduced-motion — see the guard at the bottom. */
+:root {
+	--motion-fast: 120ms;
+	--motion-base: 220ms;
+	--motion-slow: 420ms;
+	--motion-scene: 1200ms;
+}
+
+/* ONE DARK SYSTEM (UI/UX run, UX-D1). The base palette is now the Lusion-grade
+   near-black immersive theme for ALL six surfaces; surfaces differ by intensity
+   (landing cinematic, product calm), not by light/dark theme. The former light
+   "dawn" editorial palette is retired. --accent is the single electric-blue
+   accent (links, accent words, progress, series-1, focus glow, primary CTA pill
+   with dark ink on it — the DownBeat character); neutrals carry everything else.
+   Muted text is tuned for WCAG AA on the near-black canvas. */
+:root {
+	--bg: #0a0a0b; /* near-black canvas */
+	--surface: #131316; /* elevated panel / card / input fill */
+	--surface-hover: #1c1c21; /* hover fill */
+	--border: #26262c; /* hairline on dark */
+	--border-strong: #3a3a42;
+	--text: #f2f2f5; /* near-white primary text — 17.7:1 on bg */
+	--text-muted: #b9b9c2; /* 10.2:1 on bg — AA body + large */
+	--text-faint: #8b8b96; /* 5.9:1 on bg — AA body, measured by scripts/*-contrast audit */
+	--accent: #5b7cfa; /* single electric-blue accent */
+	--accent-hover: #7590ff;
+	--accent-ink: #0a0a0b; /* dark ink on the blue accent */
+	--success: #46b37d;
+	--warning: #d9a441;
+	--danger: #e0706a;
+
+	/* Chart series identity on the dark canvas: accent leads, neutrals follow. */
+	--series-1: var(--accent); /* accent — primary series */
+	--series-2: #b9b9c2; /* mid neutral — secondary series */
+	--series-3: #6e6e78; /* dark-mid neutral — tertiary series */
+
+	/* V5 §3 data-flow line identity. Three lanes of the pipeline, each a
+	   gradient between two existing palette values; the two literals are the
+	   hero's own violet and sky, hoisted here so the V5 layers carry no colours
+	   of their own. Nothing above this line changes. */
+	--flow-input-a: var(--accent);
+	--flow-input-b: #7065e2;
+	--flow-route-a: var(--danger);
+	--flow-route-b: var(--warning);
+	--flow-evidence-a: var(--success);
+	--flow-evidence-b: #8abced;
+
+	/* Pointer-follow sheen + grain tuneables for the dark canvas. */
+	--sheen-opacity: 0.16;
+	--grain-opacity: 0.05;
+
+	/* Canvas cannot read the token cascade, so cursor-field.tsx resolves these
+	   two at runtime: --accent for a mote the pointer is pushing, and the mote's
+	   resting ink. It is a blue-grey, not --text-faint, because motes are light
+	   rather than text — the neutral greys in this file are chosen for contrast
+	   ratios against body copy, which would make the field read as type. */
+	--mote-ambient: #8a93a8;
+	--ring-color: color-mix(in oklab, var(--accent) 50%, transparent);
+	color-scheme: dark;
+}
+
+@theme inline {
+	--color-bg: var(--bg);
+	--color-surface: var(--surface);
+	--color-surface-hover: var(--surface-hover);
+	--color-border: var(--border);
+	--color-border-strong: var(--border-strong);
+	--color-text: var(--text);
+	--color-text-muted: var(--text-muted);
+	--color-text-faint: var(--text-faint);
+	--color-accent: var(--accent);
+	--color-accent-hover: var(--accent-hover);
+	--color-accent-ink: var(--accent-ink);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-danger: var(--danger);
+}
+
+body {
+	background-color: var(--bg);
+	color: var(--text);
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+/* Take 3 Job 1 asks for the traditional cursor: arrow on the body, text caret in
+   inputs, hand on buttons and links. `<a href>` already computes `pointer` from
+   the UA sheet, but Chrome leaves `<button>` at `default`, so the hand had to be
+   restored explicitly on clickables. A disabled control is deliberately left at
+   `default` — a hand that promises a click that will not happen is its own lie.
+   This is a native keyword, not a drawn cursor: there is no cursor node, library
+   or `cursor: none` anywhere in the product. */
+@media (hover: hover) {
+	button:not([disabled]),
+	[role='button']:not([disabled]),
+	summary {
+		cursor: pointer;
+	}
+}
+
+/* Measured numbers everywhere (telemetry chips, gauges, charts) opt into the
+   mono face + tabular figures so digits don't jitter as values change. */
+.font-numeric {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum' 1;
+}
+
+/* One display voice for every heading, shared by all six surfaces so the same
+   role always reads identically: the neo-grotesque (Inter) at heavy weight with
+   tight negative tracking (the Lusion/DownBeat cadence). `.title-editorial` and
+   `.hero-editorial` keep their legacy names (many consumers) but now speak the
+   grotesque, not the retired serif. */
+.title-editorial {
+	font-family: var(--font-display);
+	font-size: 19px;
+	line-height: 1.25;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.hero-editorial {
+	font-family: var(--font-display);
+	font-size: 30px;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+	font-weight: 700;
+}
+
+/* Huge display type for the landing's graphic moments (hero wordmark, footer).
+   Variable Inter at 800-900 with very tight tracking, clamp-scaled. */
+.display-huge {
+	font-family: var(--font-display);
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 0.95;
+	font-size: clamp(3rem, 11vw, 9rem);
+}
+
+/* Uppercase micro-label (section eyebrows, "SCROLL TO EXPLORE", meta). */
+.label-uppercase {
+	font-family: var(--font-display);
+	font-weight: 500;
+	font-size: 0.75rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+/* ---- Motion vocabulary ----------------------------------------------------
+   Keyframes are defined once and reused by the chat visualizer, dashboard
+   charts, skeletons and route transitions. Each is neutral on transform/opacity
+   only (compositor-friendly), and every consumer pairs it with a
+   motion-reduce:animate-none or the global guard below. */
+@keyframes route-pulse {
+	0% {
+		opacity: 0.35;
+		transform: scale(0.82);
+	}
+	60% {
+		opacity: 1;
+		transform: scale(1.06);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes gauge-sweep {
+	from {
+		stroke-dashoffset: 1;
+	}
+}
+
+@keyframes bar-grow {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+@keyframes shimmer {
+	from {
+		background-position: 200% 0;
+	}
+	to {
+		background-position: -200% 0;
+	}
+}
+
+@keyframes fade-rise {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* Faint twinkle for the stars inside the door illustration. Purely decorative;
+   the global reduced-motion guard below collapses it to a static dot. */
+@keyframes twinkle {
+	0%,
+	100% {
+		opacity: 0.25;
+	}
+	50% {
+		opacity: 0.9;
+	}
+}
+
+.door-star {
+	animation: twinkle 3.2s var(--ease-in-out) infinite;
+}
+
+/* Terminal write-head caret for the scroll-typed Decision Bus log. steps(1)
+   keeps it a hard blink (a CRT cursor does not fade); the reduced-motion guard
+   collapses it to a steady block, so the log still reads as a cursor, not as a
+   missing character. */
+@keyframes caret-blink {
+	0%,
+	49% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}
+
+.caret-blink {
+	animation: caret-blink 1.1s steps(1, end) infinite;
+}
+
+/* Hero scroll indicator: a dot travels down a hairline on the landing.
+   Decorative; the global reduced-motion guard collapses it to static. */
+@keyframes scroll-dot {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	18% {
+		opacity: 1;
+	}
+	82% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(400%);
+		opacity: 0;
+	}
+}
+
+.scroll-dot {
+	animation: scroll-dot 2.2s var(--ease-expo) infinite;
+}
+
+/* Door swing on the auth surfaces: a slight perspective rotate around the
+   hinge (right) edge. `nudge` = hover over the primary button, `swing` = the
+   ~500ms open on successful sign-in. Reduced-motion collapses the transition
+   via the global guard, and the form skips the wait entirely. */
+.door-stage {
+	perspective: 700px;
+}
+
+.door-nudge {
+	transform: rotateY(-8deg);
+	transform-origin: right center;
+}
+
+.door-swing {
+	transform: rotateY(-20deg);
+	transform-origin: right center;
+}
+
+/* Loading skeleton: a moving specular band over a surface-hover base. */
+.skeleton {
+	background-image: linear-gradient(
+		90deg,
+		var(--surface-hover) 0%,
+		color-mix(in oklab, var(--surface-hover) 60%, var(--surface)) 50%,
+		var(--surface-hover) 100%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+/* Pointer-follow specular highlight for hero panels (see motion/sheen.tsx).
+   --mx/--my are set on pointermove; the accent radial fades in on hover. The
+   ::after paints above the panel surface (an absolute box over in-flow
+   children) but is pointer-transparent and kept subtle so text contrast holds.
+   The wrapper clips it to the panel's radius via overflow-hidden. */
+.sheen {
+	position: relative;
+}
+
+.sheen::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity var(--motion-slow) var(--ease-out-soft);
+	background: radial-gradient(
+		320px circle at var(--mx, 50%) var(--my, 50%),
+		var(--ring-color),
+		transparent 60%
+	);
+}
+
+/* Gated on (hover: hover) the way Tailwind v4 gates its own `hover:` variants.
+   Ungated, a tap leaves :hover stuck on touch and the glow stays lit at the last
+   touch point until the next tap. */
+@media (hover: hover) {
+	.sheen:hover::after {
+		opacity: var(--sheen-opacity);
+	}
+}
+
+/* Depth layer for pointer-tilted cards (see motion/tilt.tsx): the child rides
+   the front of the card's perspective, so the icon separates from the body as
+   the card tips. Only meaningful inside a Tilt wrapper; harmless elsewhere, and
+   flattened to no transform when the wrapper applies none. */
+.tilt-depth {
+	transform: translateZ(26px);
+}
+
+/* FAQ accordion height (§6.2-11) on native <details>: the open/close transition
+   animates the ::details-content box from 0 to its auto height. interpolate-size
+   is what makes 0 → auto interpolatable at all; browsers that know neither the
+   pseudo-element nor the property simply open and close instantly, with the
+   answer always in the DOM and reachable by keyboard.
+
+   Take 4 §4 folds that same box into a sheet of paper: it also rotates around its
+   top edge, opens a clip-path down from the crease, and arrives on a spring. One
+   element, one set of transitions — the height maths is untouched and the fold
+   only paints on top of it. The closed state stays "zero height", never "not
+   present", so no answer can be stranded in a browser that ignores either
+   property. */
+details::details-content {
+	block-size: 0;
+	overflow-y: clip;
+	opacity: 0;
+	clip-path: polygon(0 0, 100% 0, 100% 8%, 0 8%);
+	transform: perspective(700px) rotateX(-24deg);
+	transform-origin: top center;
+	transition:
+		block-size var(--motion-slow) var(--ease-expo),
+		content-visibility var(--motion-slow) var(--ease-expo) allow-discrete,
+		opacity var(--motion-slow) var(--ease-out-soft),
+		clip-path var(--motion-slow) var(--ease-expo),
+		transform var(--motion-slow) var(--ease-spring);
+}
+
+details[open]::details-content {
+	block-size: auto;
+	opacity: 1;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	transform: perspective(700px) rotateX(0deg);
+}
+
+/* The crease: a strip of shadow across the fold, strongest while the sheet is
+   still upright and lifting away as it flattens. An animation rather than a
+   transition because opening is where it starts, not where it ends. */
+.faq-answer::before {
+	content: '';
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 26px;
+	pointer-events: none;
+	background: linear-gradient(rgb(0 0 0 / 0.55), transparent);
+	opacity: 0;
+}
+
+details[open] .faq-answer::before {
+	animation: fold-lift 520ms var(--ease-out-soft) both;
+}
+
+@keyframes fold-lift {
+	from {
+		opacity: 0.85;
+		transform: translateY(0) scaleY(0.35);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(10px) scaleY(1);
+	}
+}
+
+/* Global reduced-motion kill-switch: neutralizes the decorative keyframe loops
+   for users who ask for it. Component-level motion-reduce:* still applies for
+   the transitions; this backstops the keyframe animations. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-delay: 0ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* ---- Auth surfaces (Take 2, brief §7.2) ------------------------------------
+   /login and /signup carry the landing's tokens and its signature ease, but a
+   deliberately lighter motion budget: the animated background is two CSS
+   gradient lobes on long transform loops, NOT a second WebGL context — the
+   auth routes stay shader-free so their payload and main thread stay small. */
+.auth-aurora {
+	position: absolute;
+	inset: -18%;
+	pointer-events: none;
+}
+
+/* Each lobe is sized to the ellipse it actually paints. It used to be `inset: 0`
+   on a box 136% of the viewport (measured 1939x1205 at 1440x900), and the gradient
+   inside it reaches full transparency at 70%/72% of its own radius — so ~69% of
+   every frame's raster was provably invisible pixels. Taking those pixels away is
+   the whole fix, and it was measured before it was shipped (fresh load per rep,
+   3 reps, `_lh/take3/m7/diag6.txt` + `diag7.txt`): /login scroll pacing
+   116.6 → 50 ms at p50 and 133.4 → 66.8 ms at p95, frame count 14 → 27; /signup
+   116.7 → 50.1 and 133.4 → 66.7. Changing the *property* (translate-only loops)
+   changed nothing, which is what proved the cost was painted area and not the
+   transform. Positions and sizes are the same fractions of the same parent, so the
+   glow lands exactly where it did before; only the dead margin is gone. */
+.auth-aurora::before,
+.auth-aurora::after {
+	content: '';
+	position: absolute;
+	will-change: transform;
+}
+
+.auth-aurora::before {
+	left: 1.4%;
+	top: 2.7%;
+	width: 53%;
+	height: 59%;
+	background: radial-gradient(
+		50% 50% at 50% 50%,
+		color-mix(in oklab, var(--accent) 20%, transparent),
+		transparent 100%
+	);
+	/* Travel is re-expressed against the smaller box so the absolute drift is
+	   unchanged: 6% of 1939px = 11.3% of 1028px, -5% of 1205px = -8.5% of 711px. */
+	animation: auth-aurora-a 26s var(--ease-in-out) infinite alternate;
+}
+
+.auth-aurora::after {
+	left: 47.5%;
+	top: 39.2%;
+	width: 49%;
+	height: 57.6%;
+	background: radial-gradient(
+		50% 50% at 50% 50%,
+		color-mix(in oklab, var(--accent) 12%, transparent),
+		transparent 100%
+	);
+	animation: auth-aurora-b 34s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes auth-aurora-a {
+	to {
+		transform: translate3d(11.3%, -8.5%, 0) scale(1.14);
+	}
+}
+
+@keyframes auth-aurora-b {
+	to {
+		transform: translate3d(-16.3%, 10.4%, 0) scale(1.08);
+	}
+}
+
+/* The product-surface pair. `.app-aurora` keeps the original loops and the
+   original geometry: its box is 1344x340, small enough that it already scrolls at
+   16.7ms p50 with the main thread at 0.15ms/frame (`_lh/take3/m7/diag5.txt`), so
+   there was nothing to win by resizing it. */
+@keyframes aurora-a {
+	to {
+		transform: translate3d(6%, -5%, 0) scale(1.14);
+	}
+}
+
+@keyframes aurora-b {
+	to {
+		transform: translate3d(-8%, 6%, 0) scale(1.08);
+	}
+}
+
+/* Entrance (§7.2-1/8): the card and its steps arrive as CSS animations rather
+   than JS-flipped inline styles, so the first painted frame is already the
+   animated start state (no pre-hydration hold) and the global reduced-motion
+   guard settles them instantly with no JS. `--rise-x` carries direction: login
+   slides in from the left, sign-up from the right, so switching between the two
+   reads as one surface moving rather than a page swap. */
+.auth-stage {
+	animation: auth-stage-in 820ms var(--ease-expo) both;
+}
+
+@keyframes auth-stage-in {
+	from {
+		opacity: 0;
+		transform: scale(0.985);
+	}
+}
+
+.auth-rise {
+	animation: auth-rise-in 640ms var(--ease-expo) both;
+}
+
+@keyframes auth-rise-in {
+	from {
+		opacity: 0;
+		transform: translate(var(--rise-x, 0px), 14px);
+	}
+}
+
+/* Field focus (§7.2-3): the label lifts to primary text, an accent hairline
+   draws left→right under the control, and the ring glows. The input keeps its
+   own :focus-visible outline — this is additive, never a replacement for the
+   keyboard focus indicator. */
+.field-shell:focus-within label {
+	color: var(--text);
+}
+
+.field-underline {
+	position: absolute;
+	bottom: 1px;
+	left: 14px;
+	right: 14px;
+	height: 1.5px;
+	border-radius: 999px;
+	background: var(--accent);
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform var(--motion-slow) var(--ease-expo);
+	pointer-events: none;
+}
+
+.field-shell:focus-within .field-underline {
+	transform: scaleX(1);
+}
+
+.field-shell:focus-within .field-input {
+	box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+/* Primary auth CTA (§7.2-4/5): lift + accent shadow on hover, settle on press,
+   and a click ripple painted by motion/ripple.tsx. */
+.auth-cta {
+	position: relative;
+	overflow: hidden;
+	transition:
+		transform var(--motion-base) var(--ease-expo),
+		box-shadow var(--motion-base) var(--ease-expo),
+		background-color var(--motion-base) var(--ease-out-soft);
+}
+
+/* Same (hover: hover) gate as Tailwind v4 uses for its own hover variants: a tap
+   on touch leaves :hover stuck, which would park the CTA lifted after the press
+   animation was supposed to be over. :active stays ungated — it is the tap. */
+@media (hover: hover) {
+	.auth-cta:hover {
+		transform: translateY(-1px) scale(1.012);
+		box-shadow: 0 10px 26px color-mix(in oklab, var(--accent) 26%, transparent);
+	}
+}
+
+.auth-cta:active {
+	transform: translateY(0) scale(0.99);
+	box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 18%, transparent);
+}
+
+.ripple-host {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	border-radius: inherit;
+	pointer-events: none;
+}
+
+.ripple {
+	position: absolute;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--accent-ink) 26%, transparent);
+	animation: ripple-out 620ms var(--ease-out-soft) forwards;
+}
+
+@keyframes ripple-out {
+	from {
+		opacity: 0.5;
+		transform: scale(0);
+	}
+	to {
+		opacity: 0;
+		transform: scale(1);
+	}
+}
+
+/* Validation failure (§7.2-6): one short lateral shake, transform-only, removed
+   by the global reduced-motion guard so the error text is the only signal. */
+.auth-shake {
+	animation: auth-shake 420ms var(--ease-out-soft);
+}
+
+@keyframes auth-shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	20% {
+		transform: translateX(-7px);
+	}
+	40% {
+		transform: translateX(6px);
+	}
+	60% {
+		transform: translateX(-4px);
+	}
+	80% {
+		transform: translateX(2px);
+	}
+}
+
+/* Success (§7.2-7): the check draws its stroke, then the ring fades up behind
+   it, while the door swings. pathLength=1 keeps the dash maths resolution-free. */
+.auth-check path {
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+	animation: check-draw 420ms var(--ease-expo) 90ms forwards;
+}
+
+@keyframes check-draw {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+.auth-check-ring {
+	transform-origin: center;
+	animation: check-ring 620ms var(--ease-expo) forwards;
+}
+
+@keyframes check-ring {
+	from {
+		opacity: 0;
+		transform: scale(0.86);
+	}
+	40% {
+		opacity: 1;
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* ---- App surfaces (UI/UX Take 3, brief §5) ---------------------------------
+   The in-app views (dashboard, chat, run view) carry the landing's voice rather
+   than a separate product identity: the same display weight, the same signature
+   expo ease, the same accent field — at product intensity, i.e. one entrance
+   choreography per screen instead of a scroll-driven scene per section.
+   Everything here is a CSS animation (not a JS-flipped style), so the first
+   painted frame is already the animated start state and the global
+   prefers-reduced-motion guard above settles it with no JS — content is never
+   gated behind a script. */
+
+/* The landing's aurora at product strength: same two lobes and loops as the auth
+   surfaces, at roughly half the accent so a telemetry page stays calm. */
+.app-aurora {
+	position: absolute;
+	inset: -30% -10% auto;
+	height: 340px;
+	pointer-events: none;
+	opacity: 0.55;
+}
+
+.app-aurora::before,
+.app-aurora::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	will-change: transform;
+}
+
+.app-aurora::before {
+	background: radial-gradient(
+		34% 40% at 22% 30%,
+		color-mix(in oklab, var(--accent) 14%, transparent),
+		transparent 70%
+	);
+	animation: aurora-a 30s var(--ease-in-out) infinite alternate;
+}
+
+.app-aurora::after {
+	background: radial-gradient(
+		30% 36% at 74% 62%,
+		color-mix(in oklab, var(--accent) 8%, transparent),
+		transparent 72%
+	);
+	animation: aurora-b 38s var(--ease-in-out) infinite alternate;
+}
+
+/* Page masthead: the app's answer to the landing hero. Same grotesque, same
+   weight and negative tracking as `.display-huge`, scaled to a working page
+   rather than a full-bleed statement. */
+.app-masthead {
+	font-family: var(--font-display);
+	font-size: clamp(2rem, 4.4vw, 3.25rem);
+	line-height: 1.02;
+	letter-spacing: -0.03em;
+	font-weight: 800;
+}
+
+/* Section entrance, staggered by --i (set per consumer). Runs once on mount:
+   the dashboard's panels are all live at once, so a scroll-triggered reveal
+   would hide data that is already fetched.
+
+   The rise starts at 20% opacity, never at 0, and the stagger is capped. Both
+   halves are measured, not taste (Take 3 M7, delivered build): Chrome does not
+   treat an `opacity: 0` element as an LCP candidate at all, so the dashboard's
+   masthead <h2> (48,006 px²) was invisible to LCP and the metric fell through
+   to a 6,541 px² caption that only exists once the data query resolves —
+   3,388-4,048 ms real-time LCP. With the floor the same <h2> is claimed at
+   1,068-1,108 ms. `both` fill holds the `from` frame for the whole delay, so
+   without the cap a late panel (max --i is 10 here) would sit as a 20% ghost
+   for 700ms before it moved. */
+.panel-in {
+	animation: panel-rise-in 700ms var(--ease-expo) both;
+	animation-delay: min(calc(var(--i, 0) * 70ms), 420ms);
+}
+
+@keyframes panel-rise-in {
+	from {
+		opacity: 0.2;
+		transform: translateY(18px);
+	}
+}
+
+/* Hover depth for dashboard cards. Transform and shadow only — deliberately no
+   border-width/colour change, since Take 3 §2 removed every animated border from
+   the product and a new one here would contradict that. */
+.card-lift {
+	transition:
+		transform var(--motion-base) var(--ease-expo),
+		box-shadow var(--motion-base) var(--ease-expo),
+		background-color var(--motion-base) var(--ease-out-soft);
+}
+
+@media (hover: hover) {
+	.card-lift:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 16px 38px -18px color-mix(in oklab, var(--accent) 30%, transparent);
+		background-color: var(--surface-hover);
+	}
+}
+
+/* Chart draw-in. The sparkline reuses the existing `gauge-sweep` keyframe
+   (pathLength=1 makes the dash maths resolution-free); the donut sweeps each arc
+   open from a zero-length dash, staggered by --i, with --c carrying the circle's
+   circumference from the component. */
+.spark-draw {
+	stroke-dasharray: 1;
+	animation: gauge-sweep 1100ms var(--ease-expo) both;
+}
+
+.donut-arc {
+	animation: donut-sweep 900ms var(--ease-expo) both;
+	animation-delay: calc(var(--i, 0) * 110ms);
+}
+
+@keyframes donut-sweep {
+	from {
+		stroke-dasharray: 0 var(--c, 1);
+	}
+}
+
+/* The model-pool catalog is the whole live registry (hundreds of rows). Scrolling
+   it inside its own bounded region keeps the page a page; the mask fades the last
+   row so the cut reads as continuation, not as clipping. */
+.table-scroll {
+	max-height: 420px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
+	mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
+}
+
+/* The chart components pair each aria-hidden <svg> with a visually-hidden data
+   table. Those tables are wrapped in a `div.sr-only` rather than carrying the
+   class themselves: a <table> treats `width`/`max-width` as suggestions and grows
+   to its min-content, so a "hidden" table still laid itself out hundreds of pixels
+   wide and silently widened <main> at 375px — invisible content, real scrollbar.
+   A block box does clip, so the clip lives on the wrapper. */
+
+/* --- Chat transcript motion (Take 3 §5, milestone 4) ----------------------- */
+
+/* A turn enters from its own side of the thread — the user's bubble arrives from
+   the right, Jev's answer from the left — so direction carries authorship as well
+   as the avatar does. `--bubble-from` is set by the component. Mount-time only:
+   the transcript is keyed by message id and never remounted while streaming, so
+   this runs once per turn and cannot re-play on every token. */
+.bubble-in {
+	animation: bubble-slide-in 520ms var(--ease-expo) both;
+}
+
+@keyframes bubble-slide-in {
+	from {
+		opacity: 0.2;
+		transform: translateX(var(--bubble-from, 0px)) translateY(8px);
+	}
+}
+
+/* The in-flight cue. A spinner stops the moment the first token lands and says
+   nothing while a long answer streams; these keep rising for the whole turn, and
+   the same three dots cover both hops (Jev deciding, then the model answering).
+   The loop starts and ends at a legible 0.55 rather than transparent, because the
+   reduced-motion guard runs one instant iteration and leaves the final frame — a
+   static cue is fine, static invisible dots is not. */
+.stream-dot {
+	animation: dot-rise 1050ms var(--ease-in-out) infinite;
+	animation-delay: calc(var(--i, 0) * 140ms);
+}
+
+@keyframes dot-rise {
+	0%,
+	100% {
+		opacity: 0.55;
+		transform: translateY(0);
+	}
+	30% {
+		opacity: 1;
+		transform: translateY(-3px);
+	}
+}
+
+/* Routing decision trace: each probability bar scales open from its left edge,
+   staggered per row, so the distribution reads as it is weighed. transform rather
+   than width, to stay on the compositor. */
+.route-trace {
+	transform-origin: left center;
+	animation: trace-x 620ms var(--ease-expo) both;
+	animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes trace-x {
+	from {
+		transform: scaleX(0);
+	}
+}
+
+/* Telemetry chips follow the answer in reading order. */
+.chip-in {
+	animation: chip-rise-in 380ms var(--ease-out-soft) both;
+	animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes chip-rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+/* --- AgentOS run view motion (Take 3 §5, milestone 5) ---------------------- */
+
+/* The run view's panels fill in as events arrive, so it needs a cue for a single
+   row appearing inside an already-mounted panel: a roster agent, a failover line,
+   a contradiction, a replan. Shorter and softer than `.panel-in`, which stays
+   reserved for a whole section entering. */
+.row-in {
+	animation: run-row-in 420ms var(--ease-out-soft) both;
+	animation-delay: min(calc(var(--i, 0) * 40ms), 280ms);
+}
+
+@keyframes run-row-in {
+	from {
+		opacity: 0.2;
+		transform: translateY(6px);
+	}
+}
+
+/* A live figure changing value should be noticeable without being a flash. The
+   consumer keys the span on the value, so React remounts it and this replays —
+   an odometer tick, not a `CountUp` restart: counting up from 0 every time a
+   counter incremented would make a live run's numbers look like they were
+   resetting. */
+.tick-in {
+	animation: tick-down 260ms var(--ease-out-soft) both;
+}
+
+@keyframes tick-down {
+	from {
+		opacity: 0;
+		transform: translateY(-7px);
+	}
+}
+
+/* The RUNNING roster dot. Replaces Tailwind's stock `animate-pulse` (a generic
+   opacity blink) with the product's own breathing ping: grow-and-fade, so the
+   dot reads as an active agent rather than a loading placeholder. Starts and
+   ends fully opaque because the reduced-motion guard settles an infinite loop on
+   its final frame — a static dot must still be a visible dot. */
+.dot-live {
+	animation: live-ping 1700ms var(--ease-in-out) infinite;
+}
+
+@keyframes live-ping {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.45;
+		transform: scale(1.75);
+	}
+}
+
+/* The final report unrolls top-down, which is the one moment in the run worth a
+   bigger gesture: a long answer arriving all at once otherwise reads as a paste.
+   clip-path (not height) so nothing reflows and the panel never jumps. */
+.report-in {
+	animation: report-unroll 620ms var(--ease-expo) both;
+}
+
+@keyframes report-unroll {
+	from {
+		clip-path: inset(0 0 100% 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+
+/* ---- Take 4 M4: the nine landing sections (AGENTOS_UIUX_PROMPT_V4 §4) -------
+   Each rule here is a contract with a component: the class name is the deal, the
+   component owns the numbers. The shared terms are the ones §6 asks for —
+   transform, opacity, clip-path and custom properties only, nothing that reads or
+   writes layout, and every loop is either gated by its component's observer or a
+   single composited property.
+
+   The global reduced-motion guard above collapses all of these. Where a component
+   *also* gates behaviour on useReducedMotion (the slot reels, the deal pile, the
+   magnetic pull), that is because the guard cannot reach an inline
+   style.transform — a value written from JS outranks a stylesheet rule, so the
+   reduced-motion contract has to be kept at the writer, not only in the CSS. */
+
+/* Hero scroll hint (§4): it breathes rather than blinks. The loop is on the
+   individual `scale` property, which composes with the wrapper's
+   -translate-x-1/2 (that lives in `transform`) instead of erasing it. */
+@keyframes hint-breathe {
+	0%,
+	100% {
+		scale: 1;
+		opacity: 0.5;
+	}
+	50% {
+		scale: 1.2;
+		opacity: 1;
+	}
+}
+
+.hint-breathe {
+	animation: hint-breathe 2000ms var(--ease-in-out) infinite;
+}
+
+/* Intro (§4): the house mark turning at §4's 0.5 deg per second — 720 s for one
+   revolution, which is why it reads as atmosphere instead of a spinner. The scale
+   rides `--sp`, written by useScrubVar on the wrapper from inside its rAF, so a
+   scroll frame costs one custom-property write and no React render. `rotate` and
+   `scale` are individual properties: the loop can never clobber the centring. */
+@keyframes drift-turn {
+	to {
+		rotate: 360deg;
+	}
+}
+
+.drift-mark {
+	rotate: 0deg;
+	scale: calc(0.9 + var(--sp, 1) * 0.1);
+	opacity: 0.5;
+	animation: drift-turn 720s linear infinite;
+}
+
+/* CTA (§4) "The Gathering": the words fly in from alternating edges on the
+   overshoot curve, then the line takes one collision beat once the last pair
+   meets. `animation-delay` on the impact is the component's, derived from the
+   word count and the stagger. */
+.ease-gather {
+	transition-timing-function: var(--ease-spring);
+}
+
+@keyframes gather-impact {
+	0% {
+		scale: 1;
+	}
+	38% {
+		scale: 1.014;
+	}
+	100% {
+		scale: 1;
+	}
+}
+
+.gather-impact {
+	animation: gather-impact 420ms var(--ease-out-soft) both;
+}
+
+/* Evidence counters (§4): slot-machine reels. One long-out ease per column so the
+   strip decelerates into its stop; a spring "click" on the column when that stop
+   arrives; one sonar ping when the last reel lands. `slot-land` and `slot-ping`
+   take their `animation-delay` from the component, which owns the stop order
+   (leftmost first, 0.2 s apart) and the number of columns. */
+.ease-slot-reel {
+	transition-property: transform;
+	transition-timing-function: cubic-bezier(0.12, 0.85, 0.2, 1);
+	will-change: transform;
+}
+
+@keyframes slot-land {
+	0%,
+	60% {
+		scale: 1;
+	}
+	78% {
+		scale: 1.13 0.92;
+	}
+	100% {
+		scale: 1;
+	}
+}
+
+.slot-land {
+	animation: slot-land 320ms var(--ease-spring) both;
+}
+
+@keyframes slot-ping {
+	from {
+		scale: 0.35;
+		opacity: 0.75;
+	}
+	to {
+		scale: 2.1;
+		opacity: 0;
+	}
+}
+
+.slot-ping {
+	animation: slot-ping 700ms var(--ease-expo) both;
+}
+
+/* Capabilities (§4) "The Shuffle": the pile is the grid's own centre, written by
+   DealStack as `--dx/--dy` measured from each card's real slot, so the stack is
+   correct at every breakpoint rather than being a magic number. Nothing fades —
+   the cards hold opacity 1 and their text throughout, and the deal is one
+   transform transition staggered by the `transition-delay` per card. */
+.deal-grid {
+	perspective: 1200px;
+}
+
+.deal-grid > * {
+	transition: transform 900ms var(--ease-expo);
+}
+
+.deal-grid[data-deal='pile'] > *,
+.deal-grid[data-deal='restacked'] > * {
+	transform: translate3d(var(--dx, 0), var(--dy, 0), 0) rotate(var(--tilt, 0deg)) rotateY(78deg)
+		scale(0.94);
+}
+
+/* Directional border glow on card surfaces only (§4's "brightest on the side
+   nearest the cursor"). `--ga` is the pointer angle from Tilt; the ring is a conic
+   gradient masked down to its own 1 px edge, so it costs no layout and no
+   box-shadow repaint. Owner ruling for this run: cards yes, buttons never — the
+   class is applied per surface and no button carries it. */
+.edge-glow::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	padding: 1px;
+	border-radius: inherit;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity var(--motion-slow) var(--ease-out-soft);
+	background: conic-gradient(
+		from calc(var(--ga, 180deg) - 90deg),
+		transparent 0deg,
+		var(--accent) 26deg,
+		transparent 74deg,
+		transparent 180deg,
+		color-mix(in oklab, var(--accent) 35%, transparent) 220deg,
+		transparent 300deg
+	);
+	mask:
+		linear-gradient(#000 0 0) content-box,
+		linear-gradient(#000 0 0);
+	-webkit-mask:
+		linear-gradient(#000 0 0) content-box,
+		linear-gradient(#000 0 0);
+	mask-composite: exclude;
+	-webkit-mask-composite: xor;
+}
+
+.group:hover .edge-glow::before,
+.edge-glow:hover::before {
+	opacity: 0.9;
+}
+
+/* Models & routing (§4): the request that picks a branch. `.route-track` is a
+   full-width, zero-height rail with its dot pinned to the right edge, so
+   translating the rail by a percentage of its own width carries the dot across the
+   row — no `left` animation (§6.2), no measurement, no layout on the frame. */
+@keyframes route-shot {
+	0% {
+		transform: translate3d(-100%, 0, 0);
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	86% {
+		opacity: 1;
+	}
+	100% {
+		transform: translate3d(0, 0, 0);
+		opacity: 0;
+	}
+}
+
+.route-shot {
+	animation: route-shot 1300ms var(--ease-out-soft) both;
+}
+
+@keyframes route-glow {
+	0% {
+		scale: 1;
+		opacity: 0.55;
+	}
+	30% {
+		scale: 2.6;
+		opacity: 0;
+	}
+	100% {
+		scale: 1;
+		opacity: 0;
+	}
+}
+
+.route-glow {
+	animation: route-glow 900ms var(--ease-expo) both;
+}
+
+/* Arrival: the far end of the branch lights once, after the dot has travelled —
+   the animation carries the timing so the JS never schedules a second timer. */
+@keyframes route-arrive {
+	0%,
+	40% {
+		opacity: 0;
+	}
+	54% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.route-landed {
+	animation: route-arrive 1400ms var(--ease-out-soft) both;
+	box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+/* Idle breathing on the route rows (§4's 1.0 → 1.02 over 4 s). On the individual
+   `scale` property so it composes with the scrub's inline translateY instead of
+   erasing it, and only ever applied while the stack is in view (§6.6). */
+@keyframes route-breathe {
+	50% {
+		scale: 1.02;
+	}
+}
+
+.route-breathe {
+	animation: route-breathe 4000ms var(--ease-in-out) infinite;
+}
+
+/* Benchmark (§4): the wash inside each bar strengthens as the bar grows, so the
+   chart gets louder as the measurement arrives instead of switching colour at the
+   end. `--g` is that row's own 0 → 1 progress. */
+.bench-bar {
+	background-image: linear-gradient(
+		90deg,
+		rgb(255 255 255 / 0) 0%,
+		rgb(255 255 255 / calc(var(--g, 1) * 0.18)) 100%
+	);
+}
+
+/* The winner's arrival flash. It ends transparent, so the reduced-motion guard
+   settles it on an invisible ring rather than a stuck one. */
+@keyframes bench-ding {
+	0% {
+		opacity: 0;
+		scale: 0.7;
+	}
+	35% {
+		opacity: 1;
+		scale: 1;
+	}
+	100% {
+		opacity: 0;
+		scale: 1.55;
+	}
+}
+
+.bench-ding {
+	animation: bench-ding 700ms var(--ease-spring) both;
+}
+
+/* ---- Take 4 M5: the micro-interactions (AGENTOS_UIUX_PROMPT_V4 §5) -----------
+   Same contract as the M4 block: transform, opacity and custom properties only.
+   §5.1 asks for the bar to "shrink (height transition)" and §5.5 for an underline
+   that "grows"; both are expressed as transforms here — `scale()` on the row and
+   `scaleX()` on a pseudo-element — because animating `height` or `width` on a
+   fixed header re-lays-out the document every frame (§6.2, §6.10), and the visual
+   result is the same. The reduced-motion guard collapses every rule below, and
+   each one rests at its *finished* state: the logo ends opaque and unscaled, the
+   wave ends with no offset, the veil belongs to a component that unmounts itself. */
+
+/* Nav (§5.1): the wordmark springs in behind its drawn mark once the preloader
+   has left, so the load reads mark → wordmark → headline. */
+@keyframes nav-logo-in {
+	0% {
+		opacity: 0;
+		transform: scale(0.62) rotate(-7deg);
+	}
+	58% {
+		opacity: 1;
+		transform: scale(1.06) rotate(2deg);
+	}
+	100% {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.nav-logo-in {
+	animation: nav-logo-in 620ms var(--ease-spring) both;
+}
+
+/* Nav links (§5.1): a wave travels through the letters on hover. The units are
+   inline-block because a transform does not apply to an inline box — the lesson
+   M2 learned when a whole hero flight turned out to be a no-op. */
+@keyframes nav-wave {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	45% {
+		transform: translateY(-4px);
+	}
+}
+
+.nav-wave > span {
+	display: inline-block;
+}
+
+a:hover .nav-wave > span,
+a:focus-visible .nav-wave > span {
+	animation: nav-wave 520ms var(--ease-in-out) both;
+	animation-delay: calc(var(--i, 0) * 26ms);
+}
+
+/* Nav scroll (§5.1): the shrink, scoped to this header through its own marker
+   attribute so no other page's <nav> inherits the transition. */
+[data-t4='nav'] > nav {
+	transition: transform 420ms var(--ease-expo);
+}
+
+.nav-shrunk > nav {
+	transform: scale(0.92);
+	transform-origin: 50% 0;
+}
+
+/* Preloader exit (§5.3): the brief asks for the panel to slide up and away rather
+   than fade, so the hero is uncovered from the top down. The component owns the
+   transform; this is the timing. */
+.preloader-veil {
+	transition:
+		transform 600ms var(--ease-in-out),
+		opacity 420ms linear;
+}
+
+/* Curtain reveal (§5.4): the veil slides clear and the component removes it from
+   the document once it has left, so an animation that cannot run can never be the
+   reason a diagram is covered. */
+.curtain-veil {
+	transition: transform 800ms var(--ease-in-out);
+}
+
+/* Internal link hover (§5.5): the underline leaves from the centre outward. It is
+   a pseudo-element scaled on X, not a border that appears, so the word never
+   reflows and the hover has a direction. */
+.link-center {
+	position: relative;
+}
+
+.link-center::after {
+	background: currentColor;
+	content: '';
+	height: 1px;
+	/* These links are 44px tap boxes (WCAG 2.5.8) with the word centred inside them,
+	   so the underline sits under the *text*, not under the box. */
+	inset: auto 0 10px;
+	position: absolute;
+	transform: scaleX(0);
+	transform-origin: center;
+	transition: transform 320ms var(--ease-expo);
+}
+
+.link-center:hover::after,
+.link-center:focus-visible::after {
+	transform: scaleX(1);
+}
+
+/* External link hover (§5.5): the arrow takes the diagonal it always meant to. */
+.ext-arrow {
+	transition: transform 260ms var(--ease-spring);
+}
+
+.link-external:hover .ext-arrow,
+.link-external:focus-visible .ext-arrow {
+	transform: translate(3px, -3px);
+}
+
+/* Footer (§5.6): the columns arrive on one running index (30px → 0, 100ms apart,
+   §5.6's own numbers) and the section itself rises into place on the spring curve,
+   which overshoots its resting position by a few pixels on the way in. */
+.footer-rise {
+	transition: transform 900ms var(--ease-spring);
+}
+
+/* The V5 §3 data-flow line CSS (flow-pulse / flow-lit / [data-flow-core]) was
+   removed with its component under V6 §1.2 — the one deletion the owner
+   authorised. It had no other consumer: `[data-idle]` and `[data-flow-core]`
+   existed only in flow-lines.tsx. The V5 §4 layers below are untouched, and
+   `.v5-grid[data-lit]` keeps its own data-lit rule (v5-layers.tsx sets it). */
+
+/* ── V5 §4 supporting layers ─────────────────────────────────────────────
+   All five write only transform / opacity / paint. The global reduced-motion
+   guard neutralises the loops; the JS layers additionally gate themselves so no
+   listener is even attached. */
+.v5-grid {
+	position: fixed;
+	inset: -60px 0 0 0;
+	z-index: 0;
+	pointer-events: none;
+	opacity: 0.03;
+	background-image:
+		repeating-linear-gradient(to right, var(--text) 0 1px, transparent 1px 60px),
+		repeating-linear-gradient(to bottom, var(--text) 0 1px, transparent 1px 60px);
+	animation: v5-grid-drift 10s linear infinite;
+	transition: opacity var(--motion-slow) var(--ease-out-soft);
+}
+
+.v5-grid[data-lit] {
+	opacity: 0.08;
+}
+
+@keyframes v5-grid-drift {
+	from {
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		transform: translate3d(0, 60px, 0);
+	}
+}
+
+.v5-wipe {
+	position: fixed;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	opacity: 0;
+}
+
+.v5-wipe.is-wiping {
+	background: linear-gradient(
+		90deg,
+		transparent,
+		color-mix(in srgb, var(--accent) 26%, transparent),
+		transparent
+	);
+	animation: v5-wipe-x var(--motion-slow) var(--ease-in-out) 1;
+}
+
+.v5-wipe.is-wiping[data-axis='y'] {
+	background: linear-gradient(
+		180deg,
+		transparent,
+		color-mix(in srgb, var(--accent) 26%, transparent),
+		transparent
+	);
+	animation-name: v5-wipe-y;
+}
+
+.v5-wipe.is-wiping[data-dir='rev'] {
+	animation-direction: reverse;
+}
+
+@keyframes v5-wipe-x {
+	0% {
+		opacity: 0.5;
+		transform: translate3d(-100%, 0, 0);
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(100%, 0, 0);
+	}
+}
+
+@keyframes v5-wipe-y {
+	0% {
+		opacity: 0.5;
+		transform: translate3d(0, -100%, 0);
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 0;
+		transform: translate3d(0, 100%, 0);
+	}
+}
+
+.v5-spot {
+	background-color: color-mix(in srgb, var(--accent) 6%, transparent);
+	filter: brightness(1.1);
+	transition:
+		background-color var(--motion-base) var(--ease-out-soft),
+		filter var(--motion-base) var(--ease-out-soft);
+}
+
+.v5-xray {
+	position: fixed;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+	opacity: 0;
+	mix-blend-mode: plus-lighter;
+	background: radial-gradient(
+		120px 120px at var(--xx) var(--yy),
+		color-mix(in srgb, var(--text) 12%, transparent),
+		transparent 70%
+	);
+	transition: opacity var(--motion-base) var(--ease-out-soft);
+}
+
+.v5-xray[data-on] {
+	opacity: 1;
+}
+
+.v5-thread {
+	position: fixed;
+	top: 0;
+	right: 1.4%;
+	bottom: 0;
+	width: 2px;
+	z-index: 44;
+	cursor: pointer;
+	background: color-mix(in srgb, var(--border-strong) 40%, transparent);
+}
+
+.v5-thread-fill {
+	position: absolute;
+	inset: 0;
+	transform-origin: top;
+	background: linear-gradient(180deg, var(--accent), var(--danger) 50%, var(--success));
+	will-change: transform;
+}
+
+.v5-thread-mark {
+	position: absolute;
+	left: -3px;
+	width: 8px;
+	height: 8px;
+	margin-top: -4px;
+	border-radius: 9999px;
+	background: var(--accent);
+	transition: opacity var(--motion-base) var(--ease-out-soft);
+}
+
+.v5-thread:hover .v5-thread-fill {
+	filter: brightness(1.25);
+}
+
+/* §4.5 energy pulse — hover sonar on ::before, click shockwave on ::after. The
+   shared Button owns no pseudo-element, so these cannot collide with it.
+   `.auth-cta` is the auth form's own class; it opts in without that file changing. */
+.energy,
+.auth-cta {
+	position: relative;
+}
+
+.energy::before,
+.energy::after,
+.auth-cta::before,
+.auth-cta::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	border: 2px solid var(--accent);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.energy:hover::before,
+.auth-cta:hover::before {
+	animation: v5-pulse 1.5s var(--ease-out-soft) infinite;
+}
+
+.energy:active,
+.auth-cta:active {
+	transform: scale(0.95);
+}
+
+.energy:active::after,
+.auth-cta:active::after {
+	border-width: 3px;
+	animation: v5-shock var(--motion-slow) var(--ease-expo) 1;
+}
+
+@keyframes v5-pulse {
+	0% {
+		opacity: 0.6;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.55);
+	}
+}
+
+@keyframes v5-shock {
+	0% {
+		opacity: 0.8;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2.1);
+	}
+}
+
+/* ---- V6 (Take 6, karma-observed line system) --------------------------------
+   Job 2's pinned stage carries a marquee strip of the section heading. The strip
+   is two identical halves translated by exactly -50%, so the loop is seamless
+   without measuring text. Speed is a CSS variable the scroll controller writes
+   in buckets (never per frame), which keeps the wheel handler off the style
+   recalc path. The reduced-motion guard at line 433 already collapses
+   animation-duration, so this strip is static for those users with no extra
+   branch here. ---------------------------------------------------------------- */
+.v6-marquee {
+	display: flex;
+	width: max-content;
+	animation: v6-marquee var(--v6-marquee-duration, 34s) linear infinite;
+	will-change: transform;
+}
+
+@keyframes v6-marquee {
+	from {
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		transform: translate3d(-50%, 0, 0);
+	}
+}
+
+/* Job 4's cable bundle: the dashed satellites march along themselves for as long
+   as the section is mounted. Duration is per strand (written once from React as
+   animation-duration) because the three rhythm groups must travel at different
+   speeds for the bundle to read as depth. The travel distance is the LCM of the
+   three periods, which is what makes the loop seamless. */
+.v6-march {
+	animation: v6-march 21s linear infinite;
+}
+
+@keyframes v6-march {
+	to {
+		stroke-dashoffset: var(--v6-march-units, -2700px);
+	}
+}
+
+/* Job 5's ray-burst hub: the slow breathing §8 asks for, on transform and
+   opacity only. transform-box: fill-box is what makes the scale happen about
+   the hub's own centre rather than the svg origin. */
+.v6-hub {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: v6-hub-pulse 5.5s var(--ease-expo) infinite;
+	will-change: transform;
+}
+
+@keyframes v6-hub-pulse {
+	0%,
+	100% {
+		opacity: 0.72;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.04);
+	}
+}
+
+/* §11 M9: the off-screen pause. useIdlePause marks each V6 host as it leaves the
+   viewport, and this is the only place the three loops are scoped — the
+   animations keep their duration, curve, iteration count and phase, so a host
+   that returns resumes on the frame it stopped at and paints exactly what it
+   painted before. Nothing above this line changes. */
+[data-v6-idle='paused'] .v6-march,
+[data-v6-idle='paused'] .v6-hub,
+[data-v6-idle='paused'] .v6-marquee {
+	animation-play-state: paused;
+}

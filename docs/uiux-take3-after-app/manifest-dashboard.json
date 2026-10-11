@@ -1,0 +1,281 @@
+{
+  "mode": "after",
+  "milestone": "dashboard",
+  "base": "http://localhost:3100",
+  "at": "2026-10-09T20:37:02.440Z",
+  "shots": [
+    {
+      "name": "dashboard-1440-top",
+      "file": "dashboard-1440-top.png",
+      "vp": "1440x900",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82333
+      }
+    },
+    {
+      "name": "dashboard-1440-charts",
+      "file": "dashboard-1440-charts.png",
+      "vp": "1440x900",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 760,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82333
+      }
+    },
+    {
+      "name": "dashboard-1440-benchmark",
+      "file": "dashboard-1440-benchmark.png",
+      "vp": "1440x900",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 1560,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82334
+      }
+    },
+    {
+      "name": "dashboard-1440-spend",
+      "file": "dashboard-1440-spend.png",
+      "vp": "1440x900",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 2400,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82334
+      }
+    },
+    {
+      "name": "dashboard-1440-pool-table",
+      "file": "dashboard-1440-pool-table.png",
+      "vp": "1440x900",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 3300,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82334
+      }
+    },
+    {
+      "name": "dashboard-375-top",
+      "file": "dashboard-375-top.png",
+      "vp": "375x812",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82301
+      }
+    },
+    {
+      "name": "dashboard-375-charts",
+      "file": "dashboard-375-charts.png",
+      "vp": "375x812",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 900,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82299
+      }
+    },
+    {
+      "name": "dashboard-375-benchmark",
+      "file": "dashboard-375-benchmark.png",
+      "vp": "375x812",
+      "route": "/dashboard",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 2100,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 82299
+      }
+    }
+  ],
+  "console": []
+}

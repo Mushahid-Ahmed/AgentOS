@@ -1,0 +1,727 @@
+{
+  "mode": "after",
+  "main": "http://localhost:3100",
+  "app": "http://localhost:3110",
+  "at": "2026-10-09T02:33:55.039Z",
+  "shots": [
+    {
+      "name": "landing-1440",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s1",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s2",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s3",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-capabilities",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s5",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-evidence",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s7",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-s8",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-benchmarks",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-faq",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-start",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-showcase-mid",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-footer",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            576,
+            360
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-1440-full",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "fullPage": true,
+      "consoleErrors": 0
+    },
+    {
+      "name": "landing-375",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            206,
+            446
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-375-mid",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            206,
+            446
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-375-footer",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            206,
+            446
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "landing-375-drawer-open",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            206,
+            446
+          ]
+        }
+      ],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "reduced-motion-1440-hero",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "reduced-motion-1440-section",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "sections": 12,
+      "heads": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single m",
+        "H2:Surface by surface",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": false,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "login-1440",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "sections": 0,
+      "heads": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "login-375",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "sections": 0,
+      "heads": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "signup-1440",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Sign up — AgentOS",
+      "url": "/signup",
+      "sections": 0,
+      "heads": [
+        "H1:Create your account"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "signup-375",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Sign up — AgentOS",
+      "url": "/signup",
+      "sections": 0,
+      "heads": [
+        "H1:Create your account"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "login-1440-field-focus",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "sections": 0,
+      "heads": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    },
+    {
+      "name": "login-1440-error",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "sections": 0,
+      "heads": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 1
+    },
+    {
+      "name": "route-gate-app-to-login",
+      "base": "http://localhost:3100",
+      "source": "main",
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "sections": 0,
+      "heads": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScrollPx": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-s",
+      "cursor": true,
+      "consoleErrors": 0,
+      "expectedRejections": 0
+    }
+  ],
+  "notes": [
+    "landing sections: s1, s2, s3, capabilities, s5, evidence, s7, s8, benchmarks, faq, start",
+    "showcase pinned at top 0, photographed at translateX -974px",
+    "mobile drawer captured open",
+    "INFO login-1440-error: 1 expected console line(s) from the deliberate auth rejection (filtered): Failed to load resource: the server responded with a status of 400 ()",
+    "rejected sign-in captured; alert present at /login",
+    "route gate: /app -> /login?next=%2Fapp"
+  ],
+  "console": []
+}

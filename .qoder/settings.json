@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "async": true,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/agent-log-capture.mjs", "prompt"],
+            "name": "8x-agent-log-prompt",
+            "timeout": 15,
+            "env": {
+              "AGENT_TOOL": "qoder",
+              "AGENT_AUTHOR": "mushahid-ahmed",
+              "AGENT_PROJECT": "t1-mushahid-ahmed"
+            }
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "async": true,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["scripts/agent-log-capture.mjs", "stop"],
+            "name": "8x-agent-log-stop",
+            "timeout": 20,
+            "env": {
+              "AGENT_TOOL": "qoder",
+              "AGENT_AUTHOR": "mushahid-ahmed",
+              "AGENT_PROJECT": "t1-mushahid-ahmed"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

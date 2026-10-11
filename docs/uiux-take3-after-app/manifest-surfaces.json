@@ -1,0 +1,302 @@
+{
+  "mode": "after",
+  "milestone": "surfaces",
+  "base": "http://localhost:3100",
+  "at": "2026-10-09T20:42:33.767Z",
+  "shots": [
+    {
+      "name": "notfound-1440",
+      "file": "notfound-1440.png",
+      "vp": "1440x900",
+      "route": "/this-page-does-not-exist",
+      "status": 404,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "30px",
+          "fontWeight": "700",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": {
+          "fontSize": "144px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "errorShell": true,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 141
+      }
+    },
+    {
+      "name": "admin-404-1440",
+      "file": "admin-404-1440.png",
+      "vp": "1440x900",
+      "route": "/admin",
+      "status": 404,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "30px",
+          "fontWeight": "700",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": {
+          "fontSize": "144px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "errorShell": true,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 141
+      }
+    },
+    {
+      "name": "analytics-demo-1440-top",
+      "file": "analytics-demo-1440-top.png",
+      "vp": "1440x900",
+      "route": "/analytics-demo",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 808
+      }
+    },
+    {
+      "name": "analytics-demo-1440-cards",
+      "file": "analytics-demo-1440-cards.png",
+      "vp": "1440x900",
+      "route": "/analytics-demo",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 415,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "52px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 808
+      }
+    },
+    {
+      "name": "notfound-375",
+      "file": "notfound-375.png",
+      "vp": "375x812",
+      "route": "/this-page-does-not-exist",
+      "status": 404,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "30px",
+          "fontWeight": "700",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": {
+          "fontSize": "48px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "errorShell": true,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 141
+      }
+    },
+    {
+      "name": "admin-404-375",
+      "file": "admin-404-375.png",
+      "vp": "375x812",
+      "route": "/admin",
+      "status": 404,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "30px",
+          "fontWeight": "700",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": {
+          "fontSize": "48px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "errorShell": true,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 141
+      }
+    },
+    {
+      "name": "analytics-demo-375-top",
+      "file": "analytics-demo-375-top.png",
+      "vp": "375x812",
+      "route": "/analytics-demo",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 768
+      }
+    },
+    {
+      "name": "analytics-demo-375-cards",
+      "file": "analytics-demo-375-cards.png",
+      "vp": "375x812",
+      "route": "/analytics-demo",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 702,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 768
+      }
+    }
+  ],
+  "console": [
+    "notfound-1440 [error] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "admin-404-1440 [error] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "notfound-375 [error] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "admin-404-375 [error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}

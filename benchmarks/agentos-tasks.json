@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "meta": {
+    "purpose": "AgentOS four-setup comparison (milestone 8, AGENTOS_UPGRADE_PROMPT §14). The SAME tasks run through Baseline A (single LLM), Baseline B (single LLM + RAG), Baseline C (fixed multi-agent on the Orchestra engine) and AgentOS (Jev + dynamic agents + MCP + RAG + multi-LLM + verification).",
+    "judging": "An LLM judge from a different family than the single-LLM generator scores each answer against the per-task rubric; a sample is spot-checked manually. Citation/evidence accuracy and unsupported-claim rate are derived from the evidence hub, not the judge.",
+    "categories": [
+      "research",
+      "comparison",
+      "coding",
+      "data",
+      "document-qa",
+      "factual",
+      "ambiguous"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "aos-01",
+      "category": "research",
+      "task": "Summarize the current scientific consensus on whether creatine monohydrate supplementation improves cognitive performance in healthy adults, and state where the evidence is weak.",
+      "rubric": "Names the consensus (limited/mixed evidence for cognition in healthy, well-nourished adults; stronger for physical performance), distinguishes populations (sleep-deprived/vegetarian vs healthy), and explicitly states uncertainty. Must cite sources; unsupported definitive claims are penalized."
+    },
+    {
+      "id": "aos-02",
+      "category": "research",
+      "task": "What does recent peer-reviewed evidence say about the effect of remote work on individual productivity? Weigh conflicting findings and identify where studies genuinely disagree.",
+      "rubric": "Presents both directions of findings (neutral/positive vs negative/measurement-limited), notes methodological differences (self-report vs output metrics), flags at least one genuine contradiction, and avoids a one-sided verdict."
+    },
+    {
+      "id": "aos-03",
+      "category": "comparison",
+      "task": "Compare Postgres hash sharding vs range sharding vs geographic sharding for a globally distributed database handling 50k writes/sec. Recommend one and justify the trade-offs.",
+      "rubric": "Covers hot-spot risk (hash low, range high), cross-region latency (geographic low for local reads), rebalancing cost, and gives a single recommendation tied to the write pattern with stated caveats."
+    },
+    {
+      "id": "aos-04",
+      "category": "comparison",
+      "task": "Compare Apple's and Microsoft's fiscal year 2024 total revenue. Which company earned more and by roughly how much?",
+      "rubric": "States Microsoft higher (~$245B) vs Apple (~$391B) correctly OR correctly identifies Apple higher; the correct fact is Apple ~$391.0B vs Microsoft ~$245.1B, so Apple earned more by ~$146B. Exact figures with sources score highest; a wrong direction is a fail."
+    },
+    {
+      "id": "aos-05",
+      "category": "coding",
+      "task": "Write a Python function that reverses a string without using slicing syntax [::-1].",
+      "rubric": "Provides correct, runnable code (e.g. reversed()/join or a loop), handles empty string, and does not use [::-1]. Correctness is checkable; an incorrect or slicing-based answer fails."
+    },
+    {
+      "id": "aos-06",
+      "category": "coding",
+      "task": "This Python code raises TypeError. Explain the bug and give a fixed version: total = sum([1, 2, '3'])",
+      "rubric": "Identifies that sum() cannot add int and str, explains the TypeError, and gives a fix (convert elements to int/float, e.g. sum(int(x) for x in [...])). A fix that silently changes semantics is penalized."
+    },
+    {
+      "id": "aos-07",
+      "category": "data",
+      "task": "Calculate 15 percent of 240 dollars and give the exact amount.",
+      "rubric": "Exact answer $36. Any other number fails. Showing the multiplication is a bonus."
+    },
+    {
+      "id": "aos-08",
+      "category": "data",
+      "task": "A store's daily revenue for a week is [1200, 1500, 900, 2100, 1800, 2400, 1100]. Compute the mean and the median.",
+      "rubric": "Mean = 11000/7 = 1571.43 (approx), median = 1500 (sorted middle). Both correct with brief method. Wrong median (e.g. unsorted middle) is penalized."
+    },
+    {
+      "id": "aos-09",
+      "category": "data",
+      "task": "If a metric grew from 800 to 1040 over one quarter, what is the quarter-over-quarter growth rate as a percentage?",
+      "rubric": "30% ((1040-800)/800). Correct arithmetic; a 240 (absolute) answer instead of a rate is penalized."
+    },
+    {
+      "id": "aos-10",
+      "category": "document-qa",
+      "task": "Given the claim 'Apple's FY2024 Services revenue grew faster year-over-year than its iPhone revenue', determine from primary sources whether it is accurate, contested, or refuted, and cite the figures.",
+      "rubric": "Verdict ACCURATE with figures (Services ~+12.9% vs iPhone ~+0.3%) and real citations. Notes source-quality caveats if present. A verdict without figures or citations is penalized."
+    },
+    {
+      "id": "aos-11",
+      "category": "document-qa",
+      "task": "Given the claim 'Microsoft's FY2024 Intelligent Cloud segment grew slower than the company's overall revenue', determine from primary sources whether it is accurate, contested, or refuted.",
+      "rubric": "Verdict REFUTED (Intelligent Cloud ~+19.9% vs total ~+15.7%, so it grew FASTER). Correct direction with figures and citations; agreeing with the false claim fails."
+    },
+    {
+      "id": "aos-12",
+      "category": "factual",
+      "task": "What is the capital of France? Answer in one short sentence.",
+      "rubric": "Paris. Concise. Any hedging or extra claims are unnecessary but not fatal; a wrong city fails."
+    },
+    {
+      "id": "aos-13",
+      "category": "factual",
+      "task": "In which year did the World Wide Web become publicly available outside CERN?",
+      "rubric": "1991 (public availability outside CERN); 1989/1990 as invention/internal are acceptable only if distinguished. A single wrong year with no nuance is penalized."
+    },
+    {
+      "id": "aos-14",
+      "category": "factual",
+      "task": "How many continents are there under the seven-continent model?",
+      "rubric": "Seven. Trivial; wrong number fails."
+    },
+    {
+      "id": "aos-15",
+      "category": "ambiguous",
+      "task": "Our signup conversion dropped 12% last month. Investigate possible causes and recommend concrete fixes.",
+      "rubric": "Acknowledges the question is under-specified (no data given), enumerates plausible cause families (traffic mix, funnel bugs, pricing/UX changes, seasonality, tracking breakage), proposes how to diagnose each, and gives prioritized fixes. A confident single-cause answer with no data is penalized."
+    },
+    {
+      "id": "aos-16",
+      "category": "ambiguous",
+      "task": "Should our 50-person startup adopt a microservices architecture now? Give a recommendation with the key trade-offs.",
+      "rubric": "Gives a conditional recommendation (usually: stay modular-monolith at this size), names trade-offs (operational overhead, deployment complexity, team topology), and states what evidence would change the answer. An unconditional yes/no with no trade-offs is penalized."
+    },
+    {
+      "id": "aos-17",
+      "category": "research",
+      "task": "What is the current evidence on whether daily low-dose aspirin reduces first heart-attack risk in adults over 60 with no prior cardiovascular event?",
+      "rubric": "Reflects current guidance (routine primary-prevention use in older adults generally not recommended; bleeding risk offsets benefit), cites guideline-level sources, and states that individual decisions depend on risk profile. A blanket 'aspirin prevents heart attacks' fails."
+    },
+    {
+      "id": "aos-18",
+      "category": "comparison",
+      "task": "Compare the measured latency and accuracy trade-offs of small specialized routing models versus large general-purpose LLMs for intent classification.",
+      "rubric": "Contrasts latency/cost (small models faster/cheaper) vs accuracy (large models higher on hard/long-tail intents), notes that published benchmark reliability varies, and avoids fabricating specific numbers without sources."
+    },
+    {
+      "id": "aos-19",
+      "category": "coding",
+      "task": "Write a short Python function that returns True if a string is a palindrome ignoring case and non-alphanumeric characters.",
+      "rubric": "Correct normalization (lowercase + filter alnum) and comparison; handles edge cases (empty -> True). Incorrect normalization fails."
+    },
+    {
+      "id": "aos-20",
+      "category": "data",
+      "task": "A subscription costs $19/month or $190/year. What is the effective percentage discount of the yearly plan versus paying monthly for 12 months?",
+      "rubric": "Monthly-for-12 = $228; yearly $190; discount = (228-190)/228 = 16.67%. Correct percentage; a $38 absolute answer without the rate is penalized."
+    },
+    {
+      "id": "aos-21",
+      "category": "document-qa",
+      "task": "Given the claim 'Google's parent Alphabet reported lower total revenue in 2024 than in 2023', determine from primary sources whether it is accurate, contested, or refuted.",
+      "rubric": "Verdict REFUTED (Alphabet 2024 revenue ~$350B > 2023 ~$307B, i.e. it grew). Correct direction with figures/citations; agreeing with the false claim fails."
+    },
+    {
+      "id": "aos-22",
+      "category": "ambiguous",
+      "task": "We want to 'use AI' to improve customer support. Propose a first experiment and how we would measure success.",
+      "rubric": "Scopes a concrete first experiment (e.g. AI-drafted replies for a narrow intent with human approval), defines measurable success metrics (resolution rate, CSAT, handle time, deflection with quality guard), and states risks/guardrails. Vague 'adopt an LLM' with no measurement plan is penalized."
+    },
+    {
+      "id": "aos-23",
+      "category": "research",
+      "task": "Summarize what randomized trial evidence does and does not support about vitamin D supplementation preventing respiratory infections in adults.",
+      "rubric": "Distinguishes populations (deficient vs replete), notes modest/conditional benefit signals mainly in deficient groups, states limits of the evidence, and cites trial-level sources. Overstated universal benefit fails."
+    },
+    {
+      "id": "aos-24",
+      "category": "factual",
+      "task": "Which planet in the Solar System has the most confirmed moons as of current published counts?",
+      "rubric": "Saturn (recent counts overtook Jupiter). Accepts Saturn with a note that counts revise; naming Jupiter without acknowledging recent revisions is penalized."
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "base": "http://localhost:3000",
+  "label": "after",
+  "capturedAt": "2026-10-05T20:34:08.767Z",
+  "consoleErrors": [
+    "[auth] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[auth] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).",
+    "[auth] Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "[auth] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)."
+  ],
+  "manifest": [
+    {
+      "name": "landing",
+      "width": 1440,
+      "file": "docs/ui-audit/after/landing-1440.png",
+      "url": "http://localhost:3000/"
+    },
+    {
+      "name": "login",
+      "width": 1440,
+      "file": "docs/ui-audit/after/login-1440.png",
+      "url": "http://localhost:3000/login"
+    },
+    {
+      "name": "signup",
+      "width": 1440,
+      "file": "docs/ui-audit/after/signup-1440.png",
+      "url": "http://localhost:3000/signup"
+    },
+    {
+      "name": "protected-redirect",
+      "width": 1440,
+      "url": "http://localhost:3000/login?next=%2Fapp",
+      "redirected": true
+    },
+    {
+      "name": "protected-redirect",
+      "width": 1440,
+      "file": "docs/ui-audit/after/protected-redirect-1440.png",
+      "url": "http://localhost:3000/login?next=%2Fapp"
+    },
+    {
+      "name": "landing",
+      "width": 390,
+      "file": "docs/ui-audit/after/landing-390.png",
+      "url": "http://localhost:3000/"
+    },
+    {
+      "name": "login",
+      "width": 390,
+      "file": "docs/ui-audit/after/login-390.png",
+      "url": "http://localhost:3000/login"
+    },
+    {
+      "name": "signup",
+      "width": 390,
+      "file": "docs/ui-audit/after/signup-390.png",
+      "url": "http://localhost:3000/signup"
+    },
+    {
+      "name": "protected-redirect",
+      "width": 390,
+      "url": "http://localhost:3000/login?next=%2Fapp",
+      "redirected": true
+    },
+    {
+      "name": "protected-redirect",
+      "width": 390,
+      "file": "docs/ui-audit/after/protected-redirect-390.png",
+      "url": "http://localhost:3000/login?next=%2Fapp"
+    },
+    {
+      "name": "chat",
+      "width": 1440,
+      "file": "docs/ui-audit/after/chat-1440.png",
+      "url": "http://localhost:3000/app"
+    },
+    {
+      "name": "chat-code",
+      "width": 1440,
+      "file": "docs/ui-audit/after/chat-code-1440.png",
+      "url": "http://localhost:3000/app"
+    },
+    {
+      "name": "chat-empty",
+      "width": 1440,
+      "file": "docs/ui-audit/after/chat-empty-1440.png",
+      "url": "http://localhost:3000/app"
+    },
+    {
+      "name": "dashboard",
+      "width": 1440,
+      "file": "docs/ui-audit/after/dashboard-1440.png",
+      "url": "http://localhost:3000/dashboard"
+    },
+    {
+      "name": "runview",
+      "width": 1440,
+      "file": "docs/ui-audit/after/runview-1440.png",
+      "url": "http://localhost:3000/agentos"
+    },
+    {
+      "name": "notfound",
+      "width": 1440,
+      "file": "docs/ui-audit/after/notfound-1440.png",
+      "url": "http://localhost:3000/this-route-does-not-exist"
+    },
+    {
+      "name": "chat",
+      "width": 390,
+      "file": "docs/ui-audit/after/chat-390.png",
+      "url": "http://localhost:3000/app"
+    },
+    {
+      "name": "chat-empty",
+      "width": 390,
+      "file": "docs/ui-audit/after/chat-empty-390.png",
+      "url": "http://localhost:3000/app"
+    },
+    {
+      "name": "dashboard",
+      "width": 390,
+      "file": "docs/ui-audit/after/dashboard-390.png",
+      "url": "http://localhost:3000/dashboard"
+    },
+    {
+      "name": "runview",
+      "width": 390,
+      "file": "docs/ui-audit/after/runview-390.png",
+      "url": "http://localhost:3000/agentos"
+    },
+    {
+      "name": "notfound",
+      "width": 390,
+      "file": "docs/ui-audit/after/notfound-390.png",
+      "url": "http://localhost:3000/this-route-does-not-exist"
+    }
+  ]
+}

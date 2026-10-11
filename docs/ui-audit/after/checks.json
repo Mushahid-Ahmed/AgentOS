@@ -1,0 +1,102 @@
+{
+  "base": "http://localhost:3000",
+  "label": "after",
+  "ranAt": "2026-10-05T20:37:16.166Z",
+  "results": [
+    {
+      "name": "protected redirect /app -> /login",
+      "pass": true,
+      "detail": "http://localhost:3000/login?next=%2Fapp"
+    },
+    {
+      "name": "keyboard focus ring visible (2px)",
+      "pass": true,
+      "detail": "[{\"tag\":\"INPUT\",\"outline\":\"2px solid\"},{\"tag\":\"BUTTON\",\"outline\":\"2px solid\"},{\"tag\":\"BUTTON\",\"outline\":\"2px solid\"},{\"tag\":\"A\",\"outline\":\"1px auto\"},{\"tag\":\"NEXTJS-PORTAL\",\"outline\":\"3px none\"}]"
+    },
+    {
+      "name": "session cookie sign-in reaches /app",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "contrast body >= 4.5",
+      "pass": true,
+      "detail": "17.34 (rgb(20, 20, 20) on rgb(247, 248, 250))"
+    },
+    {
+      "name": "contrast muted >= 4.5",
+      "pass": true,
+      "detail": "10.01 (rgb(61, 67, 73) on rgb(255, 255, 255))"
+    },
+    {
+      "name": "contrast faint >= 4.5",
+      "pass": true,
+      "detail": "5.98 (rgb(91, 100, 114) on rgb(255, 255, 255))"
+    },
+    {
+      "name": "chat aria-live status region",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "all decorative svgs aria-hidden",
+      "pass": true,
+      "detail": "8 svgs, unlabelled: 0"
+    },
+    {
+      "name": "h1 display serif consistent across views",
+      "pass": true,
+      "detail": "\"EB Garamond\""
+    },
+    {
+      "name": "no horizontal scroll at 1440 (app views)",
+      "pass": true,
+      "detail": "/app:false /dashboard:false /agentos:false"
+    },
+    {
+      "name": "control radius consistent (8px)",
+      "pass": true,
+      "detail": "8px | 8px | 8px"
+    },
+    {
+      "name": "dashboard sections present",
+      "pass": true,
+      "detail": "Cumulative routing statistics | Live latency and routing distribution | Benchmark | Benchmark run history | AgentOS four-setup benchmark"
+    },
+    {
+      "name": "touch targets >= 44px at 390",
+      "pass": true,
+      "detail": "0 under target"
+    },
+    {
+      "name": "no horizontal scroll at 390 (chat)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reflow no h-scroll at 720px (chat)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reflow no h-scroll at 320px (chat)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send produces reply or visible error state",
+      "pass": true,
+      "detail": "assistant-reply"
+    },
+    {
+      "name": "sign out returns to /login",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reduced-motion neutralizes animations",
+      "pass": true,
+      "detail": "0 animated-class els, 0 still running"
+    }
+  ]
+}

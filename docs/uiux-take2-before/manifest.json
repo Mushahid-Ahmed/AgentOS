@@ -1,0 +1,178 @@
+{
+  "mode": "before",
+  "base": "http://localhost:3000",
+  "at": "2026-10-08T20:40:56.774Z",
+  "shots": [
+    {
+      "route": "/",
+      "vp": "1440",
+      "hero": "landing-1440.png",
+      "full": "landing-1440-full.png",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "sections": 12,
+      "headings": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single model can’t",
+        "H3:Decision Bus",
+        "H3:Dynamic teams",
+        "H3:MCP tools",
+        "H3:Evidence hub",
+        "H3:Per-agent routing",
+        "H3:Adversarial verification",
+        "H3:Spend caps",
+        "H3:Run replay",
+        "H2:Surface by surface",
+        "H3:One question, one assembled team",
+        "H3:Real spend against real caps",
+        "H3:Every decision, on the record",
+        "H3:Claims with status, not vibes",
+        "H3:Runs that replay exactly",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof",
+        "H2:Three families, one cheap floor, zero free tier",
+        "H2:Six layers, each one drawn here",
+        "H3:Entry → plan → team",
+        "H3:Evidence RAG hub",
+        "H3:Orchestra → MCP"
+      ],
+      "canvases": [
+        {
+          "id": "",
+          "cls": "absolute inset-0 h-full w-full",
+          "kind": "2d",
+          "attr": [
+            1440,
+            900
+          ],
+          "css": [
+            1440,
+            900
+          ]
+        }
+      ],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "16px / 800",
+      "customCursor": 3
+    },
+    {
+      "route": "/login",
+      "vp": "1440",
+      "hero": "login-1440.png",
+      "full": null,
+      "title": "Log in — AgentOS",
+      "sections": 0,
+      "headings": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "30px / 700",
+      "customCursor": 3
+    },
+    {
+      "route": "/signup",
+      "vp": "1440",
+      "hero": "signup-1440.png",
+      "full": null,
+      "title": "Sign up — AgentOS",
+      "sections": 0,
+      "headings": [
+        "H1:Create your account"
+      ],
+      "canvases": [],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "30px / 700",
+      "customCursor": 3
+    },
+    {
+      "route": "/",
+      "vp": "375",
+      "hero": "landing-375.png",
+      "full": "landing-375-full.png",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "sections": 12,
+      "headings": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single model can’t",
+        "H3:Decision Bus",
+        "H3:Dynamic teams",
+        "H3:MCP tools",
+        "H3:Evidence hub",
+        "H3:Per-agent routing",
+        "H3:Adversarial verification",
+        "H3:Spend caps",
+        "H3:Run replay",
+        "H2:Surface by surface",
+        "H3:One question, one assembled team",
+        "H3:Real spend against real caps",
+        "H3:Every decision, on the record",
+        "H3:Claims with status, not vibes",
+        "H3:Runs that replay exactly",
+        "H2:If it decided, it’s on the log",
+        "H2:Nothing ships without proof",
+        "H2:Three families, one cheap floor, zero free tier",
+        "H2:Six layers, each one drawn here",
+        "H3:Entry → plan → team",
+        "H3:Evidence RAG hub",
+        "H3:Orchestra → MCP"
+      ],
+      "canvases": [
+        {
+          "id": "",
+          "cls": "absolute inset-0 h-full w-full",
+          "kind": "2d",
+          "attr": [
+            375,
+            812
+          ],
+          "css": [
+            375,
+            812
+          ]
+        }
+      ],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "16px / 800",
+      "customCursor": 3
+    },
+    {
+      "route": "/login",
+      "vp": "375",
+      "hero": "login-375.png",
+      "full": null,
+      "title": "Log in — AgentOS",
+      "sections": 0,
+      "headings": [
+        "H1:Welcome back"
+      ],
+      "canvases": [],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "30px / 700",
+      "customCursor": 3
+    },
+    {
+      "route": "/signup",
+      "vp": "375",
+      "hero": "signup-375.png",
+      "full": null,
+      "title": "Sign up — AgentOS",
+      "sections": 0,
+      "headings": [
+        "H1:Create your account"
+      ],
+      "canvases": [],
+      "hScroll": 0,
+      "fontBody": "Inter, \"Inter Fallback\", ui-sans-serif, ",
+      "h1Size": "30px / 700",
+      "customCursor": 3
+    }
+  ],
+  "console": []
+}

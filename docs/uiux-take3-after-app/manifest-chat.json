@@ -1,0 +1,179 @@
+{
+  "mode": "after",
+  "milestone": "chat",
+  "base": "http://localhost:3100",
+  "at": "2026-10-09T20:39:25.333Z",
+  "shots": [
+    {
+      "name": "chat-1440-empty",
+      "file": "chat-1440-empty.png",
+      "vp": "1440x900",
+      "route": "/app",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 2236
+      }
+    },
+    {
+      "name": "chat-1440-thread-top",
+      "file": "chat-1440-thread-top.png",
+      "vp": "1440x900",
+      "route": "/app",
+      "status": 200,
+      "thread": {
+        "rowFound": true
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 2851
+      }
+    },
+    {
+      "name": "chat-375-empty",
+      "file": "chat-375-empty.png",
+      "vp": "375x812",
+      "route": "/app",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 549
+      }
+    },
+    {
+      "name": "chat-375-thread",
+      "file": "chat-375-thread.png",
+      "vp": "375x812",
+      "route": "/app",
+      "status": 200,
+      "thread": {
+        "rowFound": true
+      },
+      "drawer": {
+        "rows": null
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "main",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 1164
+      }
+    },
+    {
+      "name": "chat-375-drawer",
+      "file": "chat-375-drawer.png",
+      "vp": "375x812",
+      "route": "/app",
+      "status": 200,
+      "thread": {
+        "rowFound": null
+      },
+      "drawer": {
+        "rows": 28
+      },
+      "replay": {
+        "run": null
+      },
+      "state": {
+        "scroller": "document",
+        "scrolledTo": 0,
+        "mainOverflowPx": 0,
+        "breakouts": [],
+        "masthead": {
+          "fontSize": "19px",
+          "fontWeight": "600",
+          "family": "Inter, \"Inter Fall"
+        },
+        "display": null,
+        "errorShell": false,
+        "docOverflowPx": 0,
+        "bodyCursor": "auto",
+        "customCursorNode": false,
+        "skeletons": 0,
+        "textChars": 2201
+      }
+    }
+  ],
+  "console": []
+}

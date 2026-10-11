@@ -1,0 +1,208 @@
+{
+  "mode": "before",
+  "base": "http://localhost:3000",
+  "at": "2026-10-09T05:47:07.943Z",
+  "shots": [
+    {
+      "route": "/",
+      "slug": "landing",
+      "vp": "1440",
+      "hero": "landing-1440.png",
+      "full": "landing-1440-full.png",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "mainSections": 12,
+      "headings": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single model c",
+        "H3:Decision Bus",
+        "H3:Dynamic teams",
+        "H3:MCP tools",
+        "H3:Evidence hub",
+        "H3:Per-agent routing",
+        "H3:Adversarial verification",
+        "H3:Spend caps",
+        "H3:Run replay",
+        "H2:Surface by surface",
+        "H3:One question, one assembled team",
+        "H3:Real spend against real caps",
+        "H3:Every decision, on the record",
+        "H3:Claims with status, not vibes",
+        "H3:Runs that replay exactly",
+        "H2:If it decided, it’s on the log"
+      ],
+      "pageHeightPx": 15057,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "0px",
+      "headingSize": "16px / 800",
+      "canvas": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            1224,
+            765
+          ]
+        }
+      ],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    },
+    {
+      "route": "/login",
+      "slug": "login",
+      "vp": "1440",
+      "hero": "login-1440.png",
+      "full": null,
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "mainSections": 0,
+      "headings": [
+        "H1:Welcome back"
+      ],
+      "pageHeightPx": 900,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "8px",
+      "headingSize": "30px / 700",
+      "canvas": [],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    },
+    {
+      "route": "/signup",
+      "slug": "signup",
+      "vp": "1440",
+      "hero": "signup-1440.png",
+      "full": null,
+      "title": "Sign up — AgentOS",
+      "url": "/signup",
+      "mainSections": 0,
+      "headings": [
+        "H1:Create your account"
+      ],
+      "pageHeightPx": 900,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "8px",
+      "headingSize": "30px / 700",
+      "canvas": [],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    },
+    {
+      "route": "/",
+      "slug": "landing",
+      "vp": "375",
+      "hero": "landing-375.png",
+      "full": "landing-375-full.png",
+      "title": "AgentOS — Adaptive multi-agent intelligence",
+      "url": "/",
+      "mainSections": 12,
+      "headings": [
+        "H1:First Super AgentOS",
+        "H2:Plan. Assemble. Verify. Judge.",
+        "H2:Eight things it does that a single model c",
+        "H3:Decision Bus",
+        "H3:Dynamic teams",
+        "H3:MCP tools",
+        "H3:Evidence hub",
+        "H3:Per-agent routing",
+        "H3:Adversarial verification",
+        "H3:Spend caps",
+        "H3:Run replay",
+        "H2:Surface by surface",
+        "H3:One question, one assembled team",
+        "H3:Real spend against real caps",
+        "H3:Every decision, on the record",
+        "H3:Claims with status, not vibes",
+        "H3:Runs that replay exactly",
+        "H2:If it decided, it’s on the log"
+      ],
+      "pageHeightPx": 14359,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "0px",
+      "headingSize": "16px / 800",
+      "canvas": [
+        {
+          "kind": "webgl2",
+          "attr": [
+            150,
+            324
+          ]
+        }
+      ],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    },
+    {
+      "route": "/login",
+      "slug": "login",
+      "vp": "375",
+      "hero": "login-375.png",
+      "full": null,
+      "title": "Log in — AgentOS",
+      "url": "/login",
+      "mainSections": 0,
+      "headings": [
+        "H1:Welcome back"
+      ],
+      "pageHeightPx": 812,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "8px",
+      "headingSize": "30px / 700",
+      "canvas": [],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    },
+    {
+      "route": "/signup",
+      "slug": "signup",
+      "vp": "375",
+      "hero": "signup-375.png",
+      "full": null,
+      "title": "Sign up — AgentOS",
+      "url": "/signup",
+      "mainSections": 0,
+      "headings": [
+        "H1:Create your account"
+      ],
+      "pageHeightPx": 812,
+      "hScrollOverflowPx": 0,
+      "bodyFont": "Inter, \"Inter Fallback\", ui-sans-serif, sy",
+      "bodyBg": "rgb(10, 10, 11)",
+      "bodyColor": "rgb(242, 242, 245)",
+      "borderRadiusSample": "8px",
+      "headingSize": "30px / 700",
+      "canvas": [],
+      "customCursorMounted": true,
+      "nativeCursorOnBody": "none",
+      "reducedMotionOnly": false
+    }
+  ],
+  "console": [
+    "/ [warning] [.WebGL-0xa6c03c6de00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "/ [warning] [.WebGL-0xa6c03c6de00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "/ [warning] [.WebGL-0xa6c03c6de00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "/ [warning] [.WebGL-0xa6c03c6de00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ],
+  "auth": null
+}
