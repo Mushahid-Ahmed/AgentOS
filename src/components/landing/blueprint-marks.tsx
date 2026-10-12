@@ -75,11 +75,15 @@ function brackets(w: number, h: number) {
 export function BlueprintFrame({
 	className = '',
 	gridAt = 'bl',
+	grid = true,
 	threshold = 0.25
 }: {
 	className?: string
 	/** Which corner carries the dotted grid patch (the opposite one carries the crosshair). */
 	gridAt?: 'bl' | 'br'
+	/** Owner ruling 2026-10-13: the hero's grid patch read as a stray box, so the
+	    ornament can be mounted without it. The brackets, ticks and crosshair stay. */
+	grid?: boolean
 	threshold?: number
 }) {
 	const reduced = useReducedMotion()
@@ -177,38 +181,40 @@ export function BlueprintFrame({
 							</g>
 						</g>
 						{/* dotted grid patch: §9's literal 1px 1px, only possible in px space */}
-						<g
-							strokeWidth={1}
-							strokeDasharray="1 1"
-							strokeOpacity={0.26}
-							style={
-								reduced
-									? undefined
-									: {
-											opacity: on ? 1 : 0,
-											transition: `opacity ${DRAW_MS}ms var(--ease-expo) ${step(3)}`
-										}
-							}
-						>
-							{Array.from({ length: cols + 1 }, (_, k) => (
-								<line
-									key={`c${k}`}
-									x1={gx + k * TILE}
-									y1={gy}
-									x2={gx + k * TILE}
-									y2={gy + rows * TILE}
-								/>
-							))}
-							{Array.from({ length: rows + 1 }, (_, k) => (
-								<line
-									key={`r${k}`}
-									x1={gx}
-									y1={gy + k * TILE}
-									x2={gx + cols * TILE}
-									y2={gy + k * TILE}
-								/>
-							))}
-						</g>
+						{grid && (
+							<g
+								strokeWidth={1}
+								strokeDasharray="1 1"
+								strokeOpacity={0.26}
+								style={
+									reduced
+										? undefined
+										: {
+												opacity: on ? 1 : 0,
+												transition: `opacity ${DRAW_MS}ms var(--ease-expo) ${step(3)}`
+											}
+								}
+							>
+								{Array.from({ length: cols + 1 }, (_, k) => (
+									<line
+										key={`c${k}`}
+										x1={gx + k * TILE}
+										y1={gy}
+										x2={gx + k * TILE}
+										y2={gy + rows * TILE}
+									/>
+								))}
+								{Array.from({ length: rows + 1 }, (_, k) => (
+									<line
+										key={`r${k}`}
+										x1={gx}
+										y1={gy + k * TILE}
+										x2={gx + cols * TILE}
+										y2={gy + k * TILE}
+									/>
+								))}
+							</g>
+						)}
 					</g>
 				</svg>
 			)}

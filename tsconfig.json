@@ -47,7 +47,9 @@
     ".next-t8c/types/**/*.ts",
     ".next-t8c/dev/types/**/*.ts",
     ".next-t9/types/**/*.ts",
-    ".next-t9/dev/types/**/*.ts"
+    ".next-t9/dev/types/**/*.ts",
+    ".next-v9/types/**/*.ts",
+    ".next-v9/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

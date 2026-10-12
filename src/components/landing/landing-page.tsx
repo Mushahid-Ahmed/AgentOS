@@ -200,8 +200,9 @@ export function LandingPage() {
 							}}
 						/>
 						{/* V6 §9: the blueprint frame on the hero's own edges — measured in CSS
-					    px against this section, painted at z-0 behind the type. */}
-						<BlueprintFrame />
+					    px against this section, painted at z-0 behind the type. The dotted grid
+					    patch is off here: the owner asked for it back out on 2026-10-13. */}
+						<BlueprintFrame grid={false} />
 						<Parallax speed={1.5} className="relative z-10">
 							<div className="flex flex-col items-center px-6 text-center">
 								<span className="label-uppercase text-text-faint mb-6">
@@ -280,7 +281,7 @@ export function LandingPage() {
 
 				{/* 5 — PIPELINE */}
 				<V7Page id="pipeline">
-					<section className="border-border border-t py-24 sm:py-28">
+					<section className="py-24 sm:py-28">
 						<div className={`${SECTION} relative`}>
 							<SectionHead
 								id="pipeline"
@@ -307,7 +308,7 @@ export function LandingPage() {
 
 				{/* 6 — CAPABILITIES */}
 				<V7Page id="capabilities">
-					<section id="capabilities" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+					<section id="capabilities" className="scroll-mt-20 py-24 sm:py-28">
 						<div className={SECTION}>
 							<SectionHead
 								kicker="Capabilities"
@@ -348,13 +349,13 @@ export function LandingPage() {
 				</V7Page>
 
 				{/* 7 — PINNED HORIZONTAL SHOWCASE */}
-				<div className="border-border border-t">
+				<div>
 					<HorizontalShowcase />
 				</div>
 
 				{/* 8 — DECISION BUS TERMINAL */}
 				<V7Page id="bus">
-					<section className="border-border border-t py-24 sm:py-28">
+					<section className="py-24 sm:py-28">
 						<div className={SECTION}>
 							<div className="grid items-center gap-12 lg:grid-cols-2">
 								<SectionHead
@@ -379,7 +380,7 @@ export function LandingPage() {
 
 				{/* 9 — EVIDENCE + COUNTUP STATS */}
 				<V7Page id="evidence">
-					<section id="evidence" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+					<section id="evidence" className="scroll-mt-20 py-24 sm:py-28">
 						<div className={SECTION}>
 							<SectionHead
 								kicker="Evidence & gates"
@@ -415,7 +416,7 @@ export function LandingPage() {
 
 				{/* 10 — MODELS & ROUTING */}
 				<V7Page id="orchestra">
-					<section className="border-border relative border-t py-24 sm:py-28">
+					<section className="relative py-24 sm:py-28">
 						<div className={`${SECTION} relative z-10`}>
 							<SectionHead
 								kicker="Models & routing"
@@ -443,7 +444,7 @@ export function LandingPage() {
 
 				{/* 11 — ARCHITECTURE D1–D6 */}
 				<V7Page id="routes">
-					<section className="border-border border-t py-24 sm:py-28">
+					<section className="py-24 sm:py-28">
 						<div className={SECTION}>
 							<SectionHead kicker="Architecture" title="Six layers, each one drawn here" />
 							<div className="mt-12">
@@ -459,10 +460,7 @@ export function LandingPage() {
 			    bundle is z-0 and the content wrapper below it is relative z-10 —
 			    nothing about the chart's bar-grow or the table's curtain changes. */}
 				<V7Page id="cable">
-					<section
-						id="benchmarks"
-						className="border-border relative scroll-mt-20 border-t py-24 sm:py-28"
-					>
+					<section id="benchmarks" className="relative scroll-mt-20 py-24 sm:py-28">
 						<CableBundle />
 						<div className={`${SECTION} relative z-10`}>
 							<SectionHead
@@ -519,7 +517,7 @@ export function LandingPage() {
 
 				{/* 13 — FAQ */}
 				<V7Page id="faq">
-					<section id="faq" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+					<section id="faq" className="scroll-mt-20 py-24 sm:py-28">
 						<div className={SECTION}>
 							<SectionHead kicker="FAQ" title="Questions a juror would ask" />
 							<div className="border-border mt-10 border-t">
@@ -531,10 +529,7 @@ export function LandingPage() {
 
 				{/* 14 — CTA */}
 				<V7Page id="cta">
-					<section
-						id="start"
-						className="border-border relative overflow-hidden border-t py-32 sm:py-40"
-					>
+					<section id="start" className="relative overflow-hidden py-32 sm:py-40">
 						{/* V8 Job 4: the owner took the warm thermal blob out of this spot ("the animation
 						    that is in color lite orange … is not according the theme") and asked for a
 						    cursor-pushed glyph field in its place. It paints at z-0 under the mote field

@@ -160,7 +160,7 @@ export function PipelineStage({ heading }: Props) {
 	// fully readable.
 	if (reduced) {
 		return (
-			<section className="border-border border-t py-24 sm:py-28">
+			<section className="py-24 sm:py-28">
 				<div className="mx-auto w-[89%] max-w-6xl">
 					<ol className="mt-14 flex flex-col gap-10">
 						{STAGES.map((s, i) => (
@@ -181,11 +181,7 @@ export function PipelineStage({ heading }: Props) {
 	}
 
 	return (
-		<div
-			ref={wrapRef}
-			className="border-border relative border-t"
-			style={{ height: `${WRAP_SVH}svh` }}
-		>
+		<div ref={wrapRef} className="relative" style={{ height: `${WRAP_SVH}svh` }}>
 			<div className="sticky top-0 h-[100svh] overflow-hidden">
 				{/* Heading marquee: the section's own title, cropped by the stage edge. */}
 				<div className="absolute inset-x-0 bottom-0 z-0 overflow-hidden pb-4">

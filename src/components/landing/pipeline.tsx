@@ -61,6 +61,32 @@ function nodeX(i: number): number {
 	return i * (NODE_W + gap)
 }
 
+// The sub line is 10px mono inside a NODE_W-wide box, so ~22 characters fit
+// (0.6em advance, 8px of side padding). "researcher · critic · synthesizer" is
+// 33, and drew itself straight through the card edge, so a sub that does not fit
+// wraps on its separators and the block re-centres on the node.
+//
+// The separator is part of the copy, not layout glue: it has to survive the wrap.
+// Dropping it at the break changed the rendered sentence ("critic synthesizer"),
+// which a byte-for-byte copy gate catches.
+const SUB_MAX_CHARS = Math.floor((NODE_W - 16) / 6)
+const SUB_LEADING = 12
+
+function wrapSub(sub: string, max = SUB_MAX_CHARS): string[] {
+	const lines: string[] = []
+	let line = ''
+	for (const item of sub.split('·').map((s) => s.trim())) {
+		if (!item) continue
+		const next = line ? `${line} · ${item}` : item
+		if (next.length > max && line) {
+			lines.push(`${line} ·`)
+			line = item
+		} else line = next
+	}
+	if (line) lines.push(line)
+	return lines
+}
+
 // Spring pop, evaluated on progress rather than on time: 0.82 → 1.08 at 70% of
 // the node's own slice, settling to exactly 1. Same shape at the same scroll
 // position on every pass, which is what keeps a scrubbed overshoot readable.
@@ -179,6 +205,7 @@ export function PipelineDiagram() {
 				{STAGES.map((s, i) => {
 					const x = nodeX(i)
 					const q = node(i)
+					const subLines = wrapSub(s.sub)
 					const isHot = hover === i
 					const dim = hover === null || isHot ? 1 : 0.3
 					return (
@@ -225,17 +252,20 @@ export function PipelineDiagram() {
 									{s.label}
 								</text>
 								{/* §4: the label lands after the node it names. */}
-								<text
-									x={x + NODE_W / 2}
-									y={Y + 50}
-									textAnchor="middle"
-									fill="var(--text-faint)"
-									fontSize="10"
-									opacity={scrubSlice(p, i * 0.11 + 0.09, 0.22)}
-									className="font-mono"
-								>
-									{s.sub}
-								</text>
+								{subLines.map((line, k) => (
+									<text
+										key={line}
+										x={x + NODE_W / 2}
+										y={Y + 50 - ((subLines.length - 1) * SUB_LEADING) / 2 + k * SUB_LEADING}
+										textAnchor="middle"
+										fill="var(--text-faint)"
+										fontSize="10"
+										opacity={scrubSlice(p, i * 0.11 + 0.09, 0.22)}
+										className="font-mono"
+									>
+										{line}
+									</text>
+								))}
 							</g>
 						</g>
 					)

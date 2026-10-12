@@ -86,7 +86,7 @@ export function LandingFooter() {
 			// the spring curve carries it a few pixels past 0 before it settles.
 			// Transform only — the footer's box never moves, so the document height and
 			// every anchor below it stay exactly where they were.
-			className="footer-rise border-border border-t bg-[var(--surface)] pt-20 pb-10"
+			className="footer-rise bg-[var(--surface)] pt-20 pb-10"
 			style={{ transform: shown ? 'none' : 'translateY(56px)' }}
 		>
 			<div className={SECTION}>

@@ -1465,12 +1465,12 @@ a:focus-visible .nav-wave > span {
 	}
 }
 
+/* Owner ruling 2026-10-13: the spotlight keeps lifting the line nearest the
+   centre, but paints no rectangle behind it — the accent fill read as a
+   highlight box around the copy and came out. */
 .v5-spot {
-	background-color: color-mix(in srgb, var(--accent) 6%, transparent);
 	filter: brightness(1.1);
-	transition:
-		background-color var(--motion-base) var(--ease-out-soft),
-		filter var(--motion-base) var(--ease-out-soft);
+	transition: filter var(--motion-base) var(--ease-out-soft);
 }
 
 .v5-xray {
