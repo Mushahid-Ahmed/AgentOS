@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { env } from '@/lib/env'
 import { log } from '@/server/lib/logger'
 import { AppError } from '@/lib/errors/app-error'
+import { captureError } from '@/lib/observability/capture-error'
 import { judgeAnswer } from '@/server/ai/rubric-judge'
 import { nightlySpendMicroUsd } from '@/server/agentos/store'
 import {
@@ -14,7 +15,10 @@ import {
 	type JudgeVerdict,
 	type SetupTaskResult
 } from '@/lib/agentos-benchmark/stats'
-import type { AgentosBenchmarkSetupOutcome, AgentosBenchmarkStreamEvent } from '@/lib/agentos-benchmark/wire'
+import type {
+	AgentosBenchmarkSetupOutcome,
+	AgentosBenchmarkStreamEvent
+} from '@/lib/agentos-benchmark/wire'
 import { runSetup, type BenchmarkTask } from './setups'
 import { createRun, finishRun, loadRunForReport, persistResult, persistVerdict } from './store'
 
@@ -114,8 +118,7 @@ export async function runAgentosBenchmark(
 	const effectiveCapMicro = Math.min(capMicro, Math.max(0, nightlyCapMicro - spentTonight))
 
 	const startedAtIso = new Date().toISOString()
-	const label =
-		options.label ?? `agentos benchmark ${pilot ? 'pilot' : 'full'} ${startedAtIso}`
+	const label = options.label ?? `agentos benchmark ${pilot ? 'pilot' : 'full'} ${startedAtIso}`
 	const runId = await createRun({
 		label,
 		judgeModel: JUDGE_MODEL_NAME,
@@ -143,6 +146,30 @@ export async function runAgentosBenchmark(
 	let executedTasks = 0
 	let status = 'completed'
 	let stopNote: string | null = null
+
+	// Row writes are ISSUED the moment a measurement exists, but no longer awaited
+	// inline. Between a setup's model call and its judge call the insert cost a full
+	// cross-region round trip (~1.8 s here) of dead wall clock inside the paid path —
+	// up to ~14 s per task with four setups, and each of those seconds counted against
+	// the 300s undici body timeout the heartbeats exist to dodge. Issuing at the same
+	// point and draining at the task boundary keeps the durability guarantee it always
+	// promised (a run that dies part-way still leaves its completed measurements
+	// behind) while making nothing on the client's critical path wait for a row.
+	const pendingWrites: Promise<void>[] = []
+	const trackWrite = (write: Promise<unknown>, op: 'result' | 'verdict') => {
+		pendingWrites.push(
+			write.then(
+				() => undefined,
+				(error) => {
+					captureError(error, { feature: 'agentos_benchmark_persist', op })
+				}
+			)
+		)
+	}
+	const drainWrites = async () => {
+		if (pendingWrites.length === 0) return
+		await Promise.all(pendingWrites.splice(0))
+	}
 
 	for (let index = 0; index < tasks.length; index++) {
 		if (options.signal?.aborted) {
@@ -174,7 +201,7 @@ export async function runAgentosBenchmark(
 			const result = await runSetup(setup, task)
 			results.push(result)
 			spentMicro += result.costMicroUsd
-			await persistResult(runId, result)
+			trackWrite(persistResult(runId, result), 'result')
 
 			// Grade only an answer that actually exists; a failed setup is recorded as a
 			// failure row and simply isn't judged (its success-rate hit is the honest signal).
@@ -203,12 +230,16 @@ export async function runAgentosBenchmark(
 						judgeModel: JUDGE_MODEL_NAME
 					}
 					verdicts.push(verdict)
-					await persistVerdict(runId, verdict)
+					trackWrite(persistVerdict(runId, verdict), 'verdict')
 				} else {
 					// A judge failure is recorded honestly (no verdict row), never coerced
 					// into a fabricated score. The task still counts; it just isn't scored
 					// for this setup.
-					log.warn('agentos benchmark judge failed', { taskId: task.id, setup, error: judged.error })
+					log.warn('agentos benchmark judge failed', {
+						taskId: task.id,
+						setup,
+						error: judged.error
+					})
 				}
 			}
 
@@ -221,6 +252,10 @@ export async function runAgentosBenchmark(
 				error: result.error
 			})
 		}
+		// The task boundary: every row this task measured is durable before the
+		// progress event that reports it, and before the counter the run's final
+		// taskCount is built from.
+		await drainWrites()
 		executedTasks += 1
 
 		emit({
@@ -235,6 +270,10 @@ export async function runAgentosBenchmark(
 	}
 
 	const finishedAtIso = new Date().toISOString()
+	// No row write may still be in flight when the run row goes terminal, or a client
+	// reading the finished run sees fewer results than were measured. Each task
+	// boundary already drains, so this normally costs nothing.
+	await drainWrites()
 	await finishRun(runId, {
 		status,
 		judgeCostMicroUsd: judgeCostMicro > 0 ? BigInt(judgeCostMicro) : null,

@@ -99,7 +99,7 @@ function rowToSummary(row: {
 /** The replay picker: recent runs, newest first. */
 export async function listRuns(limit = 50): Promise<ListRunsResponse> {
 	const rows = await db.agentRun.findMany({
-	 orderBy: { createdAt: 'desc' },
+		orderBy: { createdAt: 'desc' },
 		take: Math.max(1, Math.min(100, limit)),
 		select: RUN_SELECT
 	})
@@ -151,18 +151,26 @@ function reconstructTeam(
  * triggered, exactly as it streamed live.
  */
 export async function getRunReplay(id: bigint): Promise<RunReplayResponse | null> {
-	const run = await db.agentRun.findUnique({ where: { id }, select: { ...RUN_SELECT, plan: true } })
-	if (!run) return null
-
-	const [decisions, events, evidence] = await Promise.all([
+	// One round trip for the whole page, not two. These four reads are independent by
+	// row (all keyed by this run id), so awaiting the run lookup before starting the
+	// other three put a full cross-region RTT in front of a replay that is entirely a
+	// read. An unknown id returns null below; its three sibling queries match nothing
+	// and come back empty, which is the cheaper way to answer a request that is a 404
+	// anyway.
+	const [run, decisions, events, evidence] = await Promise.all([
+		db.agentRun.findUnique({ where: { id }, select: { ...RUN_SELECT, plan: true } }),
 		db.decisionRecord.findMany({ where: { runId: id }, orderBy: { id: 'asc' } }),
 		db.agentEvent.findMany({ where: { runId: id }, orderBy: { seq: 'asc' } }),
 		db.evidenceRecord.findMany({ where: { runId: id }, orderBy: { id: 'asc' } })
 	])
+	if (!run) return null
 
 	// Authoritative evidence rows, keyed by the stringified BigInt id the executor
 	// echoed as `evidenceId`, used to hydrate each evidence_added frame.
-	const evidenceById = new Map<string, { source: string | null; discoveredByAgent: string; status: string }>()
+	const evidenceById = new Map<
+		string,
+		{ source: string | null; discoveredByAgent: string; status: string }
+	>()
 	for (const row of evidence) {
 		evidenceById.set(row.id.toString(), {
 			source: row.source,

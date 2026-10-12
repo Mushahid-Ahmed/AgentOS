@@ -179,50 +179,56 @@ export function createRunStore(id: bigint, client: Db = db): RunStore {
 	return {
 		async save(run: Run): Promise<void> {
 			try {
-				await client.agentRun.update({
-					where: { id },
-					data: {
-						status: run.status,
-						costMicroUsd: run.usage.costMicroUsd > 0 ? BigInt(run.usage.costMicroUsd) : null,
-						modelCalls: run.usage.modelCalls,
-						toolCalls: run.usage.toolCalls,
-						replans: run.usage.replans,
-						finalAnswer: run.finalAnswer,
-						error: run.error,
-						finishedAt: run.finishedAt ? new Date(run.finishedAt) : null
-					}
-				})
-				// The plan's steps as one statement (see upsertStepsBatch). Deliberately
-				// not wrapped in a transaction with the update above: BEGIN/COMMIT would
-				// cost two more round trips to protect a write that is best-effort by
-				// contract (the executor swallows store failures, and a half-saved run is
-				// re-saved on the next state change).
-				await upsertStepsBatch(
-					client,
-					id,
-					run.plan.steps.map((step) => {
-						const state = run.stepStates[step.id]
-						const outputText = state?.result?.output?.text
-						return {
-							key: step.id,
-							agent: step.agent,
-							model: step.model,
-							toolsAllowed: step.toolsAllowed,
-							dependsOn: step.dependsOn,
-							status: state?.status ?? 'pending',
-							attempts: state?.attempts ?? 0,
-							startedAt: state?.startedAt ? new Date(state.startedAt) : null,
-							finishedAt: state?.finishedAt ? new Date(state.finishedAt) : null,
-							promptTokens: state?.result?.tokens?.input ?? 0,
-							completionTokens: state?.result?.tokens?.output ?? 0,
-							costMicroUsd:
-								state?.result?.costMicroUsd != null ? BigInt(state.result.costMicroUsd) : null,
-							outputSummary:
-								typeof outputText === 'string' ? outputText.slice(0, 4000) : null,
-							error: state?.error ?? null
+				// One round trip of wall clock for the whole save, not two. The run
+				// aggregate and its step rows are different tables with no write-order
+				// dependency (the run row already exists, and steps upsert on
+				// (run_id, key)), so awaiting them in series paid a second full
+				// cross-region RTT on EVERY transition — and a 6-step run saves a dozen
+				// times. Deliberately not a transaction: BEGIN/COMMIT would add two more
+				// round trips to protect a write that is best-effort by contract (the
+				// executor swallows store failures, and a half-saved run is re-saved on
+				// the next state change).
+				await Promise.all([
+					client.agentRun.update({
+						where: { id },
+						data: {
+							status: run.status,
+							costMicroUsd: run.usage.costMicroUsd > 0 ? BigInt(run.usage.costMicroUsd) : null,
+							modelCalls: run.usage.modelCalls,
+							toolCalls: run.usage.toolCalls,
+							replans: run.usage.replans,
+							finalAnswer: run.finalAnswer,
+							error: run.error,
+							finishedAt: run.finishedAt ? new Date(run.finishedAt) : null
 						}
-					})
-				)
+					}),
+					// The plan's steps as one statement (see upsertStepsBatch).
+					upsertStepsBatch(
+						client,
+						id,
+						run.plan.steps.map((step) => {
+							const state = run.stepStates[step.id]
+							const outputText = state?.result?.output?.text
+							return {
+								key: step.id,
+								agent: step.agent,
+								model: step.model,
+								toolsAllowed: step.toolsAllowed,
+								dependsOn: step.dependsOn,
+								status: state?.status ?? 'pending',
+								attempts: state?.attempts ?? 0,
+								startedAt: state?.startedAt ? new Date(state.startedAt) : null,
+								finishedAt: state?.finishedAt ? new Date(state.finishedAt) : null,
+								promptTokens: state?.result?.tokens?.input ?? 0,
+								completionTokens: state?.result?.tokens?.output ?? 0,
+								costMicroUsd:
+									state?.result?.costMicroUsd != null ? BigInt(state.result.costMicroUsd) : null,
+								outputSummary: typeof outputText === 'string' ? outputText.slice(0, 4000) : null,
+								error: state?.error ?? null
+							}
+						})
+					)
+				])
 			} catch (error) {
 				captureError(error, { feature: 'agentos_run_save' })
 			}
@@ -266,4 +272,3 @@ export async function nightlySpendMicroUsd(): Promise<bigint> {
 	})
 	return total._sum.costMicroUsd ?? BigInt(0)
 }
-

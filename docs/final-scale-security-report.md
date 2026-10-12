@@ -283,3 +283,70 @@ Two consequences worth stating plainly, because §10 asked for "0 high/critical"
   reachable over the LAN from this workstation and is now loopback-bound.
 - `braces` cannot be overridden to a fixed version because that version does not exist; its
   mitigation is being a lint-time dependency of a `devDependency`, not part of what ships.
+
+---
+
+## 8. Scalability pass — round-trip cuts on the hot paths (2026-10-12, after the security re-run)
+
+The owner's instruction was security first, then scalability, with `next` held at 16.3.0.
+Security closed at 10 findings (§7); this section is the scalability half. Five edits, all of
+one species: an `await` chain that nothing but code layout had ordered. Reasoning, tradeoffs
+and the two false premises the harness caught while it was being written are in decision §18;
+this is the ledger.
+
+Nothing here is a build-time or render-time change — the arms run against the **live
+database** with the real Prisma client, with `globalThis.prisma` swapped for a timestamping
+Proxy (`src/server/db/client.ts` already caches the client there). Cost: **$0**, no provider
+call. Product code is not mocked: the Proxy only observes statements, and G7/G8 read
+`engine.ts` source rather than executing its paid loop.
+
+| gate | what it can fail on | result |
+| --- | --- | --- |
+| G0 | `save()` silently gaining or losing a statement | PASS — all 3 reps issue exactly `agentRun.update`, `$executeRaw` |
+| G1 | the two statements not actually overlapping | PASS — walls 1623/1620/1622 ms vs single 1623/1619/1622 ms, summed 3246/3238/3240 ms |
+| G2 | **positive control**: the same pair awaited in series must pay the sum | PASS — 3244/3237/3566 ms; this gate failed during authoring and is the reason G1's predicate is a strict `<` on start-vs-finish |
+| G3 | a speed-up that is noise or cold-pool connection setup | PASS — paired deltas 1621/1617/1944 ms, every sample positive, median 1621 ms ≥ half of one round trip (1620 ms) |
+| G4 | the user turn still reading the thread before writing | PASS — one `message.create` (1614 ms), no read |
+| G5 | the assistant turn's two writes serialising | PASS — `message.create` 3241 ms + `conversation.update` 1618 ms in a 3241 ms wall, ratio 1.00× |
+| G6 | replay fetching the run row separately | PASS — 4 statements, 1 wall (3878 ms = its slowest statement), run rebuilt |
+| G7 | a row write still awaited inside the paid task loop (structural) | PASS — 0 inline awaits, 2/2 writes through `trackWrite` |
+| G8 | durability slipping past the task boundary or past `finishRun` | PASS — drain at byte 10041 < task counter 10063; final drain 10529 < `finishRun` 10550 |
+| G9 | the deleted-thread branch (the P2003 path) regressing into a failure | PASS — `message.create` → P2003 → `conversation.create`, fresh id 51 returned, zero reads |
+
+**10/10**, log `_lh/roundtrip-cuts.txt`. One round trip on this link measured 1620 ms in this
+run (1674 ms in the pre-format run — same order, the link is the variable).
+
+### 8.1 What that buys, per user-visible action
+
+| path | round trips before | after | wall clock removed |
+| --- | --- | --- | --- |
+| AgentOS run save (× ~8 per 6-step run) | 2 | 1 | ~13.0 s per run |
+| chat user turn | 2 | 1 | ~1.6 s |
+| chat assistant turn | 2 | 1 | ~1.6 s (both chat rows together: ~3.24 s per full exchange) |
+| replay open | 2 batches | 1 batch | ~1.6 s |
+| benchmark task | up to 8 awaited between model calls | 0 on the paid path, drained per task | the DB no longer sits between a call and its judge |
+
+### 8.2 Regression and validation on the same tree
+
+- `scripts/verify-scale-security.mts`: **8/8**, cost of one enforced request median
+  **1622 ms** (baseline 1779 ms) — the standing gate got faster, not slower.
+- `tsc --noEmit`: 0 errors. `eslint --max-warnings=0` over the 5 changed files + the new
+  script: 0 problems. `prettier --check` on all six: clean (the two doc files use the
+  repo-wide `*emphasis*` convention that prettier rewrites to `_emphasis_`; the committed
+  blobs already differ that way, so it is not a new divergence). The harness was then
+  re-run on the formatted tree: still 10/10.
+- `pnpm test`: **560 passing**, 41 failing, **every failure in
+  `scripts/check-standards.test.mjs`** and 40 of the 41 the same
+  `EPERM: operation not permitted, symlink` from the fixture builder — the recorded Windows
+  environment limit, not a regression. No `src/**` test failed.
+- `next` is still `^16.3.0`; no animation/motion file, no provider path (`providerFetch`,
+  spend cap, `guardStream` ordering) was touched.
+
+### 8.3 What scalability did *not* fix
+
+The 1.6 s is the distance between `iad1` and `ap-southeast-2`, and no amount of batching
+moves it: a request that must wait on the database still waits one round trip per
+dependency-layer instead of two. The permanent fixes are the two owner actions already
+recorded — move the Supabase primary (or the Vercel region) so they share a continent, and
+the KV/Redis counter behind `enforceRateLimit` (§2) — plus reducing statements-per-request
+further, which now has fewer places to hide than it did.

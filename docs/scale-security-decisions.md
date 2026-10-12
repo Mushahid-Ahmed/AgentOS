@@ -462,3 +462,92 @@ throwaway dev server (loopback answers, the LAN address refuses the connection).
 **Verification.** `Get-NetTCPConnection -State Listen` reports `127.0.0.1` for 3400/3500
 (where it had reported `::` for 3000/3400/3500/3600), `curl` to the LAN address on both
 ports gets no connection, and `http://127.0.0.1:3400/` still answers 307.
+
+---
+
+## 18. Round trips removed from the four hot paths (the scalability half)
+
+**What changed.** Five edits, all of the same species — a sequential `await` chain that was
+never actually ordered by anything but code layout, turned into either one statement or a
+`Promise.all`:
+
+1. `src/server/agentos/store.ts` — `save()` awaited the run-row `UPDATE` and then the plan
+   write in series. They are independent (different tables, no read depends on either) and
+   both are best-effort inside the same `try`, so the series was pure latency. Now
+   `Promise.all([agentRun.update, upsertStepsBatch])`: two statements, one round trip of
+   wall clock. `save()` runs ~8 times per 6-step run (executor.ts:304 per step start, :583
+   per transition), so this is the highest-frequency cut in the pass.
+2. `src/server/api/chat-store.ts` `persistUserTurn` — it read the conversation row to check
+   the thread existed, then wrote the message. The read is gone: write first, and treat the
+   one error that means "the parent is gone" (`P2003`, a failed FK check) as the signal to
+   start a fresh thread. Any other error still rethrows. 2 round trips → 1.
+3. `src/server/api/chat-store.ts` `persistAssistantTurn` — the message insert (with its
+   nested `routeEvent` row) and the `conversation.update` that touches `updatedAt` were
+   awaited one after the other. Now overlapped; the returned message id comes from the
+   insert, as before.
+4. `src/server/agentos/replay.ts` — the run row was fetched, and only then were its three
+   child tables batched. The run lookup is now the first element of that same `Promise.all`,
+   with the `if (!run) return null` test moved after the batch. 2 round trips → 1.
+5. `src/server/agentos-benchmark/engine.ts` — `persistResult` and `persistVerdict` were
+   awaited inside the task loop, i.e. up to 8 cross-region round trips per task sitting on
+   the path between two paid model calls. They now go through `trackWrite`, which keeps the
+   promise (rejections captured through `captureError`, never silently dropped) and
+   `drainWrites` awaits the backlog at the task boundary and immediately before `finishRun`.
+
+**Why.** `docs/baseline-audit.md` measured the link, not the queries: the primary is in
+`ap-southeast-2` and the app runs in `iad1`, so a statement costs ~1.6–1.8 s of wall clock
+while `EXPLAIN ANALYZE` plans it in 0.6–4.1 ms. Adding indexes cannot help — every plan was
+already an Index Scan over tables of 30–1 815 rows (§1). The only variable is how many
+round trips a request waits for, and each of these was waiting for two where one would do.
+
+**Tradeoff.** A concurrent `save()` holds two pool connections for its duration where the
+sequential pair held one; on a cold pool the first connection setup (~2.5 s here) is paid
+once per function invocation either way, so the cost is pool headroom, not latency, and it
+is the same trade `Promise.all` always makes. The P2003 shortcut depends on `messages`
+having exactly one foreign key (`schema/jev-swarm.prisma:37`, `onDelete: Cascade`), which is
+what makes that code unambiguous; the helper's comment says so, because a second FK on the
+table would make the inference wrong and the next reader has to notice that. The benchmark
+engine's durability contract moves from "every row is on disk before the next model call" to
+"every row is on disk at the task boundary and before the run goes terminal" — a process kill
+between the two can lose the in-flight task's row, which the per-row write already could not
+guarantee against a kill mid-statement either. Nothing here became a transaction: `BEGIN` and
+`COMMIT` are two more round trips spent protecting writes the product already defines as
+best-effort.
+
+**Not done, deliberately.** `guardStream`'s identity → budget → audit → money ordering is a
+product contract, not a latency accident, and the spend-cap check in `run.ts` must stay
+before the provider call. `benchmark.ts:114-128`'s `warmUp()` costs two paid model calls, so
+measuring it was out of scope for a $0 window. `createApiRoute`'s `authorize` option has
+zero call sites on API routes, so there was no N+1 there to cut.
+
+**Verification.** `scripts/verify-roundtrip-cuts.mts` — `node --import
+./scripts/register-ts.mjs --import ./scripts/register-no-server-only.mjs
+scripts/verify-roundtrip-cuts.mts`, the usage line in that file's header — → **10/10**, log at `_lh/roundtrip-cuts.txt`. It runs against the live database with the real Prisma client, and
+the product code is untouched: `globalThis.prisma` is replaced with a Proxy that only
+timestamps calls (`src/server/db/client.ts` caches the client there, which is what makes the
+injection legitimate rather than a mock). Three premises were false the first time this was
+written and are worth recording, because each produced a green-looking lie:
+
+- the overlap test used `wall <= max + ε`, and a genuinely sequential pair restarts inside
+  the same millisecond on a fast link, so the control passed as "concurrent". It is now a
+  strict `<` on start-vs-finish, plus the control arm (G2) that asserts the *sum*.
+- a 2-sample `median` returned the larger element, and the cold pool paid connection setup
+  inside the first arm, so the "before" sample was inflated by something other than a round
+  trip. The statistic is gone: G3 now requires every paired sample to be faster **and** the
+  median delta to be at least half a round trip.
+- `Sentry.captureException` is not callable in a bare Node process, so the `catch` path in
+  `captureError` threw while testing the dead-thread branch. That is a harness-environment
+  artifact, not a product bug (outside Next there is no Sentry runtime init), and it is why
+  the instrument prints the failing statement itself: a best-effort module swallowing its own
+  error is exactly what makes a harness-blind failure look like a crash in Sentry.
+
+Numbers from the shipped tree: one round trip = 1620 ms; concurrent `save()` walls
+1623/1620/1622 ms against a single statement of 1623/1619/1622 ms and a summed pair of
+3246/3238/3240 ms, while the identical statements awaited in series measure 3244/3237/3566
+ms (G2, the positive control — it can and did fail). Paired before-minus-after deltas
+1621/1617/1944 ms, median 1621 ms. Assistant turn: both writes issued, wall 3241 ms = the
+slower statement, ratio 1.00×. Replay: four statements, one wall, run rebuilt. Dead-thread
+branch: `message.create` → P2003 → `conversation.create`, new id returned, zero reads.
+Projected off the critical path: **~13.0 s per 6-step AgentOS run** and **~3.24 s per chat
+turn**. The standing gate `scripts/verify-scale-security.mts` was re-run on the same tree:
+8/8, cost of one enforced request median 1622 ms (baseline 1779 ms).
