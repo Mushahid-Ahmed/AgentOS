@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
+import { guardResponse, guardStream } from '@/server/api/stream-guard'
 import { chatInputSchema, chatStreamResponse } from '@/server/api/chat'
 
 // Streaming endpoint, so it bypasses createApiRoute (which buffers JSON) but
@@ -15,9 +16,13 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
 	let input: z.infer<typeof chatInputSchema>
 	try {
+		// Budget + session before the body is read or a token is spent.
+		await guardStream(req, { scope: 'chat', requireUser: true })
 		const raw = await req.json().catch(() => ({}))
 		input = chatInputSchema.parse(raw)
 	} catch (error) {
+		const guarded = guardResponse(error)
+		if (guarded) return guarded
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
 				{ error: 'Invalid request', issues: error.flatten() },

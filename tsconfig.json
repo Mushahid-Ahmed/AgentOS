@@ -41,7 +41,13 @@
     ".next-devprobe/types/**/*.ts",
     ".next-devprobe/dev/types/**/*.ts",
     ".next-t6/types/**/*.ts",
-    ".next-t6/dev/types/**/*.ts"
+    ".next-t6/dev/types/**/*.ts",
+    ".next-t7/types/**/*.ts",
+    ".next-t7/dev/types/**/*.ts",
+    ".next-t8c/types/**/*.ts",
+    ".next-t8c/dev/types/**/*.ts",
+    ".next-t9/types/**/*.ts",
+    ".next-t9/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -1,5 +1,6 @@
 import 'server-only'
 import { env } from '@/lib/env'
+import { providerFetch } from './provider-fetch'
 
 // NanoGPT completion client — the ONE place that knows the base URL and the auth
 // header (AGENTOS_FINAL_PROMPT_V3 §5.0 "One client module"). Raw `fetch` + manual
@@ -111,21 +112,29 @@ export async function* streamCompletion(
 	slug: string,
 	messages: ChatMessage[]
 ): AsyncGenerator<StreamEvent> {
-	const response = await fetch(NANOGPT_URL, {
-		method: 'POST',
-		headers: authHeaders(),
-		body: JSON.stringify({
-			model: slug,
-			messages,
-			// Cap the completion so a runaway answer can't blow the per-run spend
-			// cap. 1024 is ample for a chat answer; cost is bounded, not reserved.
-			max_tokens: 1024,
-			stream: true,
-			// Without this NanoGPT omits usage from the stream and we would have no
-			// token counts to price the call from (there is no usage.cost to read).
-			stream_options: { include_usage: true }
-		})
-	})
+	// Bounded and retried (provider-fetch.ts): the wait for the stream to START is
+	// capped and a shed or rate-limited upstream is retried twice with backoff — and
+	// the cap deliberately does not apply once tokens are flowing, because a live
+	// stream is not a stalled one.
+	const response = await providerFetch(
+		NANOGPT_URL,
+		() => ({
+			method: 'POST' as const,
+			headers: authHeaders(),
+			body: JSON.stringify({
+				model: slug,
+				messages,
+				// Cap the completion so a runaway answer can't blow the per-run spend
+				// cap. 1024 is ample for a chat answer; cost is bounded, not reserved.
+				max_tokens: 1024,
+				stream: true,
+				// Without this NanoGPT omits usage from the stream and we would have no
+				// token counts to price the call from (there is no usage.cost to read).
+				stream_options: { include_usage: true }
+			})
+		}),
+		{ timeoutCovers: 'headers' }
+	)
 
 	if (!response.ok) {
 		const text = await response.text().catch(() => '')
@@ -216,8 +225,10 @@ export async function completeOnce(
 	messages: ChatMessage[],
 	maxTokens = 16
 ): Promise<NanoGPTCompletion> {
-	const response = await fetch(NANOGPT_URL, {
-		method: 'POST',
+	// A single-shot call has no stream to keep alive, so the timeout covers the whole
+	// exchange: headers and body.
+	const response = await providerFetch(NANOGPT_URL, () => ({
+		method: 'POST' as const,
 		headers: authHeaders(),
 		body: JSON.stringify({
 			model: slug,
@@ -227,7 +238,7 @@ export async function completeOnce(
 			max_tokens: maxTokens,
 			stream: false
 		})
-	})
+	}))
 
 	if (!response.ok) {
 		const text = await response.text().catch(() => '')

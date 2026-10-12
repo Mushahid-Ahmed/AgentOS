@@ -5,6 +5,8 @@ import { isCronAuthorized } from './cron-auth'
 import { captureError } from '@/lib/observability/capture-error'
 import { enforceAuthorize, type AdminContext } from '@/lib/rbac/context'
 import type { Permission } from '@/lib/rbac/permissions'
+import { enforceRateLimit, RateLimitError, type BudgetScope } from './rate-limit'
+import { requestIdentity } from '@/server/lib/audit'
 
 // Route files under src/app/api/**/route.ts should contain zero logic —
 // just `export const GET = createApiRoute(...)`. Schema + handler logic
@@ -24,6 +26,10 @@ export function createApiRoute<InputSchema extends z.ZodType, Output>(config: {
 	// into the right status — so a route can't forget the check. Omit it for
 	// public/unauthenticated routes. See docs/rules/authorization.md.
 	authorize?: Permission | ((ctx: AdminContext) => boolean | Promise<boolean>)
+	// Which request budget this route draws on (src/server/api/rate-limit.ts).
+	// Defaults to `api`: a route has to opt OUT of being limited, not opt in, so a
+	// new endpoint can't be born unlimited.
+	rateLimit?: BudgetScope
 	handler: (input: z.infer<InputSchema>, req: NextRequest) => Promise<Output>
 }) {
 	return async function (req: NextRequest) {
@@ -31,6 +37,14 @@ export function createApiRoute<InputSchema extends z.ZodType, Output>(config: {
 			if (config.authorize !== undefined) {
 				await enforceAuthorize(config.authorize)
 			}
+
+			// Counter before the work, not after — the point is to stop the query or the
+			// provider call, not to record that it happened. proxy.ts has already denied
+			// anything without a session, so on a configured deployment this identity is
+			// a real user id; the ip: fallback only keys the counter locally, where auth
+			// env is absent.
+			const { identity } = requestIdentity(req)
+			await enforceRateLimit(config.rateLimit ?? 'api', identity)
 
 			const rawInput =
 				req.method === 'GET'
@@ -45,6 +59,15 @@ export function createApiRoute<InputSchema extends z.ZodType, Output>(config: {
 				return NextResponse.json(
 					{ error: 'Invalid request', issues: error.flatten() },
 					{ status: 400 }
+				)
+			}
+			// The one error that needs a header as well as a status: with no
+			// Retry-After a well-behaved client has nothing to back off to and keeps
+			// hammering, which is exactly the traffic the limit exists to stop.
+			if (error instanceof RateLimitError) {
+				return NextResponse.json(
+					{ error: error.userMessage },
+					{ status: 429, headers: { 'Retry-After': String(error.retryAfterSec) } }
 				)
 			}
 			// Throw AppError (src/lib/errors/app-error.ts) for anything the user

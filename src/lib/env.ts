@@ -61,6 +61,10 @@ const envSchema = z.object({
 	// Required by cron routes only; an unset secret must not break unrelated pages.
 	CRON_SECRET: z.string().optional(),
 
+	// Comma-separated Supabase user ids exempt from the API/chat/launch request
+	// budgets (src/server/api/rate-limit.ts). Unset = nobody is exempt.
+	RATE_LIMIT_ADMIN_USER_IDS: z.string().optional().or(z.literal('')),
+
 	NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
 
 	// Attached as the app_version property on every analytics event — optional,

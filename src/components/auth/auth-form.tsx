@@ -291,7 +291,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 											password: validatePassword(password, isSignup)
 										}))
 									}
-									placeholder={isSignup ? 'At least 8 characters' : 'Your password'}
+									placeholder={isSignup ? 'At least 12 characters, with a capital, a number and a symbol' : 'Your password'}
 								/>
 								<span aria-hidden className="field-underline" />
 								<button

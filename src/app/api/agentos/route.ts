@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
+import { guardResponse, guardStream } from '@/server/api/stream-guard'
 import { agentRunStreamResponse } from '@/server/agentos/run'
 
 // Streaming endpoint (SSE), so it bypasses createApiRoute (which buffers JSON)
@@ -19,9 +20,13 @@ const agentRunInputSchema = z.object({
 export async function POST(req: NextRequest) {
 	let query: string
 	try {
+		// Budget + session before the body is read or a token is spent.
+		await guardStream(req, { scope: 'launch', requireUser: true, auditAction: 'agentos_run' })
 		const raw = await req.json().catch(() => ({}))
 		query = agentRunInputSchema.parse(raw).query
 	} catch (error) {
+		const guarded = guardResponse(error)
+		if (guarded) return guarded
 		if (error instanceof z.ZodError) {
 			return NextResponse.json({ error: 'Invalid request', issues: error.flatten() }, { status: 400 })
 		}

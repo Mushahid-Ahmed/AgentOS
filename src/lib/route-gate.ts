@@ -52,3 +52,38 @@ export function gateDecision(input: {
 	}
 	return { kind: 'allow' }
 }
+
+// --- API surface ---------------------------------------------------------------
+// Everything under /api is user data or user money: conversations, runs, spend, and
+// the three POST routes that spend provider credits. There is no public API route in
+// this app, so the list below is deliberately empty and the default is deny. Adding a
+// genuinely public endpoint means adding it here *and* saying why in the comment —
+// the reviewable seam is the point, not the length of the list.
+const PUBLIC_API_PATHS: readonly string[] = []
+
+export function isPublicApiPath(normalized: string): boolean {
+	return PUBLIC_API_PATHS.includes(normalized)
+}
+
+export type ApiGateDecision = { kind: 'allow' } | { kind: 'unauthorized' }
+
+// Unlike the page gate, a failure here is a 401 JSON body, never a redirect: an API
+// client following a 307 to /login would re-POST its body to a page. The GET-only
+// restriction that protects server actions does not apply — no API route is a form
+// target.
+//
+// `configured` gates enforcement off when auth env vars are absent, which is the
+// documented boot contract (docs/rules/auth.md: the app must serve with no Supabase).
+// In that state there is no identity to check against and no data to protect, so the
+// request proceeds; on any deployment that sets Supabase keys, a sessionless /api
+// call is denied.
+export function apiGateDecision(input: {
+	normalized: string
+	hasUser: boolean
+	configured: boolean
+}): ApiGateDecision {
+	if (!input.configured) return { kind: 'allow' }
+	if (isPublicApiPath(input.normalized)) return { kind: 'allow' }
+	return input.hasUser ? { kind: 'allow' } : { kind: 'unauthorized' }
+}
+

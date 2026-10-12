@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
+import { guardResponse, guardStream } from '@/server/api/stream-guard'
 import { benchmarkInputSchema, benchmarkStreamResponse } from '@/server/api/benchmark'
 
 // Streaming endpoint (a full run takes minutes under free-tier throttling), so it
@@ -13,9 +14,13 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
 	let input: z.infer<typeof benchmarkInputSchema>
 	try {
+		// Budget + session before the body is read or a token is spent.
+		await guardStream(req, { scope: 'launch', requireUser: true, auditAction: 'benchmark_run' })
 		const raw = await req.json().catch(() => ({}))
 		input = benchmarkInputSchema.parse(raw)
 	} catch (error) {
+		const guarded = guardResponse(error)
+		if (guarded) return guarded
 		if (error instanceof z.ZodError) {
 			return NextResponse.json(
 				{ error: 'Invalid request', issues: error.flatten() },

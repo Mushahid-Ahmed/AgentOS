@@ -37,11 +37,20 @@ test('validateEmail accepts only plausible addresses', () => {
 	assert.equal(validateEmail('demo@example.com'), undefined)
 })
 
-test('validatePassword enforces 8 chars on signup only', () => {
+// The 12-character policy is a rule on NEW credentials, so every assertion here
+// separates "rejected at signup" from "never blocks an existing user's login".
+test('validatePassword enforces the signup policy and never blocks a login', () => {
 	assert.equal(validatePassword('', false), 'Enter your password.')
-	assert.equal(validatePassword('short', true), 'Use at least 8 characters.')
+	assert.equal(validatePassword('short', true), 'Use at least 12 characters.')
 	assert.equal(validatePassword('short1', false), undefined)
-	assert.equal(validatePassword('longenough', true), undefined)
+	// Long enough but missing one class each.
+	assert.equal(validatePassword('alllowercase1!', true), 'Include at least one capital letter.')
+	assert.equal(validatePassword('AllCapitalsOnly', true), 'Include at least one number.')
+	assert.equal(validatePassword('NoSymbolsHere123', true), 'Include at least one symbol.')
+	// The policy the brief asks for, satisfied.
+	assert.equal(validatePassword('Correct-Horse-1', true), undefined)
+	// A password that would fail at signup still signs an existing user in.
+	assert.equal(validatePassword('old-school-8', false), undefined)
 })
 
 test('login failures never enumerate users', () => {
@@ -60,7 +69,12 @@ test('signupFailureMessage maps provider errors to plain language', () => {
 		signupFailureMessage('email rate limit exceeded'),
 		'Too many attempts. Wait a couple of minutes and try again.'
 	)
-	assert.equal(signupFailureMessage('Password should be at least 6 characters'), 'Use at least 8 characters.')
+	// The upstream Supabase string names the old 6-character floor; the policy the user
+	// sees is the 12-character one (AGENTOS_SCALE_SECURITY §5.3).
+	assert.equal(
+		signupFailureMessage('Password should be at least 6 characters'),
+		'Use at least 12 characters.'
+	)
 	assert.equal(
 		signupFailureMessage('Unable to validate email address: invalid format'),
 		'That doesn’t look like a valid email address.'

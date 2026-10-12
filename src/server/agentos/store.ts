@@ -17,6 +17,10 @@ import type { PlanDecision } from '@/lib/decisions/types'
 
 type Json = Prisma.InputJsonValue
 
+// The Prisma surface these writes go through: the app singleton by default, so a
+// measurement script can pass its own client and exercise the real code path.
+type Db = typeof db
+
 // Create the run row up front so it has a BigInt id to plan against (the Decision
 // Bus records decisions by run id, and the executor echoes it on every event).
 // The planning columns start as placeholders and are filled by setPlan once the
@@ -99,17 +103,83 @@ export async function persistDecision(record: DecisionRecord): Promise<void> {
 }
 
 /**
+ * One statement for the whole plan.
+ *
+ * The loop this replaces issued one `agentStep.upsert` per plan step, and every
+ * statement to the pooler costs a full network round trip (measured: 20 trivial
+ * sequential round trips = 37.8s from a client, ~4.6s from a us-east serverless
+ * function against the ap-southeast-2 primary). A run saves after *every* state
+ * change, so a 6-step plan was paying 6 round trips per save, many times over the
+ * run's life — the dominant DB cost of a run by far, and nothing to do with query
+ * plans (all these tables are tiny; EXPLAIN already shows Index Scan).
+ *
+ * Postgres does the same upsert for N rows in one `INSERT … ON CONFLICT`, which is
+ * what this is. Values are bound parameters throughout (`Prisma.sql` placeholders,
+ * never string interpolation), so the raw SQL cannot be injected.
+ */
+export async function upsertStepsBatch(
+	client: Db,
+	runId: bigint,
+	steps: {
+		key: string
+		agent: string
+		model: string
+		toolsAllowed: unknown
+		dependsOn: unknown
+		status: string
+		attempts: number
+		startedAt: Date | null
+		finishedAt: Date | null
+		promptTokens: number
+		completionTokens: number
+		costMicroUsd: bigint | null
+		outputSummary: string | null
+		error: string | null
+	}[]
+): Promise<void> {
+	if (steps.length === 0) return
+	const values = steps.map((s) => {
+		return Prisma.sql`(${runId}, ${s.key}, ${s.agent}, ${s.model}, ${JSON.stringify(s.toolsAllowed ?? null)}::jsonb, ${JSON.stringify(s.dependsOn ?? null)}::jsonb, ${s.status}, ${s.attempts}, ${s.startedAt}, ${s.finishedAt}, ${s.promptTokens}, ${s.completionTokens}, ${s.costMicroUsd}, ${s.outputSummary}, ${s.error})`
+	})
+	await client.$executeRaw(Prisma.sql`
+		INSERT INTO "agent_steps"
+			("run_id", "key", "agent", "model", "tools_allowed", "depends_on", "status", "attempts",
+			 "started_at", "finished_at", "prompt_tokens", "completion_tokens", "cost_micro_usd",
+			 "output_summary", "error")
+		VALUES ${Prisma.join(values)}
+		ON CONFLICT ("run_id", "key") DO UPDATE SET
+			"agent" = EXCLUDED."agent",
+			"model" = EXCLUDED."model",
+			"tools_allowed" = EXCLUDED."tools_allowed",
+			"depends_on" = EXCLUDED."depends_on",
+			"status" = EXCLUDED."status",
+			"attempts" = EXCLUDED."attempts",
+			"started_at" = EXCLUDED."started_at",
+			"finished_at" = EXCLUDED."finished_at",
+			"prompt_tokens" = EXCLUDED."prompt_tokens",
+			"completion_tokens" = EXCLUDED."completion_tokens",
+			"cost_micro_usd" = EXCLUDED."cost_micro_usd",
+			"output_summary" = EXCLUDED."output_summary",
+			"error" = EXCLUDED."error"
+	`)
+}
+
+/**
  * Build the per-run RunStore the executor persists through. One instance per run
  * (it owns the monotonic event `seq`). save() upserts the aggregate + every step;
  * appendEvent() writes one replay-log row. Both are best-effort — errors are
  * reported and swallowed, never propagated into the run.
+ *
+ * `client` defaults to the app's Prisma singleton and is only overridable so the
+ * batch write can be exercised against a throwaway row in scripts/audit-db.mjs
+ * without touching a real run.
  */
-export function createRunStore(id: bigint): RunStore {
+export function createRunStore(id: bigint, client: Db = db): RunStore {
 	let seq = 0
 	return {
 		async save(run: Run): Promise<void> {
 			try {
-				await db.agentRun.update({
+				await client.agentRun.update({
 					where: { id },
 					data: {
 						status: run.status,
@@ -122,45 +192,37 @@ export function createRunStore(id: bigint): RunStore {
 						finishedAt: run.finishedAt ? new Date(run.finishedAt) : null
 					}
 				})
-				for (const step of run.plan.steps) {
-					const state = run.stepStates[step.id]
-					const startedAt = state?.startedAt ? new Date(state.startedAt) : null
-					const finishedAt = state?.finishedAt ? new Date(state.finishedAt) : null
-					const outputText = state?.result?.output?.text
-					await db.agentStep.upsert({
-						where: { runId_key: { runId: id, key: step.id } },
-						create: {
-							runId: id,
+				// The plan's steps as one statement (see upsertStepsBatch). Deliberately
+				// not wrapped in a transaction with the update above: BEGIN/COMMIT would
+				// cost two more round trips to protect a write that is best-effort by
+				// contract (the executor swallows store failures, and a half-saved run is
+				// re-saved on the next state change).
+				await upsertStepsBatch(
+					client,
+					id,
+					run.plan.steps.map((step) => {
+						const state = run.stepStates[step.id]
+						const outputText = state?.result?.output?.text
+						return {
 							key: step.id,
 							agent: step.agent,
 							model: step.model,
-							toolsAllowed: step.toolsAllowed as unknown as Json,
-							dependsOn: step.dependsOn as unknown as Json,
+							toolsAllowed: step.toolsAllowed,
+							dependsOn: step.dependsOn,
 							status: state?.status ?? 'pending',
 							attempts: state?.attempts ?? 0,
-							startedAt,
-							finishedAt,
+							startedAt: state?.startedAt ? new Date(state.startedAt) : null,
+							finishedAt: state?.finishedAt ? new Date(state.finishedAt) : null,
 							promptTokens: state?.result?.tokens?.input ?? 0,
 							completionTokens: state?.result?.tokens?.output ?? 0,
 							costMicroUsd:
 								state?.result?.costMicroUsd != null ? BigInt(state.result.costMicroUsd) : null,
-							outputSummary: typeof outputText === 'string' ? outputText.slice(0, 4000) : null,
-							error: state?.error ?? null
-						},
-						update: {
-							status: state?.status ?? 'pending',
-							attempts: state?.attempts ?? 0,
-							startedAt,
-							finishedAt,
-							promptTokens: state?.result?.tokens?.input ?? 0,
-							completionTokens: state?.result?.tokens?.output ?? 0,
-							costMicroUsd:
-								state?.result?.costMicroUsd != null ? BigInt(state.result.costMicroUsd) : null,
-							outputSummary: typeof outputText === 'string' ? outputText.slice(0, 4000) : null,
+							outputSummary:
+								typeof outputText === 'string' ? outputText.slice(0, 4000) : null,
 							error: state?.error ?? null
 						}
 					})
-				}
+				)
 			} catch (error) {
 				captureError(error, { feature: 'agentos_run_save' })
 			}
@@ -168,7 +230,7 @@ export function createRunStore(id: bigint): RunStore {
 		async appendEvent(_runId: string, event: OrchestrationEvent): Promise<void> {
 			const s = seq++
 			try {
-				await db.agentEvent.create({
+				await client.agentEvent.create({
 					data: {
 						runId: id,
 						seq: s,
@@ -189,19 +251,19 @@ export function createRunStore(id: bigint): RunStore {
  * every AgentRun's cost_micro_usd since midnight. Used to gate a new run against
  * NIGHTLY_SPEND_CAP_USD (§12) before it spends anything. NULL costs are skipped
  * (never counted as 0), matching the "never fabricate a number" rule.
+ *
+ * Summed by Postgres, not in JS: the previous version fetched one row per run
+ * since midnight and added them up client-side, so the gate that has to answer
+ * before a run spends anything paid a row-per-run fetch to do it. `_sum` over a
+ * nullable BigInt column ignores NULLs, which is the same rule, stated once in SQL.
  */
 export async function nightlySpendMicroUsd(): Promise<bigint> {
 	const midnight = new Date()
 	midnight.setUTCHours(0, 0, 0, 0)
-	const rows = await db.agentRun.findMany({
-		where: { createdAt: { gte: midnight } },
-		select: { costMicroUsd: true }
+	const total = await db.agentRun.aggregate({
+		_sum: { costMicroUsd: true },
+		where: { createdAt: { gte: midnight } }
 	})
-	let total = BigInt(0)
-	for (const row of rows) {
-		// NULL cost (nothing priced) is skipped, never counted as 0 — matching the
-		// ai_usage / route_events "money is NULL, never 0" rule.
-		if (row.costMicroUsd != null) total += row.costMicroUsd
-	}
-	return total
+	return total._sum.costMicroUsd ?? BigInt(0)
 }
+
