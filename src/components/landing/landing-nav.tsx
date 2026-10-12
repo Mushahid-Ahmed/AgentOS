@@ -238,7 +238,11 @@ export function LandingNav() {
 								aria-current={active === i ? 'true' : undefined}
 								className={cn(
 									'text-text-muted hover:text-text ease-expo inline-flex min-h-11 items-center px-1 text-[13px] no-underline transition-colors duration-200',
-									active === i && 'text-text'
+									// Owner ruling 2026-10-13: the section the visitor is reading is marked in
+									// the nav itself, so the active word carries weight, not just colour. The
+									// underline marker is placed from the link's measured box after this class
+									// lands, so it tracks the wider word.
+									active === i && 'text-text font-bold'
 								)}
 							>
 								<WaveLabel label={a.label} />

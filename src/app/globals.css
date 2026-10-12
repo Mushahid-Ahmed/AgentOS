@@ -1546,7 +1546,14 @@ a:focus-visible .nav-wave > span {
 	position: absolute;
 	inset: 0;
 	transform-origin: top;
-	background: linear-gradient(180deg, var(--accent), var(--danger) 50%, var(--success));
+	/* Owner ruling 2026-10-13: the rail is scroll progress, so it is the theme's own
+	   blue deepening over the dark track. The accent → danger → success gradient read
+	   as a rainbow strip on the edge of a black page and came out. */
+	background: linear-gradient(
+		180deg,
+		color-mix(in srgb, var(--accent) 42%, transparent),
+		var(--accent)
+	);
 	will-change: transform;
 }
 
