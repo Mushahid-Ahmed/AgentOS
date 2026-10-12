@@ -62,8 +62,8 @@ security layer added none to the page path (`/` and `/login` are within 4% of th
 | criterion | verdict |
 | --- | --- |
 | 100 concurrent, p95 < 500 ms, 0 errors | **PARTIAL** — met on the API path (646 ms, 0 errors vs 13.8 s, 95 errors); not met for SSR pages in a single-process local probe (see §2) |
-| securityheaders.com grade A/A+ | **NOT MEASURED** — impossible against `localhost`; the header set is dumped in `_lh/m13-http-proofs.txt` and is re-gradable on the live URL after deploy |
-| `npm audit` 0 high/critical | **PARTIALLY MET — 29 → 10 findings, 0 outside `next`/`braces`** (second pass, §7). First pass left this NOT MET at 29 (16 high, 3 critical). All 19 transitive findings are now closed by `pnpm.overrides` (decision §13); the 9 that remain are `next@16.3.0` itself, which the owner declined to bump (decision §8), and 1 `braces` DoS for which upstream has published no fix at all (3.0.3 is the newest release). The two `next` criticals that describe a reachable network path are closed off at the edge instead: the image optimizer is denied (§7, decision §14) and `/api` requires a session |
+| securityheaders.com grade A/A+ | **HEADERS PROVEN LIVE, GRADE STILL NOT ISSUED BY THE TOOL** — the earlier "impossible against `localhost`" blocker is gone: the live `https://agentos-theta-teal.vercel.app` response carries 8/8 of the scored headers (§7.5 run #1/#2 gate L1), including `frame-ancestors 'none'` and a 1-year `preload` HSTS. The grade letter itself could not be captured: securityheaders.com returns HTTP 403 to a non-browser fetch, so nothing here claims an A on the tool's behalf |
+| `npm audit` 0 high/critical | **PARTIALLY MET — 29 → 10 findings, 0 outside `next`/`braces`** (second pass, §7). First pass left this NOT MET at 29 (16 high, 3 critical). All 19 transitive findings are now closed by `pnpm.overrides` (decision §13); the 9 that remain are `next@16.3.0` itself, which the owner declined to bump (decision §8), and 1 `braces` DoS for which upstream has published no fix at all (3.0.3 is the newest release). The remaining advisories were then checked one by one against real code paths (§7.6) and the two reachable image-optimizer ones were closed without a version change — though not the way this row first claimed: the proxy denial turned out **not** to apply on Vercel, where the edge answers `/_next/image` before the proxy runs (run #1 gate L6 failed 0/4, §7.5). `images.unoptimized` was measured to remove the handler from our own server (run #2 L5, 4/4) and every attacker-shaped probe is refused before any fetch (run #2 L6/L7, 7/7) |
 | all features still work | **PROVEN FOR THE EDGE PATHS, OPEN FOR AUTHENTICATED PATHS** — 401/307/200 behaviour, header application, rate limiting, audit writes and the spend aggregate all verified; the logged-in dashboard read, chat SSE stream and AgentOS run view could not be re-proven in this window because they need the owner's interactive login (`@supabase/ssr` auth is client-side). No code on those paths changed semantics — see §5 for the exact re-proof commands |
 | Lighthouse ≥ before (97) | **NOT RE-RUN** — the landing page's client code is byte-identical apart from an auth-form placeholder string; the only global change touching HTML responses is added response headers, which Lighthouse does not score. Bundle check G14 supports the claim; the harness in `_lh/` can close it in ~10 min |
 | zero paid model calls | **MET** |
@@ -167,7 +167,7 @@ which is why `pnpm update` alone could not move any of them.
   `_lh/audit-imagegate.mjs`). That removes the reachable path behind the AVIF-decode critical
   and the optimizer SSRF high, without a framework bump.
 - **`pnpm dev` pinned to 127.0.0.1** (decision §15). Before: the Windows dev server answered
-  200 on `192.168.<lan>:3000` — LAN-reachable, unauthenticated, on the version carrying the
+  200 on `<LAN address>:3000` — LAN-reachable, unauthenticated, on the version carrying the
   windows-hosted RCE critical. After: refused.
 
 ### 7.3 What stays open, and why
@@ -209,3 +209,77 @@ the edge and at the bind address instead; the third critical has no code path at
 `pnpm test` as a whole still ends in the known Windows-only `check-standards` symlink
 `EPERM` — the same environmental failure class recorded in the previous run (~41 failures that
 are not regressions); the suites above were run individually and are green.
+
+### 7.5 Live production gates against the real deployment
+
+Two runs, both against `https://agentos-theta-teal.vercel.app`. Run #1 is kept with its
+failure because the failure is the finding.
+
+**Run #1 — 19:03, deployment `agentos-gm5z5deng` (public `e0c442c`, proxy denial only): 5/6.**
+
+| gate | result |
+| --- | --- |
+| L1 security headers on `/` | PASS 8/8 |
+| L2 anonymous `/api` denied | PASS — `GET /api/dashboard=401 GET /api/spend=401 GET /api/model-pool=401 POST /api/chat=401 POST /api/agentos=401` |
+| L3 page gate + auth form | PASS — `/app=307 -> /login?next=%2Fapp`, `/login=200` with a password field |
+| L4 landing markup signature | PASS — `<path>`=61, `<canvas>`=1, `data-v7-page`=11, identical to the pre-override build |
+| L5 control answers the optimizer | PASS 4/4 arms returned `INVALID_IMAGE_OPTIMIZE_REQUEST` on the local `:3400` build |
+| **L6 live `/_next/image` denied by the proxy** | **FAIL 0/4** — arms were `url=%2Fx.png=404`, `remote=400`, `traversal=400`, `no-params=400`, and **none** carried our `{"error":"Not found"}` body |
+
+L6 did not fail because the work was wrong; it failed because the premise was. The response
+header is `x-vercel-error`, a platform header, so Vercel resolves `/_next/image` at its edge
+layer **before** the app's proxy runs. Any proxy-level denial of a `/_next/*` path is
+therefore self-hosted-only, and the report's earlier claim that the endpoint was "denied at
+the edge" was not true of production.
+
+**Run #2 — 19:12, deployment `agentos-3f3ym2wjq` (public `b083b2e`, proxy denial +
+`images.unoptimized`): 7/7.** L1–L4 repeated green (8/8 headers, 5/5 `/api` 401s, `/app=307`,
+signature 61/1/11 unchanged), and the two new gates:
+
+| gate | result | evidence |
+| --- | --- | --- |
+| L5 `images.unoptimized` removes the optimizer handler from a Next server | PASS 4/4 | the **same** `:3400` control build, whose code was not touched, flipped from 4/4 arms carrying the optimizer's 400 body to 4/4 plain HTML 404s; `next start` reads `next.config.ts` at runtime, so this isolates the flag as the only variable. Server liveness asserted separately so a dead control cannot pass |
+| L6 live `/_next/image` never serves image bytes | PASS 0/6 | `missing-local=404 [NOT_FOUND]`, `remote-host / traversal / no-params / link-local-metadata / local-file-that-exists = 400 [INVALID_IMAGE_OPTIMIZE_REQUEST]` |
+| L7 live SSRF shapes refused at validation, before any fetch | PASS 4/4 | includes `url=http://169.254.169.254/latest/meta-data/`, the cloud-metadata target, refused with the same validation error |
+
+The honest reading of run #2 is narrower than "the endpoint is gone": on Vercel the path
+still resolves, and even a valid request for a file that exists (`/icon.svg`) is refused.
+The claims the gates support are (a) no input shape returns image bytes or makes the server
+fetch a caller-named host, and (b) the 16.3.0 optimizer handler is off our own server in
+every environment. Both are what §7.6 needs them to be; neither needs the declined
+`next` bump.
+
+Scripts and raw output: `_lh/audit-live-gates.mjs` / `.txt` (run #1),
+`_lh/audit-live-gates-2.mjs` / `.txt` (run #2), `_lh/audit-imagegate.mjs` (local two-arm).
+Run #2 replaced run #1's L6 assertion rather than weakening it — the old assertion measured
+"who answers", the new one measures "can it serve bytes or dial out", which is the property
+the advisories actually require.
+
+### 7.6 Every open finding, against a real code path
+
+The point of this table is that "10 findings left" is not "10 holes left": each row names the
+condition the advisory needs and what this repository does about it. Sources: `pnpm audit
+--json` on the overridden tree, `grep` over `src/`, the build output, and the live gates in
+§7.5.
+
+| advisory | sev | what it needs to be reachable | this app | control |
+| --- | --- | --- | --- | --- |
+| GHSA-2xp9-vwfh-vxw4 | critical | a request the Image Optimization API actually decodes (crafted AVIF) | the path resolves on Vercel even after the proxy denial, but refuses every shape before decoding | `images.unoptimized` removes the handler from our server (L5); edge refusal + zero allowlisted hosts and zero local image bytes (L6) |
+| GHSA-cjq9-62q9-8jv4 | high | a request that makes the optimizer fetch a caller-named host (SSRF) | `remotePatterns` is empty, `dangerouslyAllowLocalIP` is false | L7: remote, traversal, and `169.254.169.254` all rejected at validation, no fetch |
+| GHSA-p293-qw3h-jr36 | critical | a **Windows-hosted** Next server the attacker can reach | production is Vercel/Linux; the exposure was four local servers answering on the LAN | every harness server binds `-H 127.0.0.1`; `dev` script binds loopback; owner must restart `:3000` (decision §17) |
+| GHSA-vcvr-r3jv-pc5j | critical | `next/og` `ImageResponse` on a served route | 0 occurrences of `ImageResponse`/`next/og` in `src`, `scripts`, `next.config.ts`; no `/api/og` | no code path |
+| GHSA-3w37-wq28-93x7 | moderate | a `use cache` fill plus Draft Mode | `grep -rn "'use cache'" src` → 0; `draftMode` → 0 | no code path |
+| GHSA-4jqv-mc3x-m676 | moderate | self-hosted SSG/ISR page cache | 1 static route in the entire build (`/icon.svg`); `revalidate`/`unstable_cache`/`revalidatePath`/`revalidateTag` → 0; hosting is Vercel, not self-hosted | no code path |
+| GHSA-mcj8-r9mp-w47p | moderate | SSG/ISR rendering that substitutes per-user content | same as the row above; the dashboard feeds are explicitly `private`, so nothing user-specific enters a shared cache | no code path |
+| GHSA-f87g-xv8r-7p7x | moderate | App Router metadata image routes with `dynamicParams` | `generateMetadata` → 0, `dynamicParams` → 0 | no code path |
+| GHSA-39w2-rjm5-chcv | low | the **development** server's MCP endpoint | `next dev` only; production never runs it, and dev now binds loopback | not deployed + loopback bind |
+| GHSA-vfj7-8cjw-p6xm | high | untrusted input compiled as a glob pattern | `braces` is reached only through `eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch`, i.e. lint time, and **no release newer than 3.0.3 exists** to override to | dev-only dependency, absent from the server bundle |
+
+Two consequences worth stating plainly, because §10 asked for "0 high/critical":
+
+- `next` **stays at 16.3.0**, exactly as instructed, so nine advisories remain on paper. Six
+  have no code path in this repository, one is dev-only, the two image advisories lost their
+  handler and their inputs, and the one that was genuinely reachable — GHSA-p293 — was
+  reachable over the LAN from this workstation and is now loopback-bound.
+- `braces` cannot be overridden to a fixed version because that version does not exist; its
+  mitigation is being a lint-time dependency of a `devDependency`, not part of what ships.

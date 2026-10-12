@@ -47,12 +47,15 @@ const nextConfig: NextConfig = {
 	// this is exactly the default.
 	distDir: process.env.NEXT_DIST_DIR || '.next',
 	reactStrictMode: true,
-	// The Image Optimization API is two open criticals/highs deep (GHSA-2xp9-vwfh-vxw4
+	// The Image Optimization API is two open advisories deep (GHSA-2xp9-vwfh-vxw4
 	// AVIF/libheif RCE, GHSA-cjq9-62q9-8jv4 SSRF) and this app never calls it: zero
-	// `next/image` imports and no `public/` directory. `/_next/image` is denied in
-	// the proxy, but on Vercel the platform's own image function answers *before*
-	// the proxy runs - the live gate proved that. `unoptimized` removes the function
-	// from the build output, so the endpoint does not exist at the edge either.
+	// `next/image` imports and no `public/` directory. `unoptimized` takes the
+	// optimizer handler out of *our* server - proven locally, where the pre-change
+	// control build flipped from four optimizer `INVALID_IMAGE_OPTIMIZE_REQUEST`
+	// answers to four HTML 404s the moment this line was added. On Vercel the edge
+	// still answers the path itself (`x-vercel-error` is a platform header, and the
+	// proxy never runs), which is why the proxy denial below stays as well.
+	// Lift this if a real image component ever needs the optimizer.
 	images: { unoptimized: true },
 	async headers() {
 		return [

@@ -377,7 +377,7 @@ found"}` at 404. Same run, regression arm: `/` 200, `/login` 200, `/icon.svg` 20
 **What changed.** `"dev": "next dev"` → `"dev": "next dev -H 127.0.0.1"`.
 
 **Why.** Measured on this machine before the change: the dev server answered
-`http://192.168.<lan>:3000/` with **200**, so anything on the LAN could reach an unauthenticated
+`http://<LAN address>:3000/` with **200**, so anything on the LAN could reach an unauthenticated
 Next 16.3.0 dev server — and the highest-severity open advisory in that version is
 *Unauthenticated Remote Code Execution on windows-hosted servers* (GHSA-p293-qw3h-jr36,
 critical). This machine is a Windows host, and the dev server reads `.env.local`. Production is
@@ -391,6 +391,74 @@ untouched, so the change lands on their next restart, not mid-session.
 **Verification.** A throwaway instance on `:3199` with its own dist dir
 (`NEXT_DIST_DIR=.next-devtest`, so the owner's `.next` was never written): `127.0.0.1:3199` →
 307 (the normal root redirect), `localhost:3199` → 307 through both curl and Node fetch (the
-name still resolves to a bound address), `192.168.<lan>:3199` → **connection refused**. Instance
+name still resolves to a bound address), `<LAN address>:3199` → **connection refused**. Instance
 and dist dir removed afterwards, and the `tsconfig.json` include entries the dev server added
 for it were reverted.
+
+---
+
+## 16. Image endpoint: the proxy denial is not the production control, and the config flag is not either
+
+**What changed.** Two closures instead of one, and a claim corrected against measurement:
+`images: { unoptimized: true }` added to `next.config.ts`, the proxy's `/_next/image`
+denial kept, and both comments rewritten to say what the gates actually showed.
+
+**Why.** Live gate run #1 (`_lh/audit-live-gates.txt`, 19:03, against deployment
+`agentos-gm5z5deng` = public commit `e0c442c`, the build that contained the proxy denial)
+**failed its own L6: 0/4 arms returned our `{"error":"Not found"}` body.** The remote-URL,
+path-traversal and empty-query arms got the optimizer-shaped `400` and the relative-path
+arm got a `NOT_FOUND` page. `x-vercel-error` is a *platform* header, which means Vercel
+resolves `/_next/image` at its edge layer before the app's proxy ever runs. A proxy-level
+denial therefore protects a self-hosted deployment and nothing else.
+
+The config flag was then measured rather than assumed, and it is also not a full block:
+against the deployed app, `/_next/image?url=%2Ficon.svg&w=64&q=75` — a syntactically valid
+request for a file that **does** exist in the deployment — returns
+`400 INVALID_IMAGE_OPTIMIZE_REQUEST`, as do all four attacker-shaped arms including
+`url=http://169.254.169.254/...`. The path still exists on Vercel. What the flag
+demonstrably removes is the handler from *our* Next server: the pre-change control build
+flipped from 4/4 arms carrying the optimizer's own 400 body to 4/4 plain HTML 404s with
+**no code change at all**, because `next start` reads `next.config.ts` at runtime. That is
+the cleanest possible isolation of the variable, and it is gate L5.
+
+**Net position.** No input shape can make the path return image bytes or make the server
+fetch a host the caller names (gates L6/L7, 7/7 green). On Vercel the refusal is the
+platform's; in any self-hosted deployment it is `unoptimized` plus the proxy denial. The
+`next` 16.3.0 optimizer code is not reachable from either.
+
+**Tradeoff.** Nothing renders through the optimizer: `next/image` appears **0** times in
+`src/`, there is no `public/` directory, and the only static route in the build output is
+`/icon.svg`. If a real image component is added later it ships un-optimised URLs until this
+line is lifted — a payload regression, never a security one.
+
+**Verification.** `_lh/audit-live-gates.mjs` + `_lh/audit-live-gates.txt` (run #1, L6 FAIL
+kept verbatim), `_lh/audit-live-gates-2.mjs` + `_lh/audit-live-gates-2.txt` (run #2, 7/7),
+`_lh/audit-imagegate.mjs` (two-arm local). Numbers in
+`docs/final-scale-security-report.md` §7.5.
+
+---
+
+## 17. Local Next servers were reachable from the LAN while an open Windows RCE sat in `next`
+
+**What changed.** Every harness server started by this pass binds loopback
+(`next start -H 127.0.0.1`): `:3400` (pre-change control) and `:3500` (measurement build).
+The V7-era `:3600` server was stopped rather than restarted — it had no remaining consumer.
+`package.json`'s `dev` script already carries `-H 127.0.0.1`.
+
+**Why.** `curl http://<this workstation's LAN address>:<port>/` answered **200 on 3000,
+3400, 3500 and 3600** — four Windows-hosted Next servers listening on `::` (all interfaces),
+while `next` carries GHSA-p293-qw3h-jr36, *Unauthenticated Remote Code Execution on
+windows-hosted servers*, whose advisory text says no workaround exists other than
+upgrading. Upgrading is declined (§8), so the reachability is removed instead. Production is
+not the exposure: Vercel runs the app on Linux (`iad1`) and the advisory is scoped to
+Windows hosts.
+
+**Tradeoff.** The owner's long-running dev server on `:3000` predates the `dev`-script
+change and is therefore still LAN-bound until it is restarted; ending a session that is not
+mine to end was not authorised here. **Owner action:** stop the `:3000` process and run
+`pnpm dev` — the committed script binds loopback, and that behaviour was proven on a
+throwaway dev server (loopback answers, the LAN address refuses the connection).
+
+**Verification.** `Get-NetTCPConnection -State Listen` reports `127.0.0.1` for 3400/3500
+(where it had reported `::` for 3000/3400/3500/3600), `curl` to the LAN address on both
+ports gets no connection, and `http://127.0.0.1:3400/` still answers 307.
