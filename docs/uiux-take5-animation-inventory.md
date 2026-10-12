@@ -60,7 +60,7 @@ on top. The "smoke test" column is what to look at to prove the animation is sti
 | Meter bar grow | `dashboard/meter-bar.tsx:47` | `transition-[width]` — see §6.2 note below |
 | Routing visualizer | `chat/routing-visualizer.tsx:70` | `transition-[width]` |
 | Proximity text (app) | `motion/proximity-text.tsx:13` | per-char scale/glow rAF |
-| Auth check mark draw | `globals.css:792` | `.auth-check path` |
+| Auth check mark draw | `globals.css:792` | `.auth-check path` — owner-excepted 2026-10-12 |
 | Workspace scroll fix | `motion/smooth-scroll-provider.tsx:33` | `/app /dashboard /agentos /admin` stay on native document scroll — **Lenis must not be re-enabled there** |
 
 ## Shared infrastructure that must survive

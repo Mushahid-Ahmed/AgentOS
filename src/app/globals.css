@@ -669,8 +669,10 @@ details[open] .faq-answer::before {
 	}
 }
 
-/* Success (§7.2-7): the check draws its stroke, then the ring fades up behind
-   it, while the door swings. pathLength=1 keeps the dash maths resolution-free. */
+/* Success notice (§7.2-7): the small check beside the status line draws its
+   stroke. The full-form overlay version of this was removed on the owner's
+   2026-10-12 instruction — the button label and the live region carry the
+   message. pathLength=1 keeps the dash maths resolution-free. */
 .auth-check path {
 	stroke-dasharray: 1;
 	stroke-dashoffset: 1;
@@ -680,25 +682,6 @@ details[open] .faq-answer::before {
 @keyframes check-draw {
 	to {
 		stroke-dashoffset: 0;
-	}
-}
-
-.auth-check-ring {
-	transform-origin: center;
-	animation: check-ring 620ms var(--ease-expo) forwards;
-}
-
-@keyframes check-ring {
-	from {
-		opacity: 0;
-		transform: scale(0.86);
-	}
-	40% {
-		opacity: 1;
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
 	}
 }
 

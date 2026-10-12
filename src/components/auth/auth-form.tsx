@@ -291,7 +291,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
 											password: validatePassword(password, isSignup)
 										}))
 									}
-									placeholder={isSignup ? 'At least 12 characters, with a capital, a number and a symbol' : 'Your password'}
+									placeholder={
+										isSignup
+											? 'At least 12 characters, with a capital, a number and a symbol'
+											: 'Your password'
+									}
 								/>
 								<span aria-hidden className="field-underline" />
 								<button
@@ -376,38 +380,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
 									: 'Sign in'}
 						</Button>
 					</Rise>
-
-					{/* §7.2-7: the check draws itself over the form while the door swings.
-					    Decorative — the button label and the live region already say it. */}
-					{succeeded ? (
-						<div
-							data-t2-m5="check"
-							aria-hidden
-							className="auth-check bg-bg/70 absolute inset-0 z-20 grid place-items-center rounded-xl"
-						>
-							<svg viewBox="0 0 64 64" className="size-20">
-								<circle
-									className="auth-check-ring"
-									cx="32"
-									cy="32"
-									r="27"
-									fill="none"
-									stroke="var(--accent)"
-									strokeOpacity="0.5"
-									strokeWidth="1.5"
-								/>
-								<path
-									d="M19 33l9 9 17-19"
-									fill="none"
-									stroke="var(--accent)"
-									strokeWidth="2.5"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									pathLength={1}
-								/>
-							</svg>
-						</div>
-					) : null}
 				</form>
 
 				<Rise step={6} x={dir}>
