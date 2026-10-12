@@ -1473,6 +1473,45 @@ a:focus-visible .nav-wave > span {
 	transition: filter var(--motion-base) var(--ease-out-soft);
 }
 
+/* The slot counter's arrival cue (owner ruling 2026-10-13, same brief as the frame
+   removal above): the stats strip no longer sits in a bordered box with a blueprint
+   grid, so each figure lands on a short accent rule that draws out from under the
+   number the instant its last reel stops, and the marker at its leading edge settles
+   after it. Transform + opacity only — no layout, no paint animation. */
+.v10-rule {
+	position: relative;
+	display: block;
+	width: 46px;
+	height: 2px;
+	margin-top: 16px;
+	background: linear-gradient(
+		90deg,
+		var(--accent),
+		color-mix(in oklab, var(--accent) 18%, transparent)
+	);
+	transform-origin: left center;
+	transform: scaleX(0);
+	transition: transform 720ms var(--ease-expo);
+}
+.v10-rule[data-land='1'] {
+	transform: scaleX(1);
+}
+.v10-rule::after {
+	content: '';
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 6px;
+	height: 6px;
+	border-radius: 2px;
+	background: var(--accent);
+	opacity: 0;
+	transition: opacity 300ms var(--ease-out-soft) 460ms;
+}
+.v10-rule[data-land='1']::after {
+	opacity: 0.95;
+}
+
 .v5-xray {
 	position: fixed;
 	inset: 0;

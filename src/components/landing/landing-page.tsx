@@ -387,20 +387,19 @@ export function LandingPage() {
 								title="Nothing ships without proof"
 								body="The evidence hub holds every claim with its source and status. The two D4 gates decide whether the answer is even allowed to reach the judge."
 							/>
-							<div className="border-border relative mt-14 grid grid-cols-2 gap-px border-t lg:grid-cols-4">
-								<BlueprintFrame gridAt="br" threshold={0.2} />
+							{/* Owner ruling 2026-10-13: the frame around these four numbers read as a
+							    box with a grid patch, so the strip carries no ornament and no hairline
+							    at all — the numbers are separated by space, not by rules. */}
+							<div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
 								{[
 									{ to: 2, suffix: '', label: 'verification gates before the judge' },
 									{ to: 3, suffix: '', label: 'MCP tool families agents can call' },
 									{ to: 24, suffix: '', label: 'tasks in the completed live benchmark' },
 									{ to: 6, suffix: '', label: 'architecture layers, D1 through D6' }
 								].map((s) => (
-									<div
-										key={s.label}
-										className="border-border relative p-6 lg:border-l lg:first:border-l-0"
-									>
+									<div key={s.label}>
 										{/* V4 §4's slot-machine reels: the digits scroll past real digits, the leftmost
-								    column stops first, and the caption only drifts up once the last reel lands. */}
+									    column stops first, and the caption only drifts up once the last reel lands. */}
 										<SlotNumber
 											to={s.to}
 											suffix={s.suffix}

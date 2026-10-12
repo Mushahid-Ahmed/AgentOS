@@ -109,10 +109,16 @@ export function SlotNumber({
 					/>
 				)}
 			</span>
+			{/* The box this number used to sit in is gone (owner ruling 2026-10-13), so the
+			    figure arrives on a rule that draws under it once the last reel stops. */}
+			<span aria-hidden data-land={done ? '1' : '0'} className="v10-rule" />
 			{label && (
 				<p
 					className={cn(
-						'text-text-faint ease-expo mt-3 max-w-[24ch] text-[13px] leading-[1.5] transition-all duration-[900ms]',
+						// tracking-normal is load-bearing: letter-spacing inherits the parent's
+						// COMPUTED value, and the display size here is -0.04em of 64px = -2.56px,
+						// which at 13px welded every word of the caption together.
+						'text-text-muted ease-expo mt-3 max-w-[22ch] text-[13.5px] leading-[1.5] tracking-normal transition-all duration-[900ms]',
 						done ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
 					)}
 				>
