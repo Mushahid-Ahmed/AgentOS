@@ -293,3 +293,51 @@ Screenshots: `_lh/v11_rail/nav-rail-{art,ctrl}.png` and `rail-{art,ctrl}.png` (f
 right-edge crop, both arms), `_lh/v11_rail_live/*` (production), and `_lh/v11_rail/nav-live.png` —
 the nav row itself at Product, brought back on screen with one wheel tick up, showing the bold
 word and its underline.
+
+## 11. V12 — the diagonal bundle behind the numbers goes blue and white (owner ruling 2026-10-13)
+
+"the animation behind it - the lines going diagonal I want these color to be according to the
+theme which is blue and white and black" — the karma cable bundle behind the benchmark tables
+(`CableBundle`, mounted in `#benchmarks`), whose 22 dashed strands and fat trunk ran on
+`--flow-input/route/evidence` = accent→violet, coral→amber, green→sky.
+
+**The change is six token values, one file.** The bundle carries no colours of its own — it reads
+`var(--flow-*)` — so the palette moved at the token block in `src/app/globals.css`:
+
+| token                 | before                   | after                                        |
+| --------------------- | ------------------------ | -------------------------------------------- |
+| `--flow-input-a/b`    | `--accent` / `#7065e2`   | `color-mix(accent 55%, --bg)` / `--accent`   |
+| `--flow-route-a/b`    | `--danger` / `--warning` | `--accent` / `color-mix(accent 42%, --text)` |
+| `--flow-evidence-a/b` | `--success` / `#8abced`  | `color-mix(accent 22%, --text)` / `--text`   |
+
+Dark blue → accent → pale blue → near-white, every stop mixed from existing tokens so a theme
+value can never drift back into the bundle. Nothing else moved: the trunk path, the three rhythm
+groups (`2 10`, `40 14`, `120 30`), the five strand widths, the 0.25/1 stop opacities and the
+2700-unit march are compared arm-to-arm by the harness and are identical — 22 strands before, 22
+after. This is a recolour, not a removal.
+
+**Verification — `_lh/v12-cable.mjs` 7/7**, ART `:3000` against production as the can-fail control,
+both arms clicking Benchmarks and landing on the identical section rect (`y=-140, h=1057`). Each
+computed `stop-color` is classified by channel dominance: `neutral` (chroma ≤ 24), `blue`
+(b dominant), `warm` (r dominant), `green`. The control read
+`["blue","blue","warm","warm","green","blue"]` — the gate that demands off-theme stops is the same
+probe that grades ART, so "no warm hue" is a measurement and not an assertion:
+
+| reading                                            | ART (:3000)                                                                                   | CTRL (live, pre-push)                                                                      |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| stop classification                                | `neutral, blue, blue, neutral, neutral, neutral`                                              | `blue, blue, warm, warm, green, blue`                                                      |
+| stops 1 → 6                                        | `srgb .214 .285 .559` · `91,124,250` ×2 · `.700 .755 .969` · `.819 .847 .965` · `242,242,245` | `91,124,250` · `112,101,226` · `224,112,106` · `217,164,65` · `70,179,125` · `138,188,237` |
+| gradients / strands / rhythms / widths / opacities | 3 / 22 / 3 rhythms / 5 widths / `0.25,1,…`                                                    | identical                                                                                  |
+
+**Deployed and re-measured live.** Private `origin`: `4edf2ce` + `a893999` (logs); public
+`Mushahid-Ahmed/AgentOS` `main`: `4987d43` by explicit URL (= the Vercel deploy); the values-based
+scan over the 13 added lines returned 0 leaks, 1 staged path, 0 banned paths.
+`_lh/v12-cable-live.mjs` **8/8 green**, graded against the saved pre-push `rows.CTRL` — the canary
+is the compiled token block, and the pipeline again split each `color-mix` token into a
+`var(--accent)`/`var(--text)` fallback plus an `@supports` override, so the first 320-char window
+was too short to see all six tokens and the region now runs to the next unrelated group. Live then
+read the same six blue/neutral stops, the same 22 strands, rhythms, widths and opacities, 0 page
+errors; `_lh/v11-live-gates.mjs` re-ran on the same page and stayed green.
+
+Screenshots: `_lh/v12_cable/cable-{art,ctrl}.png` (the same section, both palettes) and
+`_lh/v12_cable_live/cable-live.png` (production).
