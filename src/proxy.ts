@@ -19,10 +19,14 @@ export default async function proxy(request: NextRequest) {
 	const { pathname, search } = request.nextUrl
 	// The Image Optimization endpoint is a Next built-in that this app never calls:
 	// there is no `next/image` import and no `public/` directory anywhere in the tree,
-	// yet the route is served and unauthenticated on every deployment. Its open
-	// advisories (unauthenticated RCE through a crafted AVIF, GHSA-2xp9-vwfh-vxw4, and
-	// SSRF, GHSA-cjq9-62q9-8jv4) are all fixed only by a `next` bump, so the surface
-	// is closed here instead — a request to it cannot reach the optimizer at all.
+	// yet the route is served and unauthenticated on every self-hosted deployment. Its
+	// open advisories (unauthenticated RCE through a crafted AVIF, GHSA-2xp9-vwfh-vxw4,
+	// and SSRF, GHSA-cjq9-62q9-8jv4) are all fixed only by a `next` bump, so the surface
+	// is closed here instead. On Vercel this denial is NOT the block: the live gate after
+	// the first deploy returned the platform image function's own 400/404 for 3 of 4
+	// query shapes, which means Vercel resolves `/_next/image` before the proxy runs.
+	// `images: { unoptimized: true }` in next.config.ts is what removes the endpoint
+	// there; this stays as the self-hosted half of the same control.
 	// Lift this if a real image component ever needs the optimizer.
 	if (pathname === '/_next/image') {
 		return NextResponse.json({ error: 'Not found' }, { status: 404 })
