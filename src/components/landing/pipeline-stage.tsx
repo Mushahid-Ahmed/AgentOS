@@ -1,15 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { LineEngine, type LineEngineHandle } from '@/components/motion/line-engine'
 import { STAGES } from '@/components/landing/pipeline'
 import { useIdlePause } from '@/lib/motion/use-idle-pause'
 import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 
 // V6 Job 2: the pinned pipeline carousel, in karma's architecture rather than
 // V5's page-wide overlay. A tall wrapper scrolls; a sticky 100svh stage holds
-// the LineEngine canvas, the step copy, the dots, the counter and a marquee of
-// the section heading. Scroll distance through the wrapper IS the animation:
+// the step copy, the dots, the counter and a marquee of the section heading.
+// Scroll distance through the wrapper IS the animation:
 //
 //   p    = clamp(-wrapperRect.top / (wrapperHeight - viewportHeight), 0, 1)
 //   step = floor(p * steps)
@@ -17,17 +16,16 @@ import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 // §2.1 measured karma at four such stages with wrappers of 200-500vh; this one
 // is (steps + 1) * 100svh = 600svh for the five real D1 stages, per §5.
 //
-// Two protected animations decided the placement. `useScrub` derives progress
+// A protected animation decided the placement. `useScrub` derives progress
 // from `y + rect.top - vh*0.9`, which is CONSTANT inside a sticky box, so the
-// scrubbed PipelineDiagram can never live in the stage; and StrandTrail sizes
-// its geometry from its own wrapper's height, so a 600svh wrapper would distort
-// it. Both stay in section 5 above, untouched, and this carousel is a sibling
-// block (§5: adapt the NEW code, never disable the V4 animation).
+// scrubbed PipelineDiagram can never live in the stage. It stays in section 5
+// above, untouched, and this carousel is a sibling block
+// (§5: adapt the NEW code, never disable the V4 animation).
 //
-// The scroll handler writes to the engine imperatively and only calls setState
-// when the step index actually changes, so a wheel event costs one layout read
-// and no React render. Marquee speed is written in four buckets, never per
-// frame, to keep the wheel handler off the style-recalc path.
+// The scroll handler only calls setState when the step index actually changes,
+// so a wheel event costs one layout read and no React render. Marquee speed is
+// changed in four buckets, never per frame, and by playback rate rather than by
+// re-timing the animation (see write() below).
 //
 // All copy is the pipeline's own: the five stage labels/subs come from
 // STAGES in landing/pipeline (one source of truth) and the marquee text is the
@@ -35,14 +33,20 @@ import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 
 const STEPS = STAGES.length
 const WRAP_SVH = (STEPS + 1) * 100
+// Four wheel-speed buckets, expressed as the strip's travel period. They are
+// applied as playback RATES on the running animation, never as animation-duration:
+// re-timing a loop re-bases its phase, (currentTime mod d) / d, and snaps the strip
+// to an earlier point of its travel — the "it starts again from Plan" the owner
+// reported, measured at 25 backward jumps up to 1,954px in 17s of wheeling.
+// playbackRate keeps currentTime and changes only how fast it advances.
 const MARQUEE_SECONDS = [34, 22, 14, 9]
+const MARQUEE_BASE = MARQUEE_SECONDS[0] ?? 34
 
 type Props = { heading: string }
 
 export function PipelineStage({ heading }: Props) {
 	const reduced = useReducedMotion()
 	const wrapRef = useRef<HTMLDivElement>(null)
-	const engineRef = useRef<LineEngineHandle>(null)
 	const marqueeRef = useRef<HTMLDivElement>(null)
 	const stepRef = useRef(0)
 	const [step, setStep] = useState(0)
@@ -64,10 +68,15 @@ export function PipelineStage({ heading }: Props) {
 		const write = (b: number) => {
 			if (b === bucket) return
 			bucket = b
-			marqueeRef.current?.style.setProperty(
-				'--v6-marquee-duration',
-				`${MARQUEE_SECONDS[b] ?? MARQUEE_SECONDS[0]}s`
-			)
+			const el = marqueeRef.current
+			if (!el) return
+			const rate = MARQUEE_BASE / (MARQUEE_SECONDS[b] ?? MARQUEE_BASE)
+			for (const a of el.getAnimations()) {
+				if ('animationName' in a && a.animationName !== 'v6-marquee') continue
+				if (a.playbackRate === rate) continue
+				if (typeof a.updatePlaybackRate === 'function') a.updatePlaybackRate(rate)
+				else a.playbackRate = rate
+			}
 		}
 
 		const measure = () => {
@@ -77,9 +86,9 @@ export function PipelineStage({ heading }: Props) {
 			// §11 M9: the band is several viewports tall, so "the band does not
 			// overlap the viewport at all" is an exact, no-false-positive test for
 			// "nothing this loop computes can be seen". Off-screen it used to read a
-			// rect, integrate wheel speed, write --v6-marquee-duration and re-arm
-			// itself on every scroll event anywhere on a 20,695px page. Here it reads
-			// the rect and stops — no engine kick, no style write, no self-reschedule.
+			// rect, integrate wheel speed, re-rate the marquee and re-arm itself on
+			// every scroll event anywhere on a 20,695px page. Here it reads the rect
+			// and stops — no rate write, no self-reschedule.
 			// The listener stays attached, so the first scroll after the band returns
 			// picks the loop up from rest (speed and lastT reset, or a flick from three
 			// sections back would otherwise re-enter at the top bucket).
@@ -91,12 +100,10 @@ export function PipelineStage({ heading }: Props) {
 			const span = Math.max(1, rect.height - vh)
 			const p = Math.min(1, Math.max(0, -rect.top / span))
 
-			engineRef.current?.setProgress(p)
 			const next = Math.min(STEPS - 1, Math.floor(p * STEPS))
 			if (next !== stepRef.current) {
 				stepRef.current = next
 				setStep(next)
-				engineRef.current?.setStepIndex(next)
 			}
 
 			// Wheel SPEED → marquee speed. A per-event delta cannot work here:
@@ -104,7 +111,7 @@ export function PipelineStage({ heading }: Props) {
 			// velocity has to be integrated over time. Peak-hold, not a sum: an
 			// accumulator that decayed AND added every frame converged to ~12x the
 			// real speed and pinned every arm to the top bucket. Quantised into four
-			// buckets so the style write stays rare, and the loop keeps ticking above
+			// buckets so the rate write stays rare, and the loop keeps ticking above
 			// the rest bucket so one fast flick settles back instead of leaving the
 			// marquee permanently racing. Thresholds are the measured px/s of a
 			// deliberate wheel (peak ~380) against a hard one (peak ~11,300).
@@ -150,14 +157,11 @@ export function PipelineStage({ heading }: Props) {
 	)
 
 	// Reduced motion: no pin, no 600svh of scroll, every step in normal flow and
-	// fully readable, with the engine painting its static terminal shape once.
+	// fully readable.
 	if (reduced) {
 		return (
 			<section className="border-border border-t py-24 sm:py-28">
 				<div className="mx-auto w-[89%] max-w-6xl">
-					<div className="relative h-[46svh] min-h-64">
-						<LineEngine ref={engineRef} />
-					</div>
 					<ol className="mt-14 flex flex-col gap-10">
 						{STAGES.map((s, i) => (
 							<li key={s.id} className="border-border border-l pl-6">
@@ -183,8 +187,6 @@ export function PipelineStage({ heading }: Props) {
 			style={{ height: `${WRAP_SVH}svh` }}
 		>
 			<div className="sticky top-0 h-[100svh] overflow-hidden">
-				<LineEngine ref={engineRef} />
-
 				{/* Heading marquee: the section's own title, cropped by the stage edge. */}
 				<div className="absolute inset-x-0 bottom-0 z-0 overflow-hidden pb-4">
 					<div ref={marqueeRef} className="v6-marquee">

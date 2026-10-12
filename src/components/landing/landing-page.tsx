@@ -8,12 +8,10 @@ import { HeroSubhead } from '@/components/landing/hero/subhead-blur'
 import { HorizontalShowcase } from '@/components/landing/horizontal-showcase'
 import { PipelineDiagram } from '@/components/landing/pipeline'
 import { PipelineStage } from '@/components/landing/pipeline-stage'
-import { HrBand } from '@/components/landing/hr-band'
+import { V7Camera, V7Page } from '@/components/landing/v7-camera'
 import { CableBundle } from '@/components/landing/cable-bundle'
-import { RayBurst, type RayGroup } from '@/components/landing/ray-burst'
 import { BlueprintCorners, BlueprintFrame } from '@/components/landing/blueprint-marks'
 import { KaraokeFill } from '@/components/landing/karaoke-fill'
-import { ThermalBlob } from '@/components/landing/thermal-blob'
 import { ArchGrid } from '@/components/landing/arch-grid'
 import { BenchChart } from '@/components/landing/bench-chart'
 import { LandingFooter } from '@/components/landing/landing-footer'
@@ -28,12 +26,11 @@ import { DealStack } from '@/components/motion/deal-stack'
 import { SlotNumber } from '@/components/motion/slot-counter'
 import { GatherWords } from '@/components/motion/gather-words'
 import { CursorField } from '@/components/motion/cursor-field'
+import { GlyphField } from '@/components/motion/glyph-field'
 import { Magnetic } from '@/components/motion/magnetic'
 import { Parallax } from '@/components/motion/parallax'
 import { RippleLayer } from '@/components/motion/ripple'
-import { StrandTrail } from '@/components/motion/strand-trail'
 import { V5Layers } from '@/components/motion/v5-layers'
-import { AGENT_ROLES, COMPLEXITY_TIERS, TASK_TYPES } from '@/lib/decisions/types'
 
 // The content-rich, most-animated landing (brief §6.2): fifteen sections from
 // preloader to footer, all copy grounded in what this repo actually ships —
@@ -138,17 +135,6 @@ const FAMILIES = [
 // The bottom of the degradation ladder: always paid, never free (D-44).
 const FLOOR = { family: 'floor', slug: 'meta-llama/llama-3.3-70b-instruct', dim: true }
 
-// V6 §8 Job 5: the ray burst's 19 spokes are this product's own decision
-// vocabulary — the roles the orchestra can staff, the task types Jev
-// classifies, the routes it chooses between, the tiers it reasons in. Only the
-// COUNTS cross the boundary; the burst draws geometry and no text.
-const RAY_GROUPS: RayGroup[] = [
-	{ id: 'roles', count: AGENT_ROLES.length },
-	{ id: 'task-types', count: TASK_TYPES.length },
-	{ id: 'model-routes', count: FAMILIES.length + 1 },
-	{ id: 'complexity-tiers', count: COMPLEXITY_TIERS.length }
-]
-
 // Real run #6 numbers (full 24-task four-setup comparison), kept as data (not
 // pre-formatted strings) so the chart and the table render the same
 // measurements.
@@ -187,404 +173,408 @@ export function LandingPage() {
 			tabIndex={-1}
 			className="text-text selection:bg-accent/30 selection:text-bg"
 		>
-			<Preloader />
-			<LandingNav />
-			{/* V6 §1.2: the V5 page-wide flow-line overlay (FlowLines) is the ONE
+			<V7Camera>
+				<Preloader />
+				<LandingNav />
+				{/* V6 §1.2: the V5 page-wide flow-line overlay (FlowLines) is the ONE
 			    animation the owner authorised removing — replaced by the per-section
 			    pinned line system (Job 2 below). Everything else on this page is
 			    untouched; see docs/uiux-decisions-log.md [V6][Job 2]. */}
-			<V5Layers />
+				<V5Layers />
 
-			{/* 3 — HERO */}
-			<section className="relative flex h-[100dvh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[var(--bg)] text-[var(--text)]">
-				{/* §4's depth split: the type leaves the screen 1.5× faster than the
+				{/* 3 — HERO */}
+				<V7Page id="hero">
+					<section className="relative flex h-[100dvh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[var(--bg)] text-[var(--text)]">
+						{/* §4's depth split: the type leaves the screen 1.5× faster than the
 				    document carries it, the fluid sheet 0.5× as fast, so the two
 				    separate as you scroll. The fluid itself is untouched — this wraps
 				    it in a transform, it does not change the shader. */}
-				<Parallax speed={0.5} className="absolute inset-0">
-					<HeroFluid className="h-full w-full" />
-				</Parallax>
-				<div
-					aria-hidden
-					className="pointer-events-none absolute inset-0"
-					style={{
-						background: 'radial-gradient(60% 50% at 50% 42%, transparent 0%, var(--bg) 78%)'
-					}}
-				/>
-				{/* V6 §9: the blueprint frame on the hero's own edges — measured in CSS
+						<Parallax speed={0.5} className="absolute inset-0">
+							<HeroFluid className="h-full w-full" />
+						</Parallax>
+						<div
+							aria-hidden
+							className="pointer-events-none absolute inset-0"
+							style={{
+								background: 'radial-gradient(60% 50% at 50% 42%, transparent 0%, var(--bg) 78%)'
+							}}
+						/>
+						{/* V6 §9: the blueprint frame on the hero's own edges — measured in CSS
 					    px against this section, painted at z-0 behind the type. */}
-				<BlueprintFrame />
-				<Parallax speed={1.5} className="relative z-10">
-					<div className="flex flex-col items-center px-6 text-center">
-						<span className="label-uppercase text-text-faint mb-6">
-							Adaptive multi-agent intelligence
-						</span>
-						<HeroDisplay
-							text="First Super AgentOS"
-							lines={['First Super', 'AgentOS']}
-							className="font-display font-extrabold tracking-[-0.04em]"
-							lineClassName="display-huge leading-[0.95]"
-						/>
-						<HeroSubhead
-							text="Watch Jev assemble the right AI team for every question."
-							lead={1.2}
-							className="text-text-muted mt-7 max-w-md text-[16px] leading-[1.6] text-balance"
-						/>
-						<FadeUp delay={560}>
-							<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-								<Button asChild className="energy" variant="primary" size="control">
-									<Link href="/signup">Sign up</Link>
-								</Button>
-								<Button asChild className="energy" variant="outline" size="control">
-									<Link href="/login">Login</Link>
-								</Button>
+						<BlueprintFrame />
+						<Parallax speed={1.5} className="relative z-10">
+							<div className="flex flex-col items-center px-6 text-center">
+								<span className="label-uppercase text-text-faint mb-6">
+									Adaptive multi-agent intelligence
+								</span>
+								<HeroDisplay
+									text="First Super AgentOS"
+									lines={['First Super', 'AgentOS']}
+									className="font-display font-extrabold tracking-[-0.04em]"
+									lineClassName="display-huge leading-[0.95]"
+								/>
+								<HeroSubhead
+									text="Watch Jev assemble the right AI team for every question."
+									lead={1.2}
+									className="text-text-muted mt-7 max-w-md text-[16px] leading-[1.6] text-balance"
+								/>
+								<FadeUp delay={560}>
+									<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+										<Button asChild className="energy" variant="primary" size="control">
+											<Link href="/signup">Sign up</Link>
+										</Button>
+										<Button asChild className="energy" variant="outline" size="control">
+											<Link href="/login">Login</Link>
+										</Button>
+									</div>
+								</FadeUp>
 							</div>
-						</FadeUp>
-					</div>
-				</Parallax>
-				<div
-					aria-hidden
-					className="hint-breathe absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3"
-				>
-					<span className="text-text-faint font-mono text-[10px] tracking-[0.2em] uppercase">
-						Scroll
-					</span>
-					<span className="bg-border relative h-12 w-px overflow-hidden">
-						<span className="scroll-dot bg-accent absolute top-0 left-0 h-3 w-px" />
-					</span>
-				</div>
-			</section>
+						</Parallax>
+						<div
+							aria-hidden
+							className="hint-breathe absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3"
+						>
+							<span className="text-text-faint font-mono text-[10px] tracking-[0.2em] uppercase">
+								Scroll
+							</span>
+							<span className="bg-border relative h-12 w-px overflow-hidden">
+								<span className="scroll-dot bg-accent absolute top-0 left-0 h-3 w-px" />
+							</span>
+						</div>
+					</section>
+				</V7Page>
 
-			{/* 4 — MANIFESTO */}
-			<section className="relative overflow-hidden py-28 sm:py-36">
-				{/* §4's background element: the house mark, turning at 0.5 deg/s and
+				{/* 4 — MANIFESTO */}
+				<V7Page id="thesis">
+					<section className="relative overflow-hidden py-28 sm:py-36">
+						{/* §4's background element: the house mark, turning at 0.5 deg/s and
 				    opening as the section passes. Decorative and aria-hidden; the
 				    global reduced-motion guard stops the turn and DriftMark pins its
 				    scroll scale at the resting value. */}
-				<DriftMark path="M100 8 18 54v92l82 46 82-46V54Zm0 46 41 23v46l-41 23-41-23V77Z" />
-				<div className={SECTION + ' relative'}>
-					{/* §4 asks for both gestures on the intro: the section-wide diagonal
+						<DriftMark path="M100 8 18 54v92l82 46 82-46V54Zm0 46 41 23v46l-41 23-41-23V77Z" />
+						<div className={SECTION + ' relative'}>
+							{/* §4 asks for both gestures on the intro: the section-wide diagonal
 					    sheet, and the lines arriving from alternating sides inside it. The
 					    sweep only hides ink — the paragraph keeps its box, so the two
 					    mechanisms never fight over layout. */}
-					<SweepReveal as="div" duration={1400} threshold={0.2}>
-						<LineMaskReveal
-							as="p"
-							lines={[
-								'A question arrives.',
-								'Jev decides who works on it.',
-								'The team is built for this run, then retired.',
-								'Claims carry evidence. Evidence carries status.',
-								'Everything is on the record.'
-							]}
-							// §4's "pages settling into a book": each line also arrives from
-							// alternating sides with a 1.5deg tilt that unwinds as it lands.
-							alternate
-							stagger={130}
-							className="font-display text-text text-[24px] leading-[1.3] font-medium tracking-[-0.02em] sm:text-[34px] sm:leading-[1.28]"
-						/>
-					</SweepReveal>
-				</div>
-			</section>
-
-			{/* V6 Job 3 — karma's hr-band dividers (§6): one strip per chosen
-			    boundary, never more than one at a boundary, and always OUTSIDE the
-			    sections they separate so they can't overlap a V4/V5 transition that
-			    already owns that edge. Four of the fifteen boundaries carry one;
-			    the pinned carousel, the showcase and the CTA (CursorField) keep
-			    their own motion and get no band. */}
-			<HrBand />
-
-			{/* 5 — PIPELINE */}
-			{/* overflow-x-clip: the strand orbit is drawn wider than the 89%-width wrapper on
-			    purpose (it enters from off the left edge), and at narrow widths that extra
-			    radius would otherwise widen the document and open a horizontal scrollbar. The
-			    section is already full-bleed, so clipping on this axis costs the animation
-			    nothing it was meant to show. */}
-			<section className="border-border overflow-x-clip border-t py-24 sm:py-28">
-				<div className={`${SECTION} relative`}>
-					<StrandTrail />
-					<SectionHead
-						id="pipeline"
-						kicker="The pipeline"
-						title={PIPELINE_TITLE}
-						karaoke
-						body="The D1 pipeline runs the same way every time: Jev plans, the orchestra staffs a team, evidence is gathered, critics and two verification gates pressure-test it, and a judge returns PASS — or REWORK, which replans and spawns agents to close the gap."
-					/>
-					<FadeUp delay={120}>
-						<div className="mt-12">
-							<PipelineDiagram />
+							<SweepReveal as="div" duration={1400} threshold={0.2}>
+								<LineMaskReveal
+									as="p"
+									lines={[
+										'A question arrives.',
+										'Jev decides who works on it.',
+										'The team is built for this run, then retired.',
+										'Claims carry evidence. Evidence carries status.',
+										'Everything is on the record.'
+									]}
+									// §4's "pages settling into a book": each line also arrives from
+									// alternating sides with a 1.5deg tilt that unwinds as it lands.
+									alternate
+									stagger={130}
+									className="font-display text-text text-[24px] leading-[1.3] font-medium tracking-[-0.02em] sm:text-[34px] sm:leading-[1.28]"
+								/>
+							</SweepReveal>
 						</div>
-					</FadeUp>
-				</div>
-			</section>
+					</section>
+				</V7Page>
 
-			{/* 5b — PINNED PIPELINE CAROUSEL (V6 Job 2). A sibling block, NOT a
+				{/* 5 — PIPELINE */}
+				<V7Page id="pipeline">
+					<section className="border-border border-t py-24 sm:py-28">
+						<div className={`${SECTION} relative`}>
+							<SectionHead
+								id="pipeline"
+								kicker="The pipeline"
+								title={PIPELINE_TITLE}
+								karaoke
+								body="The D1 pipeline runs the same way every time: Jev plans, the orchestra staffs a team, evidence is gathered, critics and two verification gates pressure-test it, and a judge returns PASS — or REWORK, which replans and spawns agents to close the gap."
+							/>
+							<FadeUp delay={120}>
+								<div className="mt-12">
+									<PipelineDiagram />
+								</div>
+							</FadeUp>
+						</div>
+					</section>
+				</V7Page>
+
+				{/* 5b — PINNED PIPELINE CAROUSEL (V6 Job 2). A sibling block, NOT a
 			    wrapper around section 5: the scrubbed PipelineDiagram above freezes
 			    inside a sticky box (useScrub measures y + rect.top, which is constant
-			    under a pin) and StrandTrail sizes itself from its wrapper's height, so
-			    both stay where they are and the pin gets its own 600svh of scroll. */}
-			<PipelineStage heading={PIPELINE_TITLE} />
+			    under a pin), so it stays where it is and the pin gets its own 600svh
+			    of scroll. */}
+				<PipelineStage heading={PIPELINE_TITLE} />
 
-			{/* 6 — CAPABILITIES */}
-			<section id="capabilities" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
-				<div className={SECTION}>
-					<SectionHead
-						kicker="Capabilities"
-						title="Eight things it does that a single model can’t"
-					/>
-					<DealStack className="border-border mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4">
-						{CAPABILITIES.map((c) => (
-							<div key={c.name} className="h-full">
-								{/* The cell is the card DealStack flies out of the pile — it owns the pile
+				{/* 6 — CAPABILITIES */}
+				<V7Page id="capabilities">
+					<section id="capabilities" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+						<div className={SECTION}>
+							<SectionHead
+								kicker="Capabilities"
+								title="Eight things it does that a single model can’t"
+							/>
+							<DealStack className="border-border mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4">
+								{CAPABILITIES.map((c) => (
+									<div key={c.name} className="h-full">
+										{/* The cell is the card DealStack flies out of the pile — it owns the pile
 								    transform written from its own measured slot. The tilt lives on the inner
 								    element, so the two transforms compose instead of overwriting each other. */}
-								<Tilt glow className="h-full">
-									<div className="sheen edge-glow border-border group ease-expo relative h-full border-t p-5 transition-colors duration-[var(--motion-base)] hover:bg-[var(--surface)] sm:border-l sm:first:border-l-0">
-										<BlueprintCorners />
-										<svg
-											viewBox="0 0 24 24"
-											aria-hidden
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="1.4"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											className="tilt-depth text-text-faint group-hover:text-accent ease-expo size-7 transition-colors duration-[var(--motion-base)]"
-										>
-											{c.icon}
-										</svg>
-										<h3 className="font-display text-text mt-5 text-[16px] font-semibold tracking-[-0.01em]">
-											{c.name}
-										</h3>
-										<p className="text-text-muted mt-2 text-[13px] leading-[1.55]">{c.body}</p>
+										<Tilt glow className="h-full">
+											<div className="sheen edge-glow border-border group ease-expo relative h-full border-t p-5 transition-colors duration-[var(--motion-base)] hover:bg-[var(--surface)] sm:border-l sm:first:border-l-0">
+												<BlueprintCorners />
+												<svg
+													viewBox="0 0 24 24"
+													aria-hidden
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="1.4"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													className="tilt-depth text-text-faint group-hover:text-accent ease-expo size-7 transition-colors duration-[var(--motion-base)]"
+												>
+													{c.icon}
+												</svg>
+												<h3 className="font-display text-text mt-5 text-[16px] font-semibold tracking-[-0.01em]">
+													{c.name}
+												</h3>
+												<p className="text-text-muted mt-2 text-[13px] leading-[1.55]">{c.body}</p>
+											</div>
+										</Tilt>
 									</div>
-								</Tilt>
-							</div>
-						))}
-					</DealStack>
+								))}
+							</DealStack>
+						</div>
+					</section>
+				</V7Page>
+
+				{/* 7 — PINNED HORIZONTAL SHOWCASE */}
+				<div className="border-border border-t">
+					<HorizontalShowcase />
 				</div>
-			</section>
 
-			{/* 7 — PINNED HORIZONTAL SHOWCASE */}
-			<div className="border-border border-t">
-				<HorizontalShowcase />
-			</div>
-
-			{/* 8 — DECISION BUS TERMINAL */}
-			<section className="border-border border-t py-24 sm:py-28">
-				<div className={SECTION}>
-					<div className="grid items-center gap-12 lg:grid-cols-2">
-						<SectionHead
-							kicker="The Decision Bus"
-							title="If it decided, it’s on the log"
-							body="Team assembly, model routes, gate outcomes, spend — each one is a structured event the run view renders live and replay plays back. This is run #81, streamed from this deployment."
-						/>
-						{/* §5.4's curtain: the terminal is uncovered left→right instead of
+				{/* 8 — DECISION BUS TERMINAL */}
+				<V7Page id="bus">
+					<section className="border-border border-t py-24 sm:py-28">
+						<div className={SECTION}>
+							<div className="grid items-center gap-12 lg:grid-cols-2">
+								<SectionHead
+									kicker="The Decision Bus"
+									title="If it decided, it’s on the log"
+									body="Team assembly, model routes, gate outcomes, spend — each one is a structured event the run view renders live and replay plays back. This is run #81, streamed from this deployment."
+								/>
+								{/* §5.4's curtain: the terminal is uncovered left→right instead of
 						    fading up. The panel is removed from the document as soon as it
 						    has left, so the reveal can never be the reason a line of the log
 						    is invisible. */}
-						<CurtainReveal className="min-w-0">
-							<Typewriter
-								lines={BUS}
-								className="border-border bg-surface text-text-muted max-w-full rounded-xl border p-5 text-[11.5px] leading-[1.9] sm:text-[12.5px]"
-							/>
-						</CurtainReveal>
-					</div>
-				</div>
-			</section>
-
-			<HrBand />
-
-			{/* 9 — EVIDENCE + COUNTUP STATS */}
-			<section id="evidence" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
-				<div className={SECTION}>
-					<SectionHead
-						kicker="Evidence & gates"
-						title="Nothing ships without proof"
-						body="The evidence hub holds every claim with its source and status. The two D4 gates decide whether the answer is even allowed to reach the judge."
-					/>
-					<div className="border-border relative mt-14 grid grid-cols-2 gap-px border-t lg:grid-cols-4">
-						<BlueprintFrame gridAt="br" threshold={0.2} />
-						{[
-							{ to: 2, suffix: '', label: 'verification gates before the judge' },
-							{ to: 3, suffix: '', label: 'MCP tool families agents can call' },
-							{ to: 24, suffix: '', label: 'tasks in the completed live benchmark' },
-							{ to: 6, suffix: '', label: 'architecture layers, D1 through D6' }
-						].map((s) => (
-							<div key={s.label} className="border-border relative p-6 lg:border-l lg:first:border-l-0">
-								{/* V4 §4's slot-machine reels: the digits scroll past real digits, the leftmost
-								    column stops first, and the caption only drifts up once the last reel lands. */}
-								<SlotNumber
-									to={s.to}
-									suffix={s.suffix}
-									label={s.label}
-									className="font-display text-text text-[48px] leading-none font-bold tracking-[-0.04em] sm:text-[64px]"
-								/>
+								<CurtainReveal className="min-w-0">
+									<Typewriter
+										lines={BUS}
+										className="border-border bg-surface text-text-muted max-w-full rounded-xl border p-5 text-[11.5px] leading-[1.9] sm:text-[12.5px]"
+									/>
+								</CurtainReveal>
 							</div>
-						))}
-					</div>
-				</div>
-			</section>
+						</div>
+					</section>
+				</V7Page>
 
-			{/* 10 — MODELS & ROUTING */}
-			{/* V6 Job 5: the ray burst is this section's backdrop at z-0, and the content
-			    wrapper takes relative z-10, so ModelRoutes (the V4 routing animation) keeps
-			    its own layer and no ray can ever cross a row. */}
-			<section className="border-border relative border-t py-24 sm:py-28">
-				<RayBurst groups={RAY_GROUPS} />
-				<div className={`${SECTION} relative z-10`}>
-					<SectionHead
-						kicker="Models & routing"
-						title="Three families, one cheap floor, zero free tier"
-						body="NanoGPT carries the traffic. Each family routes to its flagship; degradation walks down to a llama-3.3-70b floor and a policy fallback — cheaper, never free, because the provider has no free tier."
-					/>
-					<ModelRoutes rows={[...FAMILIES, FLOOR]} />
-					<div className="mt-8 flex flex-wrap gap-2">
-						{[
-							'all-paid degradation (D-44)',
-							'cost = tokens × curated per-1M rates (D-47)',
-							'zero-citation knowledge mode (D-45)'
-						].map((b) => (
-							<span
-								key={b}
-								className="border-border text-text-faint rounded-full border px-3 py-1.5 font-mono text-[10.5px]"
-							>
-								{b}
-							</span>
-						))}
-					</div>
-				</div>
-			</section>
+				{/* 9 — EVIDENCE + COUNTUP STATS */}
+				<V7Page id="evidence">
+					<section id="evidence" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+						<div className={SECTION}>
+							<SectionHead
+								kicker="Evidence & gates"
+								title="Nothing ships without proof"
+								body="The evidence hub holds every claim with its source and status. The two D4 gates decide whether the answer is even allowed to reach the judge."
+							/>
+							<div className="border-border relative mt-14 grid grid-cols-2 gap-px border-t lg:grid-cols-4">
+								<BlueprintFrame gridAt="br" threshold={0.2} />
+								{[
+									{ to: 2, suffix: '', label: 'verification gates before the judge' },
+									{ to: 3, suffix: '', label: 'MCP tool families agents can call' },
+									{ to: 24, suffix: '', label: 'tasks in the completed live benchmark' },
+									{ to: 6, suffix: '', label: 'architecture layers, D1 through D6' }
+								].map((s) => (
+									<div
+										key={s.label}
+										className="border-border relative p-6 lg:border-l lg:first:border-l-0"
+									>
+										{/* V4 §4's slot-machine reels: the digits scroll past real digits, the leftmost
+								    column stops first, and the caption only drifts up once the last reel lands. */}
+										<SlotNumber
+											to={s.to}
+											suffix={s.suffix}
+											label={s.label}
+											className="font-display text-text text-[48px] leading-none font-bold tracking-[-0.04em] sm:text-[64px]"
+										/>
+									</div>
+								))}
+							</div>
+						</div>
+					</section>
+				</V7Page>
 
-			<HrBand />
+				{/* 10 — MODELS & ROUTING */}
+				<V7Page id="orchestra">
+					<section className="border-border relative border-t py-24 sm:py-28">
+						<div className={`${SECTION} relative z-10`}>
+							<SectionHead
+								kicker="Models & routing"
+								title="Three families, one cheap floor, zero free tier"
+								body="NanoGPT carries the traffic. Each family routes to its flagship; degradation walks down to a llama-3.3-70b floor and a policy fallback — cheaper, never free, because the provider has no free tier."
+							/>
+							<ModelRoutes rows={[...FAMILIES, FLOOR]} />
+							<div className="mt-8 flex flex-wrap gap-2">
+								{[
+									'all-paid degradation (D-44)',
+									'cost = tokens × curated per-1M rates (D-47)',
+									'zero-citation knowledge mode (D-45)'
+								].map((b) => (
+									<span
+										key={b}
+										className="border-border text-text-faint rounded-full border px-3 py-1.5 font-mono text-[10.5px]"
+									>
+										{b}
+									</span>
+								))}
+							</div>
+						</div>
+					</section>
+				</V7Page>
 
-			{/* 11 — ARCHITECTURE D1–D6 */}
-			<section className="border-border border-t py-24 sm:py-28">
-				<div className={SECTION}>
-					<SectionHead kicker="Architecture" title="Six layers, each one drawn here" />
-					<div className="mt-12">
-						<ArchGrid />
-					</div>
-				</div>
-			</section>
+				{/* 11 — ARCHITECTURE D1–D6 */}
+				<V7Page id="routes">
+					<section className="border-border border-t py-24 sm:py-28">
+						<div className={SECTION}>
+							<SectionHead kicker="Architecture" title="Six layers, each one drawn here" />
+							<div className="mt-12">
+								<ArchGrid />
+							</div>
+						</div>
+					</section>
+				</V7Page>
 
-			{/* 12 — BENCHMARK (real numbers, run #6) */}
-			{/* V6 Job 4: this is the darkest section and it carries the page's real
+				{/* 12 — BENCHMARK (real numbers, run #6) */}
+				{/* V6 Job 4: this is the darkest section and it carries the page's real
 			    numbers, so karma's cable bundle goes behind it. §7's stacking: the
 			    bundle is z-0 and the content wrapper below it is relative z-10 —
 			    nothing about the chart's bar-grow or the table's curtain changes. */}
-			<section
-				id="benchmarks"
-				className="border-border relative scroll-mt-20 border-t py-24 sm:py-28"
-			>
-				<CableBundle />
-				<div className={`${SECTION} relative z-10`}>
-					<SectionHead
-						kicker="Benchmarks — measured, not marketed"
-						title="One full 24-task run. All four setups."
-						karaoke
-						body="Judged by gpt-4.1 against a rubric, priced from real token usage. The honest finding: full AgentOS was the priciest and slowest setup — and the sole best performer on the two tasks dynamic teams exist for (document QA and deliberately ambiguous prompts)."
-					/>
-					<BenchChart rows={BENCH} />
-					{/* The table is the same measurement as the chart above it, so it gets
+				<V7Page id="cable">
+					<section
+						id="benchmarks"
+						className="border-border relative scroll-mt-20 border-t py-24 sm:py-28"
+					>
+						<CableBundle />
+						<div className={`${SECTION} relative z-10`}>
+							<SectionHead
+								kicker="Benchmarks — measured, not marketed"
+								title="One full 24-task run. All four setups."
+								karaoke
+								body="Judged by gpt-4.1 against a rubric, priced from real token usage. The honest finding: full AgentOS was the priciest and slowest setup — and the sole best performer on the two tasks dynamic teams exist for (document QA and deliberately ambiguous prompts)."
+							/>
+							<BenchChart rows={BENCH} />
+							{/* The table is the same measurement as the chart above it, so it gets
 					    §5.4's curtain from the top down rather than a second grow animation
 					    competing with the bars. */}
-					<CurtainReveal direction="down" threshold={0.12}>
-						<div className="border-border mt-6 overflow-x-auto rounded-xl border">
-							<table className="w-full min-w-[560px] border-collapse text-left">
-								<thead>
-									<tr className="border-border">
-										{['Setup', 'Avg score', 'Avg cost / task', 'Avg latency', 'Success'].map(
-											(h) => (
-												<th
-													key={h}
-													className="text-text-faint label-uppercase border-b border-[var(--border)] px-5 py-3"
+							<CurtainReveal direction="down" threshold={0.12}>
+								<div className="border-border mt-6 overflow-x-auto rounded-xl border">
+									<table className="w-full min-w-[560px] border-collapse text-left">
+										<thead>
+											<tr className="border-border">
+												{['Setup', 'Avg score', 'Avg cost / task', 'Avg latency', 'Success'].map(
+													(h) => (
+														<th
+															key={h}
+															className="text-text-faint label-uppercase border-b border-[var(--border)] px-5 py-3"
+														>
+															{h}
+														</th>
+													)
+												)}
+											</tr>
+										</thead>
+										<tbody className="font-mono text-[13px]">
+											{BENCH.map((r) => (
+												<tr
+													key={r.setup}
+													className="border-group border-border hover:bg-surface border-b last:border-b-0"
 												>
-													{h}
-												</th>
-											)
-										)}
-									</tr>
-								</thead>
-								<tbody className="font-mono text-[13px]">
-									{BENCH.map((r) => (
-										<tr
-											key={r.setup}
-											className="border-group border-border hover:bg-surface border-b last:border-b-0"
-										>
-											<td className="text-text px-5 py-4 font-sans font-medium">{r.setup}</td>
-											<td className="text-text-muted px-5 py-4">{fmtScore(r.score)}</td>
-											<td className="text-text-muted px-5 py-4">{fmtCost(r.cost)}</td>
-											<td className="text-text-muted px-5 py-4">{fmtLatency(r.latency)}</td>
-											<td className="text-text-muted px-5 py-4">{r.pass}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
+													<td className="text-text px-5 py-4 font-sans font-medium">{r.setup}</td>
+													<td className="text-text-muted px-5 py-4">{fmtScore(r.score)}</td>
+													<td className="text-text-muted px-5 py-4">{fmtCost(r.cost)}</td>
+													<td className="text-text-muted px-5 py-4">{fmtLatency(r.latency)}</td>
+													<td className="text-text-muted px-5 py-4">{r.pass}</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							</CurtainReveal>
+							<p className="text-text-faint mt-5 text-[12.5px]">
+								Whole-suite spend: $0.530901 · zero citation tasks by design (knowledge mode) ·
+								results live on the dashboard.
+							</p>
 						</div>
-					</CurtainReveal>
-					<p className="text-text-faint mt-5 text-[12.5px]">
-						Whole-suite spend: $0.530901 · zero citation tasks by design (knowledge mode) · results
-						live on the dashboard.
-					</p>
-				</div>
-			</section>
+					</section>
+				</V7Page>
 
-			<HrBand />
+				{/* 13 — FAQ */}
+				<V7Page id="faq">
+					<section id="faq" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
+						<div className={SECTION}>
+							<SectionHead kicker="FAQ" title="Questions a juror would ask" />
+							<div className="border-border mt-10 border-t">
+								<Faq />
+							</div>
+						</div>
+					</section>
+				</V7Page>
 
-			{/* 13 — FAQ */}
-			<section id="faq" className="border-border scroll-mt-20 border-t py-24 sm:py-28">
-				<div className={SECTION}>
-					<SectionHead kicker="FAQ" title="Questions a juror would ask" />
-					<div className="border-border mt-10 border-t">
-						<Faq />
-					</div>
-				</div>
-			</section>
-
-			{/* 14 — CTA */}
-			<section
-				id="start"
-				className="border-border relative overflow-hidden border-t py-32 sm:py-40"
-			>
-				{/* V6 §10: the landing is one dark theme, so the thermal blob takes §10's own
-				fallback — the accent shift at the CTA boundary. It paints at z-0 under the
-				cursor field and the content wrapper, and it adds nothing to the layout. */}
-				<ThermalBlob />
-				<CursorField className="pointer-events-none absolute inset-0" />
-				<div className="relative z-10 flex flex-col items-center px-6 text-center">
-					{/* V4 §4's Gathering: the words leave from alternating edges, overshoot where
+				{/* 14 — CTA */}
+				<V7Page id="cta">
+					<section
+						id="start"
+						className="border-border relative overflow-hidden border-t py-32 sm:py-40"
+					>
+						{/* V8 Job 4: the owner took the warm thermal blob out of this spot ("the animation
+						    that is in color lite orange … is not according the theme") and asked for a
+						    cursor-pushed glyph field in its place. It paints at z-0 under the mote field
+						    and the content wrapper, and it adds nothing to the layout. */}
+						<GlyphField className="pointer-events-none absolute inset-0" />
+						<CursorField className="pointer-events-none absolute inset-0" />
+						<div className="relative z-10 flex flex-col items-center px-6 text-center">
+							{/* V4 §4's Gathering: the words leave from alternating edges, overshoot where
 					    they collide, and the h2 keeps the CTA in the page's heading outline. */}
-					<h2 className="font-display text-text max-w-[16ch] text-[40px] leading-[1.05] font-extrabold tracking-[-0.04em] text-balance sm:text-[72px]">
-						<GatherWords text="Welcome to First Super AgentOS" />
-					</h2>
-					<FadeUp delay={260} y={16}>
-						<div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-							{/* Magnetic approach pull, then the click ripple. Owner ruling for this run:
+							<h2 className="font-display text-text max-w-[16ch] text-[40px] leading-[1.05] font-extrabold tracking-[-0.04em] text-balance sm:text-[72px]">
+								<GatherWords text="Welcome to First Super AgentOS" />
+							</h2>
+							<FadeUp delay={260} y={16}>
+								<div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+									{/* Magnetic approach pull, then the click ripple. Owner ruling for this run:
 							    cards yes, buttons never — this button moves and sweeps, it gets no border
 							    animation. */}
-							<Magnetic radius={100}>
-								<Button asChild className="energy" variant="primary" size="control">
-									<Link href="/signup">
-										<RippleLayer />
-										Sign up
+									<Magnetic radius={100}>
+										<Button asChild className="energy" variant="primary" size="control">
+											<Link href="/signup">
+												<RippleLayer />
+												Sign up
+											</Link>
+										</Button>
+									</Magnetic>
+									<Link
+										href="/login"
+										className="text-text-muted hover:text-text link-center ease-expo inline-flex min-h-11 items-center px-1 font-mono text-[13px] no-underline transition-colors duration-[var(--motion-base)]"
+									>
+										or log in
 									</Link>
-								</Button>
-							</Magnetic>
-							<Link
-								href="/login"
-								className="text-text-muted hover:text-text link-center ease-expo inline-flex min-h-11 items-center px-1 font-mono text-[13px] no-underline transition-colors duration-[var(--motion-base)]"
-							>
-								or log in
-							</Link>
+								</div>
+							</FadeUp>
 						</div>
-					</FadeUp>
-				</div>
-			</section>
+					</section>
+				</V7Page>
 
-			{/* 15 — FOOTER */}
-			<LandingFooter />
+				{/* 15 — FOOTER */}
+				<LandingFooter />
+			</V7Camera>
 		</main>
 	)
 }

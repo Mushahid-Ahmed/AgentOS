@@ -1605,15 +1605,16 @@ a:focus-visible .nav-wave > span {
 /* ---- V6 (Take 6, karma-observed line system) --------------------------------
    Job 2's pinned stage carries a marquee strip of the section heading. The strip
    is two identical halves translated by exactly -50%, so the loop is seamless
-   without measuring text. Speed is a CSS variable the scroll controller writes
-   in buckets (never per frame), which keeps the wheel handler off the style
-   recalc path. The reduced-motion guard at line 433 already collapses
+   without measuring text. Its period is FIXED: the scroll controller changes the
+   strip's speed with Animation.playbackRate, never by re-timing this duration,
+   because (currentTime mod d) / d re-bases the phase on every write and the strip
+   visibly jumps backwards. The reduced-motion guard at line 433 already collapses
    animation-duration, so this strip is static for those users with no extra
    branch here. ---------------------------------------------------------------- */
 .v6-marquee {
 	display: flex;
 	width: max-content;
-	animation: v6-marquee var(--v6-marquee-duration, 34s) linear infinite;
+	animation: v6-marquee 34s linear infinite;
 	will-change: transform;
 }
 
@@ -1672,4 +1673,121 @@ a:focus-visible .nav-wave > span {
 [data-v6-idle='paused'] .v6-hub,
 [data-v6-idle='paused'] .v6-marquee {
 	animation-play-state: paused;
+}
+
+/* V7 — the 3D zoom-out camera's own surface. The page transforms are written per
+   frame by V7Camera (they are a function of scroll, not a loop), so the only CSS
+   here is the scroll indicator and the loops that make it read as alive. Every
+   value is an existing token. ---------------------------------------------- */
+[data-v7-rail] {
+	position: relative;
+	/* one tick is 1px tall and the column gap is 12px, which is the pitch the
+	   bead has to travel per page */
+	--v7-pitch: 13px;
+}
+
+[data-v7-tick] {
+	transform-origin: right center;
+	transition:
+		width var(--motion-slow) var(--ease-expo),
+		background-color var(--motion-base) var(--ease-expo);
+	animation: v7-breathe 4.4s var(--ease-expo) infinite;
+	animation-delay: calc(var(--v7-i, 0) * -0.34s);
+}
+
+[data-v7-tick][data-v7-active='true'] {
+	width: 18px;
+	background-color: var(--accent);
+	animation: v7-focus 2.6s var(--ease-expo) infinite;
+}
+
+[data-v7-bead] {
+	top: 0;
+	transform: translate3d(
+		-3.5px,
+		calc(var(--v7-progress, 0) * (var(--v7-pages, 1) - 1) * var(--v7-pitch)),
+		0
+	);
+	transition: opacity var(--motion-base) var(--ease-expo);
+	box-shadow: 0 0 6px 0 color-mix(in oklab, var(--accent) 38%, transparent);
+}
+
+/* The comet's halo, drawn as its own element rather than an animated shadow: a
+   box-shadow loop is recalculated and repainted on the main thread every single
+   frame (it is not a compositable property), which is what measured as the rail's
+   per-frame style cost. Transform and opacity are composited, so the same ring that
+   opens and closes now costs the compositor nothing on the main thread. */
+[data-v7-bead]::after {
+	content: '';
+	position: absolute;
+	inset: -1px;
+	border-radius: 9999px;
+	border: 1px solid color-mix(in oklab, var(--accent) 72%, transparent);
+	animation: v7-comet 3.2s var(--ease-expo) infinite;
+	will-change: transform, opacity;
+}
+
+/* The rig parks its rAF loop when a handoff converges; the indicator's loops follow
+   it, on the same [data-v*-idle] idiom V6 already uses for .v6-march/.v6-hub/
+   .v6-marquee. Nothing is removed — a paused keyframe resumes on its own phase the
+   moment the camera wakes, so a reader who stopped scrolling is not charged frames
+   for a HUD that is not going anywhere. */
+[data-v7-rail][data-v7-motion='idle'] [data-v7-tick],
+[data-v7-rail][data-v7-motion='idle'] [data-v7-bead]::after {
+	animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/* The global kill-switch at the top of this file loses to these rules on
+	   specificity (an `animation` shorthand on an attribute selector outranks `*`),
+	   so the rail's loops are settled here with the same declarations the backstop
+	   uses everywhere else — the wave snaps to rest instead of looping. The
+	   indicator itself stays, which is what brief §3.11 asks for. */
+	[data-v7-tick],
+	[data-v7-bead]::after {
+		animation-duration: 0.001ms !important;
+		animation-delay: 0ms !important;
+		animation-iteration-count: 1 !important;
+	}
+}
+
+/* The rail's page ticks inhale on staggered phases, so the indicator reads as one
+   travelling wave rather than a static ladder. */
+@keyframes v7-breathe {
+	0%,
+	100% {
+		opacity: 0.32;
+		transform: scaleX(0.62);
+	}
+	50% {
+		opacity: 0.66;
+		transform: scaleX(1);
+	}
+}
+
+@keyframes v7-focus {
+	0%,
+	100% {
+		opacity: 0.85;
+		transform: scaleX(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scaleX(1.28);
+	}
+}
+
+/* HrBand's comet language, reused: the bead carries a halo that opens and closes
+   as it travels the rail. Drawn on the bead's ring element, whose only animated
+   properties are the two the compositor owns. */
+@keyframes v7-comet {
+	0%,
+	100% {
+		opacity: 0.9;
+		transform: scale(1);
+	}
+	55% {
+		opacity: 0;
+		transform: scale(3.4);
+	}
 }
