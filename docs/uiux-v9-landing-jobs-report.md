@@ -234,3 +234,62 @@ looser one.
 Screenshots: `_lh/v10_stats/stats-art.png` (working tree) and `_lh/v10_stats_live/stats-art.png`
 (production) — no box, no grid patch, no hairline, a short accent rule under each figure and four
 legible two-line captions; `_lh/v9_regress/*-art.png` for the four V9 jobs on this tree.
+
+## 10. V11 — the edge rail stops being a rainbow, the nav word gains weight (owner ruling 2026-10-13)
+
+Two screenshots, one instruction, "under 10 mins": the vertical line that runs beside the Product
+pages had to stop being colourful and match the theme (blue on dark), and the nav word of the
+section being read had to go bold.
+
+**What the line was.** Not the V7 page indicator (that one is `hidden lg:block` and already
+monochrome — a DOM sweep at the owner's own viewport width ruled it out). It is `.v5-thread`, the
+fixed 2px scroll-progress rail at `right: 1.4%`, whose fill carried
+`linear-gradient(180deg, var(--accent), var(--danger) 50%, var(--success))`: blue → coral → green
+down the edge of a black page.
+
+**The change.** Two lines, two files:
+
+- `.v5-thread-fill` now runs `color-mix(in srgb, var(--accent) 42%, transparent)` → `var(--accent)`
+  — the theme's own blue deepening as the page travels, over the unchanged dark track. The
+  animation is untouched: the fill is still `inset: 0` with `transform-origin: top`, driven by the
+  same `scaleY`, so the rail still draws down as progress; only its palette changed. The three
+  `.v5-thread-mark` dots and the `:hover` brightness lift are byte-identical.
+- The active nav link gains `font-bold` alongside its existing `text-text`. The travelling
+  underline is placed from the link's measured box in an effect keyed on `active`, so it re-reads
+  `offsetLeft`/`offsetWidth` after the weight lands and keeps tracking the wider word.
+
+**Verification — `_lh/v11-rail-nav.mjs` 9/9**, ART `:3000` against production as the can-fail
+control (which still carried the rainbow and a 400-weight word at the moment of the run), both
+arms driven by the owner's own gesture — a click on the nav word — and arriving at the identical
+`scrollY` 8521:
+
+| reading                     | ART (:3000)                                                         | CTRL (live, pre-push)                                                     |
+| --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| rail `background-image`     | `linear-gradient(color(srgb .357 .486 .98 / .42), rgb(91,124,250))` | `linear-gradient(rgb(91,124,250), rgb(224,112,106) 50%, rgb(70,179,125))` |
+| active nav word weight      | `700`                                                               | `400`                                                                     |
+| bold words in the row       | 1 (`Product:700`, four at 400)                                      | 0                                                                         |
+| marker vs link box          | x 666 = 666, width 53 vs 54                                         | —                                                                         |
+| fill painted height / marks | 396px of a 900px track, 3 × `rgb(91,124,250)`                       | 396px, identical marks — nothing but the palette moved                    |
+
+**Deployed.** Private `origin`: `636748f` (source) + `47a61a0` (logs). Public
+`Mushahid-Ahmed/AgentOS` `main`: `72aa37b`, the same two paths (+13/−2), pushed by explicit URL.
+The values-based scan returned 0 leaks over 13 added lines / 7 secrets, 2 staged paths, 0 banned
+paths.
+
+**Live re-measurement — `_lh/v11-live-gates.mjs` 10/10 green.** The control is temporal: the
+pre-push `rows.CTRL` from the sweep above, since production no longer contains the old build. The
+deploy canary is the compiled stylesheet, not the HTML — the rail's class name never changed, so
+only the rule body tells the builds apart, and the pipeline splits it into a `var(--accent)`
+fallback plus an `@supports (color: color-mix(in lab, red, red))` block carrying the real
+`color-mix`. The gate scans the region after `.v5-thread-fill` for that block and for any surviving
+`--danger`; it matched on the first poll after the build landed. Live then read the blue gradient,
+`Product:700` with four words at 400, the marker on the bolder word, the same 396px fill and the
+same three accent dots, with 0 page errors.
+
+**Regressions on the deployed page:** `_lh/v10-stats.mjs --live-check` **15/15** and
+`_lh/v9-live-gates.mjs` **14/14** — the stats strip and the four V9 removals are unaffected.
+
+Screenshots: `_lh/v11_rail/nav-rail-{art,ctrl}.png` and `rail-{art,ctrl}.png` (full page and the
+right-edge crop, both arms), `_lh/v11_rail_live/*` (production), and `_lh/v11_rail/nav-live.png` —
+the nav row itself at Product, brought back on screen with one wheel tick up, showing the bold
+word and its underline.
