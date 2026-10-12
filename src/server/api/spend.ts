@@ -24,7 +24,7 @@ import {
 
 const micro = (value: bigint | null): number | null => (value == null ? null : Number(value))
 
-export async function getSpendAndUsage(): Promise<SpendAndUsage> {
+export async function getSpendAndUsage(userId: string): Promise<SpendAndUsage> {
 	const [usageRows, runRows, benchRuns, benchResultSums, routeRows, spentTonight] =
 		await Promise.all([
 			db.aiUsage.findMany({
@@ -38,7 +38,11 @@ export async function getSpendAndUsage(): Promise<SpendAndUsage> {
 					createdAt: true
 				}
 			}),
+			// Ownership-scoped: this row set carries `query`, the user's own prompt text.
+			// The cost/token rollups below stay account-wide because the spend caps they
+			// enforce are account-wide, and they expose no user content.
 			db.agentRun.findMany({
+				where: { userId },
 				select: {
 					id: true,
 					query: true,

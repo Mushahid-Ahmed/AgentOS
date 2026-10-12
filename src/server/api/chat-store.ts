@@ -52,6 +52,10 @@ export type PersistedRoute = {
  * streams; it just isn't saved).
  */
 export async function persistUserTurn(input: {
+	// The verified caller, stamped on the conversation this turn creates. Every later
+	// history read filters on this column, so a row written without it would be
+	// invisible to the person who just wrote it.
+	userId: string
 	conversationId: string | null
 	messages: Array<{ role: 'user' | 'assistant'; content: string }>
 }): Promise<bigint | null> {
@@ -61,19 +65,28 @@ export async function persistUserTurn(input: {
 
 		if (input.conversationId) {
 			const id = BigInt(input.conversationId)
-			// Write first, don't ask permission. The previous shape read the
-			// conversation back before inserting, which put a full cross-region
-			// round trip (~1.8s) in front of every chat turn just to find out whether
-			// the thread still exists. `messages.conversation_id` carries a real FK
-			// (20260930135431_add_jev_swarm_persistence), so Postgres already knows: a
-			// deleted thread rejects the insert with P2003, which is the same signal
-			// the probe returned as `existing === null`. Any other failure rethrows to
-			// the catch below.
+			// Ownership and the write share ONE round trip. A prior turn's thread can
+			// belong to somebody else — the client sends the id, it is not a proof —
+			// so the same statement that would have been a plain existence probe
+			// (`updatedAt` touch) is scoped by owner, and it overlaps the insert
+			// instead of preceding it. `messages.conversation_id` carries a real FK,
+			// so a deleted thread rejects the insert with P2003 — the same signal the
+			// old read-back returned as `existing === null`.
+			const touch = db.conversation.updateMany({
+				where: { id, userId: input.userId },
+				data: { updatedAt: new Date() }
+			})
 			try {
-				await db.message.create({
-					data: { conversationId: id, role: 'user', content: lastUser.content }
-				})
-				return id
+				const [owned, message] = await Promise.all([
+					touch,
+					db.message.create({
+						data: { conversationId: id, role: 'user', content: lastUser.content }
+					})
+				])
+				if (owned.count > 0) return id
+				// The thread exists but is not the caller's. Rewind the write so no
+				// foreign thread gains a message, then start the caller their own.
+				await db.message.delete({ where: { id: message.id } })
 			} catch (error) {
 				if (!isMissingConversation(error)) throw error
 				// The client pointed at a thread that no longer exists; start a fresh
@@ -84,6 +97,7 @@ export async function persistUserTurn(input: {
 		const firstUser = input.messages.find((m) => m.role === 'user')
 		const conversation = await db.conversation.create({
 			data: {
+				userId: input.userId,
 				title: deriveTitle(firstUser?.content ?? lastUser.content),
 				messages: {
 					create: input.messages.map((m) => ({ role: m.role, content: m.content }))

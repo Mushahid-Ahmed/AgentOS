@@ -24,8 +24,13 @@ const LIST_LIMIT = 100
 // what the user saw in the moment, rather than inventing a distribution.
 const EMPTY_PROBABILITIES: Record<ModelLabel, number> = { claude: 0, gpt: 0, gemini: 0 }
 
-export async function listConversations(): Promise<ListConversationsResponse> {
+export async function listConversations(userId: string): Promise<ListConversationsResponse> {
 	const rows = await db.conversation.findMany({
+		// Ownership filter, not a nicety: without it every signed-in user gets
+		// every other user's threads. A NULL user_id (the 30 rows written before
+		// the column existed) matches no uuid, so legacy history is served to
+		// nobody rather than to everyone.
+		where: { userId },
 		orderBy: { updatedAt: 'desc' },
 		take: LIST_LIMIT,
 		select: {
@@ -56,9 +61,14 @@ function toProbabilities(value: unknown): Record<ModelLabel, number> {
 	return out
 }
 
-export async function getConversation(id: string): Promise<GetConversationResponse> {
-	const conversation = await db.conversation.findUnique({
-		where: { id: BigInt(id) },
+export async function getConversation(
+	userId: string,
+	id: string
+): Promise<GetConversationResponse> {
+	// findFirst with the owner in the predicate, so another user's id answers 404
+	// — a separate 403 would confirm the row exists, which is its own leak.
+	const conversation = await db.conversation.findFirst({
+		where: { id: BigInt(id), userId },
 		include: { messages: { orderBy: { createdAt: 'asc' }, include: { routeEvent: true } } }
 	})
 	if (!conversation) throw new AppError('Conversation not found', { status: 404 })
@@ -87,8 +97,7 @@ export async function getConversation(id: string): Promise<GetConversationRespon
 			const completionTokens = ev.completionTokens
 			const cost = ev.costMicroUsd != null ? Number(ev.costMicroUsd) / 1_000_000 : null
 			const estimatedCost =
-				(promptTokens * model.promptPricePer1M +
-					completionTokens * model.completionPricePer1M) /
+				(promptTokens * model.promptPricePer1M + completionTokens * model.completionPricePer1M) /
 				1_000_000
 			telemetry = {
 				model: { label: model.label, slug: model.slug, displayName: model.displayName },
@@ -123,9 +132,11 @@ export async function getConversation(id: string): Promise<GetConversationRespon
 	}
 }
 
-export async function deleteConversation(id: string): Promise<{ ok: true }> {
-	// Cascade removes messages and route_events (schema onDelete: Cascade).
-	const result = await db.conversation.deleteMany({ where: { id: BigInt(id) } })
+export async function deleteConversation(userId: string, id: string): Promise<{ ok: true }> {
+	// Cascade removes messages and route_events (schema onDelete: Cascade). The
+	// owner is part of the delete key: count 0 means either no such row or not
+	// yours, and both answer 404.
+	const result = await db.conversation.deleteMany({ where: { id: BigInt(id), userId } })
 	if (result.count === 0) throw new AppError('Conversation not found', { status: 404 })
 	return { ok: true }
 }

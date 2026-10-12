@@ -19,20 +19,32 @@ const agentRunInputSchema = z.object({
 
 export async function POST(req: NextRequest) {
 	let query: string
+	let userId: string
 	try {
 		// Budget + session before the body is read or a token is spent.
-		await guardStream(req, { scope: 'launch', requireUser: true, auditAction: 'agentos_run' })
+		const guard = await guardStream(req, {
+			scope: 'launch',
+			requireUser: true,
+			auditAction: 'agentos_run'
+		})
+		// requireUser makes guardStream throw on no session, so this is the verified
+		// id from proxy.ts — the owner the run row is stamped with.
+		userId = guard.userId as string
 		const raw = await req.json().catch(() => ({}))
 		query = agentRunInputSchema.parse(raw).query
 	} catch (error) {
 		const guarded = guardResponse(error)
 		if (guarded) return guarded
 		if (error instanceof z.ZodError) {
-			return NextResponse.json({ error: 'Invalid request', issues: error.flatten() }, { status: 400 })
+			return NextResponse.json(
+				{ error: 'Invalid request', issues: error.flatten() },
+				{ status: 400 }
+			)
 		}
 		const { userMessage, status } = captureError(error)
 		return NextResponse.json({ error: userMessage }, { status })
 	}
 
-	return agentRunStreamResponse(query)
+	// guardStream already refused anything with no session, so userId is set.
+	return agentRunStreamResponse(query, userId as string)
 }

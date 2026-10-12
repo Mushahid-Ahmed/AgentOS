@@ -551,3 +551,72 @@ branch: `message.create` → P2003 → `conversation.create`, new id returned, z
 Projected off the critical path: **~13.0 s per 6-step AgentOS run** and **~3.24 s per chat
 turn**. The standing gate `scripts/verify-scale-security.mts` was re-run on the same tree:
 8/8, cost of one enforced request median 1622 ms (baseline 1779 ms).
+
+## 19. Per-user history: ownership columns + predicates in the API layer
+
+**Decision.** Chat threads, AgentOS runs and the spend panel's per-run list are now keyed to
+the signed-in user. `conversations` and `agent_runs` each gained `user_id uuid` (nullable) with
+a `[user_id, <timestamp>]` index; every read that returns user content filters on it, every
+create stamps it, and a route with no verified identity throws 401 instead of reading.
+
+**Why this was not a middleware fix.** The header check from §2–§4 proves *who* called; it never
+limited *what* they could read. `listConversations` was `db.conversation.findMany({orderBy …})`
+with no predicate — and `conversations` had no column that could hold an owner. Same for
+`agent_runs`, same for `getRunReplay(id)`, `getConversation(id)` and `deleteConversation(id)`:
+any signed-in user could enumerate, open, delete, and continue every other user's threads, and
+`/api/spend` returned the `query` text of every run in the database. RLS could not have closed
+this either: Prisma connects as the table owner, not through PostgREST, so `RLS ON / no
+policies` (already in place) is a backstop for a *different* client, not the enforcement point.
+Enforcement belongs in the API/action layer, exactly as `agents.md` states.
+
+**How the hot path stayed fast.** §18 cut the user turn to one round trip by removing the
+existence read. Ownership needed a proof of "this thread is mine" without buying that round trip
+back, so the scoped `conversation.updateMany({where: {id, userId}})` runs **concurrently** with
+`message.create` in the same `Promise.all`: `count > 0` means ours, `count === 0` means the
+message we just wrote is deleted again and a fresh, caller-owned thread is created. Attack and
+deleted-thread paths cost an extra trip; the normal path costs zero. Cross-user ids answer 404,
+never 403, so a thread's existence is not leaked to someone who does not own it.
+
+**Benchmark rows have no owner.** `agentRunStreamResponse(query, null)` from
+`src/server/agentos-benchmark/setups.ts`: a benchmark run is a measurement of the engine, not a
+person's history, so a `NULL` owner keeps all 24 tasks out of every user's run list. The
+predicate is a uuid equality, so `NULL` matches nothing — deny by default, in both directions.
+
+**Legacy history: visible to nobody.** 30 conversations and all 83 pre-existing `agent_runs`
+were written before an owner column existed and stay `NULL`. They are deliberately served to no
+one rather than guessed at: the titles mix the owner's real threads with weeks of harness
+probes, and attributing them to one account would show that account other people's prompts —
+the same bug with the sign reversed. Nothing is deleted; recovery is one statement per row the
+owner recognises (`UPDATE conversations SET user_id = '<their uuid>' WHERE id = …`).
+
+**Out-of-band DDL, and what to do when CI's migration lands.** Migrations are CI-generated
+(`prisma/schema/migrations/README.md`), and the cross-region `migrate diff` I ran to *obtain*
+the SQL timed out twice, so the columns were applied to the shared database directly:
+
+```sql
+ALTER TABLE "conversations" ADD COLUMN IF NOT EXISTS "user_id" uuid;
+CREATE INDEX IF NOT EXISTS "conversations_user_id_updated_at_idx" ON "conversations"("user_id", "updated_at");
+ALTER TABLE "agent_runs" ADD COLUMN IF NOT EXISTS "user_id" uuid;
+CREATE INDEX IF NOT EXISTS "agent_runs_user_id_created_at_idx" ON "agent_runs"("user_id", "createdAt");
+```
+
+Consequence: today's live database already equals the schema, so the zero-drift gate
+(`migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema --exit-code`) is
+expected to pass, but a fresh replay of the migration history will not have these columns until
+the `migrations` job commits them. When it does, `prisma migrate deploy` against production will
+fail with `column "user_id" already exists`. The fix is `prisma migrate resolve --applied
+<generated_migration_name>` — the migration's effect is already in the database, and marking it
+applied is honest; dropping and re-adding the column is not, because it would erase the owners
+this change just wrote.
+
+**Evidence.** `scripts/verify-user-ownership.mts` runs against the live database with no paid
+call: 13/13 gates, each cross-user refusal paired with a positive control proving the other
+user's row exists and is readable by them (G3), the delete gate re-reading the row to prove the
+404 was a refusal and not a silent no-op (G5), a write-hijack gate that counts the victim's
+messages before and after (G6), and G10 asserting `requireUserId` throws 401 rather than
+returning a null that a caller might treat as "no filter". The harness earned its keep: the
+first `listRuns` edit landed the comment but not `where: { userId }`, and G7 failed — a
+predicated-by-docs bug that a code read would have waved through. Fixed in product code, not by
+loosening the gate. Probe rows are deleted at the end (G11); a follow-up sweep removed the 8
+threads from earlier runs of the same harness, so the table now holds 30 unowned rows and no
+test residue.

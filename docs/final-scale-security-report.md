@@ -389,3 +389,38 @@ Also recorded honestly: **CI on the public mirror is red for every commit today*
 `migrations` and `ai-models` pass — including `d9b794d`, which deployed successfully. Public
 CI is therefore not a deploy signal; private CI is the lane with credentials. This pass
 changed nothing about either.
+
+## 9. Per-user history (2026-10-12, after the owner's login test)
+
+The owner logged in and could see other people's conversations. That was not a broken session
+check — it was a missing data model: `conversations` and `agent_runs` had no owner column, so
+`findMany` returned the whole table to anyone signed in, and `getConversation(id)`,
+`deleteConversation(id)`, `getRunReplay(id)` and `/api/spend`'s per-run list were keyed on the
+id alone. Fixed in the API layer (decision §19): owner columns + indexes, `requireUserId(req)`
+on every history route, ownership predicates on every read that returns user content, 404 rather
+than 403 for someone else's id, and the write path stamping the owner — with the ownership proof
+folded into the single round trip §18 had just created, so the latency savings are intact.
+
+| Gate (live DB, no paid call) | Result |
+| --- | --- |
+| G1/G1b both threads persist and carry their owner | PASS |
+| G2/G3 list is scoped, and the other user still reads their own row | PASS |
+| G4 reading another user's thread by id | 404 |
+| G5 deleting another user's thread | refused, and the row re-read to prove it survived |
+| G6 continuing another user's thread | victim's message count unchanged, attacker redirected to a new thread |
+| G7/G8 AgentOS run list + replay are scoped | PASS |
+| G8b spend panel's per-run list (prompt text) is scoped | PASS |
+| G9 30 unowned legacy threads | visible to nobody; positive control proves they exist |
+| G10 `requireUserId` with no identity | 401, never an unfiltered read |
+| G11 probe rows removed | residue 0 |
+
+`tsc --noEmit` 0, ESLint 0 on the 17 touched files, `next build` exit 0. Prettier does not parse
+`.prisma` files, so the two schema edits are formatted by hand to match their neighbours.
+
+**Consequences the owner should know before logging in:** every thread and run written before
+this change has no owner, so the sidebar will look empty on the first login — including the
+owner's own old chats. Those 30 threads and 83 runs are untouched in the database; attributing
+any of them is one `UPDATE … SET user_id = '<uuid>' WHERE id = …` per row. And when CI's
+`migrations` job commits the generated migration, `migrate deploy` will fail on production with
+`column "user_id" already exists` because the DDL was applied out-of-band (§19); the correct
+response is `prisma migrate resolve --applied <name>`, never a drop-and-readd.

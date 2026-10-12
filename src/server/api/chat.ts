@@ -45,10 +45,7 @@ export const chatInputSchema = z.object({
 		.min(1)
 		.max(50),
 	// String form of the BigInt conversation id; omit to start a new thread.
-	conversationId: z
-		.string()
-		.regex(/^\d+$/, 'conversationId must be a numeric string')
-		.optional()
+	conversationId: z.string().regex(/^\d+$/, 'conversationId must be a numeric string').optional()
 })
 
 export type ChatInput = z.infer<typeof chatInputSchema>
@@ -115,7 +112,10 @@ const MAX_CHAT_CHAIN = 6
 // selection policy appends health-aware candidates (circuit-open models skipped,
 // measured reliability first) for cross-family depth. A catalog outage therefore
 // degrades gracefully to "just the family chain" rather than erroring the turn.
-async function resolveChatCandidates(model: ModelInfo, messages: ChatMessage[]): Promise<ChatCandidate[]> {
+async function resolveChatCandidates(
+	model: ModelInfo,
+	messages: ChatMessage[]
+): Promise<ChatCandidate[]> {
 	const candidates: ChatCandidate[] = familyDegradationChain(model.slug, model.displayName).map(
 		(link) => ({
 			slug: link.slug,
@@ -165,7 +165,7 @@ async function resolveChatCandidates(model: ModelInfo, messages: ChatMessage[]):
  * fails. Never rejects: an upstream failure is converted into a terminal
  * `error` event so the client always gets a clean end-of-stream.
  */
-export function chatStreamResponse(input: ChatInput): Response {
+export function chatStreamResponse(input: ChatInput, userId: string): Response {
 	const requestStartedAt = performance.now()
 
 	const stream = new ReadableStream<Uint8Array>({
@@ -190,6 +190,7 @@ export function chatStreamResponse(input: ChatInput): Response {
 				// so the Jev hop overlaps the database write instead of following it.
 				const routePromise = routeQuery(lastUser.content)
 				const conversationId = await persistUserTurn({
+					userId,
 					conversationId: input.conversationId ?? null,
 					messages: input.messages
 				})
@@ -338,7 +339,11 @@ export function chatStreamResponse(input: ChatInput): Response {
 						break
 					}
 					lastError = { message: outcome.error?.message ?? 'Upstream stream failed.' }
-					const kind = classifyFailure(outcome.error?.status ?? null, outcome.error?.message ?? '', {})
+					const kind = classifyFailure(
+						outcome.error?.status ?? null,
+						outcome.error?.message ?? '',
+						{}
+					)
 					if (outcome.emitted || !FAILOVER_WORTHY.has(kind)) break
 				}
 

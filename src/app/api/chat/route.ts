@@ -15,9 +15,13 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
 	let input: z.infer<typeof chatInputSchema>
+	let userId: string
 	try {
 		// Budget + session before the body is read or a token is spent.
-		await guardStream(req, { scope: 'chat', requireUser: true })
+		const guard = await guardStream(req, { scope: 'chat', requireUser: true })
+		// requireUser makes guardStream throw on no session, so this is the verified
+		// id from proxy.ts — the value every history read is scoped by.
+		userId = guard.userId as string
 		const raw = await req.json().catch(() => ({}))
 		input = chatInputSchema.parse(raw)
 	} catch (error) {
@@ -33,5 +37,6 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: userMessage }, { status })
 	}
 
-	return chatStreamResponse(input)
+	// guardStream already refused anything with no session, so userId is set.
+	return chatStreamResponse(input, userId as string)
 }

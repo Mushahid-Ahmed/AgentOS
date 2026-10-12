@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
+import { requireUserId } from '@/server/api/identity'
 import { getRunReplay } from '@/server/agentos/replay'
 
 // One AgentOS run's reconstructed wire-event stream for replay (M7 / D6). The path
@@ -22,10 +23,10 @@ function toResponse(error: unknown): NextResponse {
 	return NextResponse.json({ error: userMessage }, { status })
 }
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
+export async function GET(req: NextRequest, ctx: Ctx) {
 	try {
 		const { id } = paramsSchema.parse(await ctx.params)
-		const replay = await getRunReplay(BigInt(id))
+		const replay = await getRunReplay(requireUserId(req), BigInt(id))
 		if (!replay) {
 			return NextResponse.json({ error: 'Run not found' }, { status: 404 })
 		}

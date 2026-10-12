@@ -39,6 +39,10 @@ model AgentRun {
 	replans      Int      @default(0)
 	finalAnswer  String?  @map("final_answer")
 	error        String?
+	// The owning user (Supabase auth uid), nullable for the runs written before
+	// ownership existed. Same rule as conversations: reads are scoped by this
+	// column, so a NULL owner means the row is served to nobody.
+	userId       String?  @map("user_id") @db.Uuid
 
 	steps     AgentStep[]
 	decisions DecisionRecord[]
@@ -46,6 +50,7 @@ model AgentRun {
 	evidence  EvidenceRecord[]
 
 	@@index([createdAt])
+	@@index([userId, createdAt])
 	@@index([status])
 	@@map("agent_runs")
 }

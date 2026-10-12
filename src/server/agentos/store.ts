@@ -25,10 +25,11 @@ type Db = typeof db
 // Bus records decisions by run id, and the executor echoes it on every event).
 // The planning columns start as placeholders and are filled by setPlan once the
 // Decision Bus has decided.
-export async function createAgentRun(query: string): Promise<bigint> {
+export async function createAgentRun(query: string, userId: string | null): Promise<bigint> {
 	const run = await db.agentRun.create({
 		data: {
 			query,
+			userId,
 			status: 'planning',
 			taskType: 'pending',
 			tier: 'pending',

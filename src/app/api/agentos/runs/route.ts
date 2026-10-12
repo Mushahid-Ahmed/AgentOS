@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createApiRoute } from '@/server/api/route-factory'
+import { requireUserId } from '@/server/api/identity'
 import { listRuns } from '@/server/agentos/replay'
 
 // AgentOS run history for the D6 replay picker (M7). Zero-logic adapter over the
@@ -11,5 +12,5 @@ export const dynamic = 'force-dynamic'
 
 export const GET = createApiRoute({
 	input: z.object({}),
-	handler: () => listRuns()
+	handler: (_input, req) => listRuns(requireUserId(req))
 })

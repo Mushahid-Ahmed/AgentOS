@@ -19,9 +19,16 @@ model Conversation {
 	createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 	updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 	title     String
+	// The owning user (Supabase auth uid). Nullable because the column arrived
+	// after 30 threads were already written with no owner — those legacy rows
+	// stay NULL and are deliberately visible to nobody: a read is scoped by
+	// `userId`, so an unowned row can never be served to anyone. Every new
+	// conversation stamps its creator at insert time.
+	userId    String?   @map("user_id") @db.Uuid
 	messages  Message[]
 
 	@@index([updatedAt])
+	@@index([userId, updatedAt])
 	@@map("conversations")
 }
 

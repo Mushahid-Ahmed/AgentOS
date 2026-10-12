@@ -100,7 +100,7 @@ function createEvidenceFinalizer(evidence: EvidencePort): Finalizer {
  * Never rejects: an upstream failure becomes a terminal `error` event so the
  * client always gets a clean end-of-stream.
  */
-export function agentRunStreamResponse(query: string): Response {
+export function agentRunStreamResponse(query: string, userId: string | null): Response {
 	// Hoisted out of start() so the cancel() handler (client disconnect) can mark
 	// the run terminal too. Null until createAgentRun returns the row id.
 	let runRowId: bigint | null = null
@@ -134,7 +134,7 @@ export function agentRunStreamResponse(query: string): Response {
 					return
 				}
 
-				const id = await createAgentRun(query)
+				const id = await createAgentRun(query, userId)
 				runRowId = id
 				const runId = id.toString()
 

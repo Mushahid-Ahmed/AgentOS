@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
+import { requireUserId } from '@/server/api/identity'
 import { deleteConversation, getConversation } from '@/server/api/conversations'
 
 // Load / delete a single conversation. createApiRoute parses input from the
@@ -27,17 +28,17 @@ function toResponse(error: unknown): NextResponse {
 	return NextResponse.json({ error: userMessage }, { status })
 }
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
+export async function GET(req: NextRequest, ctx: Ctx) {
 	try {
-		return NextResponse.json(await getConversation(await resolveId(ctx)))
+		return NextResponse.json(await getConversation(requireUserId(req), await resolveId(ctx)))
 	} catch (error) {
 		return toResponse(error)
 	}
 }
 
-export async function DELETE(_req: NextRequest, ctx: Ctx) {
+export async function DELETE(req: NextRequest, ctx: Ctx) {
 	try {
-		return NextResponse.json(await deleteConversation(await resolveId(ctx)))
+		return NextResponse.json(await deleteConversation(requireUserId(req), await resolveId(ctx)))
 	} catch (error) {
 		return toResponse(error)
 	}

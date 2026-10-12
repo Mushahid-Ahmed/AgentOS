@@ -97,8 +97,12 @@ function rowToSummary(row: {
 }
 
 /** The replay picker: recent runs, newest first. */
-export async function listRuns(limit = 50): Promise<ListRunsResponse> {
+export async function listRuns(userId: string, limit = 50): Promise<ListRunsResponse> {
 	const rows = await db.agentRun.findMany({
+		// Ownership first. Without this predicate every signed-in user reads every other
+		// user's run history; a NULL user_id (a run written before the column
+		// existed) matches no uuid, so legacy runs are served to nobody.
+		where: { userId },
 		orderBy: { createdAt: 'desc' },
 		take: Math.max(1, Math.min(100, limit)),
 		select: RUN_SELECT
@@ -150,7 +154,7 @@ function reconstructTeam(
  * keep emission order). A gate decision therefore lands right before the replan it
  * triggered, exactly as it streamed live.
  */
-export async function getRunReplay(id: bigint): Promise<RunReplayResponse | null> {
+export async function getRunReplay(userId: string, id: bigint): Promise<RunReplayResponse | null> {
 	// One round trip for the whole page, not two. These four reads are independent by
 	// row (all keyed by this run id), so awaiting the run lookup before starting the
 	// other three put a full cross-region RTT in front of a replay that is entirely a
@@ -158,7 +162,7 @@ export async function getRunReplay(id: bigint): Promise<RunReplayResponse | null
 	// and come back empty, which is the cheaper way to answer a request that is a 404
 	// anyway.
 	const [run, decisions, events, evidence] = await Promise.all([
-		db.agentRun.findUnique({ where: { id }, select: { ...RUN_SELECT, plan: true } }),
+		db.agentRun.findFirst({ where: { id, userId }, select: { ...RUN_SELECT, plan: true } }),
 		db.decisionRecord.findMany({ where: { runId: id }, orderBy: { id: 'asc' } }),
 		db.agentEvent.findMany({ where: { runId: id }, orderBy: { seq: 'asc' } }),
 		db.evidenceRecord.findMany({ where: { runId: id }, orderBy: { id: 'asc' } })

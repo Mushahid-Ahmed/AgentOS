@@ -126,10 +126,15 @@ async function geminiComplete(
 // ---- Setup A: single LLM, no retrieval ------------------------------------
 
 async function baselineA(task: BenchmarkTask): Promise<SetupOutcome> {
-	const { text, costMicroUsd } = await geminiComplete('agentos_bench_a', ANSWERER_SYSTEM, task.task, {
-		setup: 'baseline_a',
-		taskId: task.id
-	})
+	const { text, costMicroUsd } = await geminiComplete(
+		'agentos_bench_a',
+		ANSWERER_SYSTEM,
+		task.task,
+		{
+			setup: 'baseline_a',
+			taskId: task.id
+		}
+	)
 	if (!text) return failure('empty_completion', costMicroUsd, 0, 1)
 	return outcome({ ok: true, answer: text, costMicroUsd, modelCalls: 1 })
 }
@@ -148,7 +153,8 @@ async function baselineB(task: BenchmarkTask): Promise<SetupOutcome> {
 	const { text: research, citations } = readResearchOutput(tool.output)
 	const urls = citations.map((c) => c.url)
 	const distinctUrls = new Set(urls).size
-	const sourceBlock = urls.length > 0 ? `\n\nSources:\n${urls.map((u, i) => `[${i + 1}] ${u}`).join('\n')}` : ''
+	const sourceBlock =
+		urls.length > 0 ? `\n\nSources:\n${urls.map((u, i) => `[${i + 1}] ${u}`).join('\n')}` : ''
 	const user = [
 		`Task:\n${task.task}`,
 		'',
@@ -163,7 +169,14 @@ async function baselineB(task: BenchmarkTask): Promise<SetupOutcome> {
 	})
 	const totalCost = toolCost + costMicroUsd
 	if (!text) return failure('empty_completion', totalCost, 1, 1)
-	return outcome({ ok: true, answer: text, citations: distinctUrls, costMicroUsd: totalCost, modelCalls: 1, toolCalls: 1 })
+	return outcome({
+		ok: true,
+		answer: text,
+		citations: distinctUrls,
+		costMicroUsd: totalCost,
+		modelCalls: 1,
+		toolCalls: 1
+	})
 }
 
 // ---- Setup C: fixed multi-agent DAG on the real Orchestra engine ----------
@@ -330,7 +343,9 @@ async function agentosSetup(task: BenchmarkTask): Promise<SetupOutcome> {
 	// routing, MCP tools, RAG evidence hub, D4 gates and D5 replan. We only consume its
 	// output stream and fold it through the D6 reducer, so setup-D metrics never drift
 	// from what the UI shows for the same run.
-	const response = agentRunStreamResponse(task.task)
+	// null owner: a benchmark row belongs to no signed-in user, so it is never
+	// served by the per-user run history (same rule as the pre-ownership legacy rows).
+	const response = agentRunStreamResponse(task.task, null)
 	const frames = await collectRunFrames(response)
 	const derived = deriveAgentosOutcome(frames)
 	return outcome({
@@ -367,7 +382,12 @@ export async function runSetup(setup: AgentosSetup, task: BenchmarkTask): Promis
 	const startedAt = performance.now()
 	try {
 		const result = await RUNNERS[setup](task)
-		return { ...result, taskId: task.id, setup, latencyMs: Math.round(performance.now() - startedAt) }
+		return {
+			...result,
+			taskId: task.id,
+			setup,
+			latencyMs: Math.round(performance.now() - startedAt)
+		}
 	} catch (error) {
 		const latencyMs = Math.round(performance.now() - startedAt)
 		const message = error instanceof Error ? error.message : 'setup_failed'
