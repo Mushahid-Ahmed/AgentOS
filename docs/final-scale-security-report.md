@@ -351,28 +351,41 @@ recorded — move the Supabase primary (or the Vercel region) so they share a co
 the KV/Redis counter behind `enforceRateLimit` (§2) — plus reducing statements-per-request
 further, which now has fewer places to hide than it did.
 
+
 ### 8.4 Deploy status for this pass (recorded, not assumed)
 
-Private `main` = `e5ed371` (+ `fdaa5c8` logs), public `main` = `3b89909`, re-pushed as
-`1e43b02`. **The scalability build is not live yet**: Vercel's git integration has not
-created a `Production` deployment for either commit — GitHub still reports the newest
-`Production` deployment as `d9b794d` (the security build, created 14:25Z), 30+ minutes after
-both pushes. `_lh/scale-live-gates.mjs` proves it with a gate that is designed to fail on
-exactly this: `G0 the pushed commit is what Production is deploying` FAILs with
-`sha=d9b794d state=success (expected 3b89909)`, while the seven gates that measure the
-serving deployment all pass — 8/8 security headers, `/` 200, `/login` 200, `/app` 307 →
-`/login?next=%2Fapp`, 4/4 `/api` 401, forged `x-agentos-user-id` → 401, `/_next/image` →
-400 `INVALID_IMAGE_OPTIMIZE_REQUEST` with no image bytes, and 50 concurrent unauthenticated
-API requests at p50 329 ms / p95 820 ms with **zero 5xx**.
+Private `main` = `e5ed371` (+ `fdaa5c8` logs, `b6a08e6` docs), public `main` = `3b89909`
+→ `1e43b02` → `08a4901`. Vercel's git integration **lagged ~26 minutes** on this push where
+it took ~2 minutes on the security commits: at 15:37Z the newest `Production` deployment was
+still `d9b794d`, and the `Production` deployment object for `3b89909` appeared at 15:46Z.
 
-So: production today is the hardened security build, healthy under load, running the OLD
-persistence code. Nothing here claims the round-trip savings are live. Owner action to close
-it: redeploy `Mushahid-Ahmed/AgentOS@1e43b02` from the Vercel dashboard (or re-check the
-repo's Git Integration — the previous push at 14:23 did produce a `Production` deployment
-within two minutes, this one produced none), then re-run
-`node _lh/scale-live-gates.mjs https://agentos-theta-teal.vercel.app 1e43b02` and expect 8/8.
+`_lh/scale-live-gates.mjs <base> <expected-sha>` was run four times against
+`https://agentos-theta-teal.vercel.app`:
 
-Also recorded honestly: **CI on the public mirror is red for every commit today**, including
-`d9b794d` which deployed successfully — `check`/`build`/`e2e`/`deploy` fail there because the
-public repo carries no secrets, while `migrations` and `ai-models` pass. CI on the private
-repo is the lane that has secrets. This pass changed nothing about either.
+| run | G0 deployment marker | the seven serving-behaviour gates |
+| --- | --- | --- |
+| 15:23Z (before the marker gate existed) | n/a — buildId probe found only Next 16/Turbopack's literal `immutable` asset segment, so it proves nothing about which build is live | 8/8 |
+| 15:37Z | **FAIL** — `sha=d9b794d state=success (expected 3b89909)`, correctly reporting that the pushed tree was not live | 7/7 |
+| 15:49Z | unreadable — `sha=-`, and `/rate_limit` confirms the unauthenticated GitHub quota for this IP was exhausted (0 remaining) | 7/7 |
+| 15:53Z | unreadable again — same `sha=-`, quota still exhausted; the marker becomes readable after the hourly GitHub reset | 7/7 |
+
+So the deployment for the pushed commit exists in the `Production` environment, and the live
+app is healthy: 8/8 security headers on `/`, `/` 200, `/login` 200, `/app` 307 →
+`/login?next=%2Fapp`, 4/4 `/api` routes 401, forged `x-agentos-user-id` still 401,
+`/_next/image` → 400 `INVALID_IMAGE_OPTIMIZE_REQUEST` with no image bytes, and 50 concurrent
+unauthenticated API requests at p50 786 ms / p95 865 ms with **zero 5xx**.
+
+**What is NOT claimed:** that the round-trip savings were observed in production. Every gate
+that could be run anonymously answers identically on the old and the new build — the changed
+code only runs inside a chat turn, a run save or a replay, all behind the owner's
+`@supabase/ssr` login. The production proof of §8 is a logged-in run of chat + AgentOS +
+replay on `agentos-theta-teal.vercel.app`, which is the same open item §3 already lists.
+The deployment for `3b89909` is visible by sha in the Vercel dashboard at zero API cost;
+`scale-live-gates.mjs` G0 closes anonymously once the hourly GitHub reset lands (the 15:53Z
+re-run answered the other seven gates: `/api` p50 dropped to 329 ms, p95 794 ms, 5xx 0).
+
+Also recorded honestly: **CI on the public mirror is red for every commit today** —
+`check`/`build`/`e2e`/`deploy` fail there because that repo carries no secrets, while
+`migrations` and `ai-models` pass — including `d9b794d`, which deployed successfully. Public
+CI is therefore not a deploy signal; private CI is the lane with credentials. This pass
+changed nothing about either.
