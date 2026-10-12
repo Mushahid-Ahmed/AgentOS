@@ -115,3 +115,21 @@ Not done, explicitly: `llm_logs` table (`ai_usage` already is that ledger), TOTP
 server-side per-account login lockout (no server login action exists), a DOM sanitiser
 (no HTML injection surface exists), sliding windows instead of fixed windows, an SSE route
 factory so a future streaming route cannot skip the guard, Vercel KV for counters.
+
+## 6. Live production gates (after the deploy, 2026-10-12)
+
+Published to `Mushahid-Ahmed/AgentOS` `main` as `eb9c30d` (log-free tree, 33 paths,
+values-scan 7 values / 0 hits); Vercel git-deploy went live on
+`https://agentos-theta-teal.vercel.app` in ~60 s (`X-Vercel-Id: bom1::iad1::…`).
+
+| gate | live result |
+| --- | --- |
+| security headers on `/` | **8/8 present** (CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, COOP, CORP, HSTS `max-age=31536000; includeSubDomains; preload`) |
+| `/api/dashboard`, `/api/spend`, `/api/model-pool` (GET), `/api/chat`, `/api/agentos` (POST), anonymous | **401 on all five** |
+| `x-agentos-user-id` forged from the client | **401** — the edge header is not spoofable in production either |
+| `Cache-Control` on `/api/dashboard` | `private, max-age=15, stale-while-revalidate=60` |
+| page gate | `/app` → 307 `/login?next=%2Fapp`; `/login` → 200 |
+| deployed artifact ≡ verified local artifact | same structural signature on both HTML bodies: 61 `<path>`, 1 `<canvas>`, 11 `data-v7-page` (byte size differs by the build-time public keys only) |
+| live load, 50 concurrent × 100, `/api/dashboard` | **p50 710 ms, p95 1 188 ms, 0 errors, 100× 401** — the whole 401 path costs one edge function, no DB, no lambda SSR. Measured from this machine to a `bom1` edge, so it is dominated by the client's own RTT, not by the app |
+
+External grading (securityheaders.com) still needs a browser-side pass — see §5 step 2.
