@@ -116,8 +116,48 @@ and sits inside it on ART.
   transforms pages, so the check now compares the *scroll position* against an `offsetTop` target
   reached by trusted wheel events, and gate P1 fails the run if any shot missed.
 
-## 7. State at handoff
+## 7. State at handoff (superseded by §8)
 
 `:3000` (the owner's dev server), `:3400` and `:3500` left running and untouched; the `:3700`
 server started for this run was stopped. Nothing was deployed. Work is uncommitted on the working
 tree.
+
+## 8. Committed, pushed, deployed, and re-measured live (2026-10-13)
+
+The owner's go-ahead was "do itt faasstt and quick". The work is now `20598d0` + `460d79d` on
+`main` of the private repo, and `f499f1f` on `Mushahid-Ahmed/AgentOS` `main` — the log-free orphan
+tree, same eight paths, +225/−73, byte-identical to the committed source. Because the public repo
+is git-connected to Vercel, that push *is* the deploy.
+
+`_lh/v9-live-gates.mjs` re-ran the same probes against `https://agentos-theta-teal.vercel.app/`
+after the build landed: **14/14 green**. A live check has no second server to compare against —
+every other host on this machine also runs the new code — so the positive control is the *same
+alias measured by the same probe code before the push* (`rows.CTRL` of §4), and each claim is
+paired with the number that measurement returned:
+
+| gate | live now | pre-push control |
+| --- | --- | --- |
+| hero dotted-grid `<line>`s | 0 (group gone) | 15 in 1 group |
+| hero frame ornaments | 5 | 5 — only the patch came out |
+| non-hero (`evidence`) frame grid | 15 | 15 — untouched, per "only remove what I'm saying" |
+| `.v5-spot` samples with a painted background | 0 of 13 | 11, e.g. `color(srgb … / 0.06)` |
+| `.v5-spot` lift | `filter: brightness(1.1)` still applies | same |
+| sections/footers with a top border | 0 of 13 | 10 (`capabilities`, `evidence`, `benchmarks`, `faq`, `start`, `FOOTER`, …) |
+| worst pipeline-sub overflow | 0px over 5 rects × 37 on-screen samples | 52.2px |
+| sub copy | `researcher · critic ·` / `synthesizer` (letters identical to the control) | one line, overflowing |
+
+Production CSS confirms the artifact independently: the live stylesheet now ships
+`.v5-spot{filter:brightness(1.1);transition:filter var(--motion-base) var(--ease-out-soft)}` — the
+`background-color` and its transition entry are gone, the lift is not.
+
+Screenshots: `_lh/v9_live/01-hero-live.png` (no bottom-left patch; crosshair and edge ticks still
+drawn), `02-spotlight-live.png` (line lifted, no rectangle behind it), `03-pipeline-live.png`
+(*Dynamic team* subtitle wrapped inside the node card).
+
+Two things this run did **not** change: the `[V9][ProdLoop]` self-hosted `next start` defect of §6
+is still open (Vercel is unaffected — the alias serves 200 with 0 page errors), and the public
+repo's GitHub Actions suite fails exactly the same five jobs (`check`, `build`, `e2e`,
+`migrations`, `deploy`) on `f499f1f` as it did on its predecessor `7fbba7d`, so that breakage
+predates this push and is not a regression from it. Vercel deploys from the git connection, not
+from those jobs, which is why production moved.
+
