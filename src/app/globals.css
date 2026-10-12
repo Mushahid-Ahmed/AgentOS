@@ -76,15 +76,19 @@
 	--series-3: #6e6e78; /* dark-mid neutral — tertiary series */
 
 	/* V5 §3 data-flow line identity. Three lanes of the pipeline, each a
-	   gradient between two existing palette values; the two literals are the
-	   hero's own violet and sky, hoisted here so the V5 layers carry no colours
-	   of their own. Nothing above this line changes. */
-	--flow-input-a: var(--accent);
-	--flow-input-b: #7065e2;
-	--flow-route-a: var(--danger);
-	--flow-route-b: var(--warning);
-	--flow-evidence-a: var(--success);
-	--flow-evidence-b: #8abced;
+	   gradient between two existing palette values.
+	   Owner ruling 2026-10-13: the diagonal bundle is blue, white and black — the
+	   theme's own colours. The violet/coral/amber/green/sky pairs came out; the
+	   geometry, the three rhythm groups, the march and every opacity are untouched,
+	   so this is a palette change and not a new animation or a removed one. The
+	   ramp runs dark blue → accent → pale blue → near-white, all mixed from tokens
+	   so a theme value can never drift out of the bundle. */
+	--flow-input-a: color-mix(in srgb, var(--accent) 55%, var(--bg));
+	--flow-input-b: var(--accent);
+	--flow-route-a: var(--accent);
+	--flow-route-b: color-mix(in srgb, var(--accent) 42%, var(--text));
+	--flow-evidence-a: color-mix(in srgb, var(--accent) 22%, var(--text));
+	--flow-evidence-b: var(--text);
 
 	/* Pointer-follow sheen + grain tuneables for the dark canvas. */
 	--sheen-opacity: 0.16;
