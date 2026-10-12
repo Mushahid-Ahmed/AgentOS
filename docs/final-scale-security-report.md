@@ -63,7 +63,7 @@ security layer added none to the page path (`/` and `/login` are within 4% of th
 | --- | --- |
 | 100 concurrent, p95 < 500 ms, 0 errors | **PARTIAL** — met on the API path (646 ms, 0 errors vs 13.8 s, 95 errors); not met for SSR pages in a single-process local probe (see §2) |
 | securityheaders.com grade A/A+ | **NOT MEASURED** — impossible against `localhost`; the header set is dumped in `_lh/m13-http-proofs.txt` and is re-gradable on the live URL after deploy |
-| `npm audit` 0 high/critical | **NOT MET** — 29 findings (16 high, 3 critical), root cause `next@16.3.0 < 16.3.8`; deliberately not upgraded minutes before a production push (decision §8) |
+| `npm audit` 0 high/critical | **PARTIALLY MET — 29 → 10 findings, 0 outside `next`/`braces`** (second pass, §7). First pass left this NOT MET at 29 (16 high, 3 critical). All 19 transitive findings are now closed by `pnpm.overrides` (decision §13); the 9 that remain are `next@16.3.0` itself, which the owner declined to bump (decision §8), and 1 `braces` DoS for which upstream has published no fix at all (3.0.3 is the newest release). The two `next` criticals that describe a reachable network path are closed off at the edge instead: the image optimizer is denied (§7, decision §14) and `/api` requires a session |
 | all features still work | **PROVEN FOR THE EDGE PATHS, OPEN FOR AUTHENTICATED PATHS** — 401/307/200 behaviour, header application, rate limiting, audit writes and the spend aggregate all verified; the logged-in dashboard read, chat SSE stream and AgentOS run view could not be re-proven in this window because they need the owner's interactive login (`@supabase/ssr` auth is client-side). No code on those paths changed semantics — see §5 for the exact re-proof commands |
 | Lighthouse ≥ before (97) | **NOT RE-RUN** — the landing page's client code is byte-identical apart from an auth-form placeholder string; the only global change touching HTML responses is added response headers, which Lighthouse does not score. Bundle check G14 supports the claim; the harness in `_lh/` can close it in ~10 min |
 | zero paid model calls | **MET** |
@@ -133,3 +133,79 @@ values-scan 7 values / 0 hits); Vercel git-deploy went live on
 | live load, 50 concurrent × 100, `/api/dashboard` | **p50 710 ms, p95 1 188 ms, 0 errors, 100× 401** — the whole 401 path costs one edge function, no DB, no lambda SSR. Measured from this machine to a `bom1` edge, so it is dominated by the client's own RTT, not by the app |
 
 External grading (securityheaders.com) still needs a browser-side pass — see §5 step 2.
+
+---
+
+## 7. Second pass — full audit re-run and remediation (2026-10-12, after the deploy)
+
+The owner asked for the audit re-run, every vulnerability enumerated, and every threat
+blocked, with one constraint stated in the same breath: **no `next@16.3.0 → 16.3.8`**.
+
+### 7.1 The 29 findings, enumerated (pre-remediation)
+
+| package | count | severity | direct? | who pulls it | fixed by |
+| --- | --- | --- | --- | --- | --- |
+| `next` | 9 | 3 critical, 1 high, 4 moderate, 1 low | yes | app dependency | 16.3.3 / 16.3.6 / 16.3.8 only — **declined** |
+| `fast-uri` | 6 | 5 high, 1 moderate | no | `ajv 8.20.0` ← `@modelcontextprotocol/sdk`, and ← `schema-utils`/`webpack` in `@sentry/nextjs` | 3.1.8 |
+| `brace-expansion` | 6 | 3 high, 3 moderate | no | `minimatch`/`glob` (two majors in the tree: 1.1.18 and 5.0.9) | 1.1.21 and 5.0.12 |
+| `sharp` | 2 | 2 high | no | `next` (its image optimizer) | 0.35.5 |
+| `dompurify` | 2 | 2 low | no | `posthog-js 1.415.4` | 3.4.17 |
+| `deepmerge-ts` | 1 | high | no | `@prisma/config` ← `prisma 6.19.3` | 8.0.2 (major) |
+| `js-yaml` | 1 | high | no | eslint/prettier-tooling | 4.3.2 |
+| `braces` | 1 | high | no | `micromatch` (build/lint tooling) | **nothing — no release newer than 3.0.3 exists** |
+| `source-map-js` | 1 | high | no | `postcss` ← tailwind | 1.2.2 |
+
+Counts: `{"low":3,"moderate":7,"high":16,"critical":3}`. Not one was a direct dependency,
+which is why `pnpm update` alone could not move any of them.
+
+### 7.2 What was blocked
+
+- **19 transitive findings closed** by eight `pnpm.overrides` entries (decision §13). `pnpm
+  audit` now reports **10 findings: 3 critical, 1 high, 5 moderate, 1 low** — 9 in `next`, 1
+  in `braces`.
+- **`/_next/image` denied at the proxy** (decision §14, gate 12/12 in
+  `_lh/audit-imagegate.mjs`). That removes the reachable path behind the AVIF-decode critical
+  and the optimizer SSRF high, without a framework bump.
+- **`pnpm dev` pinned to 127.0.0.1** (decision §15). Before: the Windows dev server answered
+  200 on `192.168.<lan>:3000` — LAN-reachable, unauthenticated, on the version carrying the
+  windows-hosted RCE critical. After: refused.
+
+### 7.3 What stays open, and why
+
+| advisory | sev | what it is | status on this deployment |
+| --- | --- | --- | --- |
+| GHSA-p293-qw3h-jr36 | critical | Unauth RCE, **windows-hosted servers** | Prod is Vercel/Linux → not the affected topology. Local exposure closed by the loopback bind (§15); patch needs 16.3.3 |
+| GHSA-2xp9-vwfh-vxw4 | critical | Unauth RCE in Image Optimization via crafted AVIF | Endpoint denied at the proxy (§14); Vercel-side answer recorded in §7.4. Patch needs 16.3.3 |
+| GHSA-vcvr-r3jv-pc5j | critical | RCE in `next/og` `ImageResponse` | **No code path exists**: `ImageResponse`/`next/og` appears nowhere in `src`, `scripts` or `next.config.ts`, and there is no `/api/og` route. Patch needs 16.3.6 |
+| GHSA-cjq9-62q9-8jv4 | high | SSRF in Image Optimization | Same denial as above; additionally `images.remotePatterns` is unset, so a remote URL was already rejected (`'url' parameter is not allowed`, measured) |
+| GHSA-4jqv-mc3x-m676, GHSA-mcj8-r9mp-w47p | moderate | SSG/ISR cache poisoning, **self-hosted only** | Not self-hosted — Vercel serves these; the two per-user API feeds are `private` (decision §4) |
+| GHSA-3w37-wq28-93x7 | moderate | `use cache` fill can leak Draft Mode content | No Draft Mode usage in the app |
+| GHSA-f87g-xv8r-7p7x | moderate | Metadata-image route info disclosure via `dynamicParams` | Only metadata route is the static `/icon.svg` (200, measured); no dynamic metadata image route exists |
+| GHSA-39w2-rjm5-chcv | low | Dev-server MCP endpoint info disclosure | Dev-only surface; loopback bind (§15) means a same-host process only |
+| GHSA-vfj7-8cjw-p6xm (`braces`) | high | Stack exhaustion on deeply nested brace patterns | No upstream fix exists. Build/lint-time path only (`micromatch`), never fed attacker-controlled patterns in the request path |
+
+**The honest summary:** every finding that has a fix and does not require touching `next` is
+closed. The nine `next` advisories are open by the owner's decision, three of them critical —
+and 16.3.8 is the only release that clears the whole set. The two criticals that describe a
+network-reachable path on this deployment (image optimizer, windows dev server) are blocked at
+the edge and at the bind address instead; the third critical has no code path at all.
+
+### 7.4 Gates re-run on the overridden tree
+
+| gate | result |
+| --- | --- |
+| `pnpm audit --json` | 10 findings, all in `next` + `braces` (from 29) |
+| `pnpm typecheck` | clean |
+| `pnpm lint` (`--max-warnings=0`) | clean |
+| unit tests (`src/**\/*.test.mts` + `scripts/*.test.mts`) | **525/525** |
+| `NEXT_DIST_DIR=.next-t9 pnpm build` | exit 0 |
+| `scripts/smoke-mcp-after-overrides.mts` (SDK → ajv → fast-uri 3.1.8) | 4/4 |
+| `scripts/verify-scale-security.mts` (live DB) | 8/8 |
+| `prisma validate` (deepmerge-ts 8.0.2 in `getConfig()`) | 21-table schema valid |
+| `check:env` / `check:rls` / `check:ai-models` / `check:secrets` | 12 vars declared / RLS on 21 tables, no policies / 4 models curated / exit 0 |
+| image-endpoint gate (`_lh/audit-imagegate.mjs`) | 12/12, control still live |
+| loopback gate (`:3199` throwaway) | loopback 307, LAN refused |
+
+`pnpm test` as a whole still ends in the known Windows-only `check-standards` symlink
+`EPERM` — the same environmental failure class recorded in the previous run (~41 failures that
+are not regressions); the suites above were run individually and are green.

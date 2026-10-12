@@ -17,6 +17,16 @@ export default async function proxy(request: NextRequest) {
 	let user: { id: string } | null = null
 
 	const { pathname, search } = request.nextUrl
+	// The Image Optimization endpoint is a Next built-in that this app never calls:
+	// there is no `next/image` import and no `public/` directory anywhere in the tree,
+	// yet the route is served and unauthenticated on every deployment. Its open
+	// advisories (unauthenticated RCE through a crafted AVIF, GHSA-2xp9-vwfh-vxw4, and
+	// SSRF, GHSA-cjq9-62q9-8jv4) are all fixed only by a `next` bump, so the surface
+	// is closed here instead — a request to it cannot reach the optimizer at all.
+	// Lift this if a real image component ever needs the optimizer.
+	if (pathname === '/_next/image') {
+		return NextResponse.json({ error: 'Not found' }, { status: 404 })
+	}
 	const isApi = pathname === '/api' || pathname.startsWith('/api/')
 	// API routes are the hot path (every dashboard poll, every chat turn). getUser()
 	// round-trips to Supabase's auth server on each call, which would add a network
@@ -125,6 +135,8 @@ export default async function proxy(request: NextRequest) {
 export const config = {
 	// Pages: skip static files and Next internals, locale routing applies to real
 	// pages only. /api/* is listed separately because it needs the session check but
-	// must never touch next-intl's rewrite.
-	matcher: ['/((?!api|_next|_vercel|.*\\..*).*)', '/api/:path*']
+	// must never touch next-intl's rewrite. `/_next/image` is listed separately because
+	// the general pattern excludes Next internals, and the image endpoint is the one
+	// built-in we want to deny rather than serve (see the guard above).
+	matcher: ['/((?!api|_next|_vercel|.*\\..*).*)', '/api/:path*', '/_next/image']
 }

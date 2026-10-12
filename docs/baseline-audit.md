@@ -128,6 +128,12 @@ omission (decision §7).
   (advisory range `>=16.0.0 <16.3.8`), reached directly and through `@sentry/nextjs@10.70.0`
   and `next-intl@4.13.6`. A framework minor-upgrade was *not* performed inside this
   window; see decision §8 for the reasoning and the exact command.
+  **Second pass (same day, after the deploy): 29 → 10.** All 19 transitive findings were
+  closed with eight `pnpm.overrides` pins — none of them a direct dependency, which is why
+  `pnpm update` moved nothing — and the residual set is `next` (9, closed only by a version
+  bump the owner declined) plus `braces` (1, for which upstream has published no fix). The
+  per-package enumeration, the GHSA-by-GHSA exposure table and the re-run gates are in
+  `docs/final-scale-security-report.md` §7.
 - Secret scanning is value-based, not pattern-based: the real strings from `.env.local`
   (Supabase URL/keys, DB passwords, NanoGPT/BeatAPI keys, Sentry DSN, PostHog key,
   `CRON_SECRET`) are searched as literal byte sequences across the tracked tree, `.gitignore`

@@ -310,3 +310,87 @@ surface). `llm_logs` as specified is not implemented: `ai_usage` covers it.
 **Verification.** `verify-scale-security.mts`: a row lands with metadata + ip; a row dated
 91 days ago is deleted by the prune while today's row survives (both directions asserted, so
 "prune returns a count" cannot pass vacuously).
+
+---
+
+## 13. Transitive advisories closed by `pnpm.overrides`, not by waiting for parents
+
+**What changed.** `package.json` gained `pnpm.overrides` pinning eight transitive families:
+fast-uri 3.1.8, brace-expansion 1.1.21 **and** 5.0.12 (selector-scoped per major), js-yaml
+4.3.2, source-map-js 1.2.2, sharp 0.35.5, dompurify 3.4.17, deepmerge-ts 8.0.2. `next` stays
+at 16.3.0.
+
+**Why.** 19 of the 29 findings live in packages nothing here depends on directly, so their
+parents (ajv 8.20.0, `@prisma/config`, posthog-js, webpack/`schema-utils`) decide when they
+move. An override is the only mechanism that patches a transitive without changing the app's
+own declared ranges, and every pin except one stays inside the major the consumer declared.
+The exception is deepmerge-ts, whose advisory range is `<8.0.0` — no 7.x release fixes it.
+
+**Tradeoff.** An override promises a consumer a version it never tested against, so the risk
+was bounded per package and proven on the live path for the two that mattered: `prisma
+validate` exercises `@prisma/config`'s `getConfig()` — the code that calls deepmerge-ts — and
+still reports the 21-table schema valid on 8.0.2, and an MCP tool round-trip over the SDK's own
+in-memory transport compiles a zod→JSON-Schema contract and rejects a wrong-typed argument with
+fast-uri 3.1.8 loaded (`scripts/smoke-mcp-after-overrides.mts`). `brace-expansion` needed a
+selector per major because 1.x and 5.x are different APIs; a single pin would have handed the
+older glob callers a breaking package while trying to fix a DoS.
+
+**Verification.** `pnpm audit` **29 → 10** findings (3 critical / 16 high → 3 critical / 2 high),
+and the residual set is `next` (9) + `braces` (1). Typecheck, lint at `--max-warnings=0`, 525
+unit tests, `NEXT_DIST_DIR=.next-t9 pnpm build`, the 8 DB-backed security gates, `check:env`,
+`check:rls`, `check:ai-models` and `check:secrets` all re-run green on the overridden tree.
+
+---
+
+## 14. The Image Optimization endpoint is denied at the proxy
+
+**What changed.** `src/proxy.ts` answers `/_next/image` with a 404 before any session or
+locale work, and its matcher gained an explicit `/_next/image` entry — the general pattern
+deliberately excludes Next internals, so without the extra entry the guard would never run.
+
+**Why.** Three of the open `next` advisories are in that one built-in route: unauthenticated
+RCE when a crafted AVIF is decoded (GHSA-2xp9-vwfh-vxw4, critical), SSRF in the optimizer
+(GHSA-cjq9-62q9-8jv4, high), and the metadata-image information-disclosure family. Their only
+patch is a `next` bump the owner declined (§8). This app never calls the optimizer: there is no
+`next/image` import and no `public/` directory, and the only image asset is `/icon.svg`, served
+as a static metadata route file. So the endpoint is attack surface with zero product value, and
+denying it turns "critical/high with an open network path" into "no path" without touching the
+framework.
+
+**Tradeoff.** Anyone who later adds `next/image` gets broken images until they delete the guard;
+the comment names the advisories and says why, so it cannot be removed blindly. Vercel answers
+`/_next/image` from the platform's own image function, which may intercept before the proxy
+runs — the live production gate says which of the two answered, and that answer is reported
+either way rather than assumed.
+
+**Verification.** `_lh/audit-imagegate.mjs`, 12/12. Control build (`:3400`, pre-change) answers
+all four query shapes with the optimizer's *own* 400s — `"url" parameter is required`, `"url"
+parameter is not allowed`, `The requested resource isn't a valid image.` — so the endpoint is
+provably reachable there; the hardened build (`:3500`) answers all four with `{"error":"Not
+found"}` at 404. Same run, regression arm: `/` 200, `/login` 200, `/icon.svg` 200,
+`/app/dashboard` 307 — the guard cannot be passing by breaking the app.
+
+---
+
+## 15. `pnpm dev` binds 127.0.0.1
+
+**What changed.** `"dev": "next dev"` → `"dev": "next dev -H 127.0.0.1"`.
+
+**Why.** Measured on this machine before the change: the dev server answered
+`http://192.168.<lan>:3000/` with **200**, so anything on the LAN could reach an unauthenticated
+Next 16.3.0 dev server — and the highest-severity open advisory in that version is
+*Unauthenticated Remote Code Execution on windows-hosted servers* (GHSA-p293-qw3h-jr36,
+critical). This machine is a Windows host, and the dev server reads `.env.local`. Production is
+unaffected either way: Vercel runs Linux, and both `/api` and `/_next/image` are now denied at
+the edge.
+
+**Tradeoff.** Testing from a phone or another machine on the LAN stops working at the next
+`pnpm dev` restart; the revert is deleting `-H 127.0.0.1`. The owner's running server was left
+untouched, so the change lands on their next restart, not mid-session.
+
+**Verification.** A throwaway instance on `:3199` with its own dist dir
+(`NEXT_DIST_DIR=.next-devtest`, so the owner's `.next` was never written): `127.0.0.1:3199` →
+307 (the normal root redirect), `localhost:3199` → 307 through both curl and Node fetch (the
+name still resolves to a bound address), `192.168.<lan>:3199` → **connection refused**. Instance
+and dist dir removed afterwards, and the `tsconfig.json` include entries the dev server added
+for it were reverted.
