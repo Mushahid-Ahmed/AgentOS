@@ -350,3 +350,29 @@ dependency-layer instead of two. The permanent fixes are the two owner actions a
 recorded — move the Supabase primary (or the Vercel region) so they share a continent, and
 the KV/Redis counter behind `enforceRateLimit` (§2) — plus reducing statements-per-request
 further, which now has fewer places to hide than it did.
+
+### 8.4 Deploy status for this pass (recorded, not assumed)
+
+Private `main` = `e5ed371` (+ `fdaa5c8` logs), public `main` = `3b89909`, re-pushed as
+`1e43b02`. **The scalability build is not live yet**: Vercel's git integration has not
+created a `Production` deployment for either commit — GitHub still reports the newest
+`Production` deployment as `d9b794d` (the security build, created 14:25Z), 30+ minutes after
+both pushes. `_lh/scale-live-gates.mjs` proves it with a gate that is designed to fail on
+exactly this: `G0 the pushed commit is what Production is deploying` FAILs with
+`sha=d9b794d state=success (expected 3b89909)`, while the seven gates that measure the
+serving deployment all pass — 8/8 security headers, `/` 200, `/login` 200, `/app` 307 →
+`/login?next=%2Fapp`, 4/4 `/api` 401, forged `x-agentos-user-id` → 401, `/_next/image` →
+400 `INVALID_IMAGE_OPTIMIZE_REQUEST` with no image bytes, and 50 concurrent unauthenticated
+API requests at p50 329 ms / p95 820 ms with **zero 5xx**.
+
+So: production today is the hardened security build, healthy under load, running the OLD
+persistence code. Nothing here claims the round-trip savings are live. Owner action to close
+it: redeploy `Mushahid-Ahmed/AgentOS@1e43b02` from the Vercel dashboard (or re-check the
+repo's Git Integration — the previous push at 14:23 did produce a `Production` deployment
+within two minutes, this one produced none), then re-run
+`node _lh/scale-live-gates.mjs https://agentos-theta-teal.vercel.app 1e43b02` and expect 8/8.
+
+Also recorded honestly: **CI on the public mirror is red for every commit today**, including
+`d9b794d` which deployed successfully — `check`/`build`/`e2e`/`deploy` fail there because the
+public repo carries no secrets, while `migrations` and `ai-models` pass. CI on the private
+repo is the lane that has secrets. This pass changed nothing about either.
