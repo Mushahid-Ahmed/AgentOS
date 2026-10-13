@@ -149,6 +149,8 @@ export function DashboardView() {
 	const run = useBenchmarkRun({ onDone: handleRunDone })
 
 	const runs = runsQuery.data?.runs ?? []
+	// V14 M3: the server states whose runs this list is, so the panel labels it.
+	const visibility = runsQuery.data?.visibility ?? 'own'
 	const latestRunId = runs[0]?.id ?? null
 
 	const effectiveRunId = selectedRunId ?? latestRunId
@@ -236,7 +238,7 @@ export function DashboardView() {
 								hasTurns ? (
 									<CountUp to={stats?.avgJevLatencyMs ?? 0} />
 								) : (
-									<span aria-hidden="true">—</span>
+									<span aria-hidden="true">{'n/a'}</span>
 								)
 							}
 							unit={hasTurns ? 'ms' : undefined}
@@ -253,7 +255,7 @@ export function DashboardView() {
 								report?.speedUpFactor != null ? (
 									<CountUp to={report.speedUpFactor} decimals={1} />
 								) : (
-									<span aria-hidden="true">—</span>
+									<span aria-hidden="true">{'n/a'}</span>
 								)
 							}
 							unit={report?.speedUpFactor != null ? '× vs judge' : undefined}
@@ -266,7 +268,7 @@ export function DashboardView() {
 								hasTurns ? (
 									<CountUp to={Math.round((stats?.fallbackRate ?? 0) * 100)} suffix="%" />
 								) : (
-									<span aria-hidden="true">—</span>
+									<span aria-hidden="true">{'n/a'}</span>
 								)
 							}
 							hint={
@@ -350,7 +352,7 @@ export function DashboardView() {
 								<CardDescription>
 									Route the full labelled dataset through Jev and the{' '}
 									<code className="font-mono text-xs">gpt-4.1-nano</code> judge baseline.
-									Concurrency 1, honoring the free-tier throttle — waits are excluded from measured
+									Concurrency 1, honoring the free-tier throttle. Waits are excluded from measured
 									latency.
 								</CardDescription>
 							</CardHeader>
@@ -461,7 +463,6 @@ export function DashboardView() {
 								) : (
 									<p className="text-text-faint text-sm">
 										No benchmark runs yet. Run one to compare Jev against the LLM-as-judge baseline
-										— every bar, accuracy and cost figure here is measured, never assumed.
 									</p>
 								)}
 							</CardContent>
@@ -476,16 +477,27 @@ export function DashboardView() {
 					>
 						<Card className="card-lift">
 							<CardHeader>
-								<CardTitle>Run history</CardTitle>
+								<div className="flex flex-wrap items-center gap-2">
+									<CardTitle>Run history</CardTitle>
+									<Badge variant={visibility === 'all' ? 'warning' : 'secondary'}>
+										{visibility === 'all' ? 'Staff: every account' : 'This account only'}
+									</Badge>
+								</div>
 								<CardDescription>
-									Stored benchmark runs, newest first. Select one to chart its report above.
+									{visibility === 'all'
+										? 'Stored benchmark runs across the deployment, newest first. Select one to chart its report above.'
+										: 'Stored benchmark runs launched by this account, newest first. Select one to chart its report above.'}
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								{runsQuery.isLoading ? (
 									<SkeletonBlock lines={4} label="Loading stored benchmark runs…" />
 								) : runs.length === 0 ? (
-									<p className="text-text-faint text-sm">No runs stored yet.</p>
+									<p className="text-text-faint text-sm">
+										{visibility === 'all'
+											? 'No runs stored yet.'
+											: 'No runs from this account yet. A run launched here is yours alone.'}
+									</p>
 								) : (
 									<ul className="flex flex-col gap-1">
 										{runs.map((entry) => {

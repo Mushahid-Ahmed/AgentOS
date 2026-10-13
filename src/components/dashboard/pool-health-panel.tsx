@@ -29,18 +29,18 @@ import { useModelPoolHealth } from './use-model-pool-health'
 // than inventing rows.
 
 function fmtPct(rate: number | null): string {
-	if (rate == null) return '—'
+	if (rate == null) return 'n/a'
 	return `${Math.round(rate * 100)}%`
 }
 
 function fmtLatency(ms: number | null): string {
-	if (ms == null) return '—'
+	if (ms == null) return 'n/a'
 	if (ms < 1000) return `${Math.round(ms)}ms`
 	return `${(ms / 1000).toFixed(1)}s`
 }
 
 function fmtContext(n: number | null): string {
-	if (n == null) return '—'
+	if (n == null) return 'n/a'
 	if (n >= 1000) return `${Math.round(n / 1000)}k`
 	return `${n}`
 }
@@ -116,7 +116,7 @@ function PoolTable({ models }: { models: PoolModelHealth[] }) {
 							<TableNum className="tabular-nums">{fmtContext(m.contextLength)}</TableNum>
 							<TableCell>
 								{m.tags.length === 0 ? (
-									<span className="text-text-faint text-xs">—</span>
+									<span className="text-text-faint text-xs">n/a</span>
 								) : (
 									<span className="flex flex-wrap gap-1">
 										{m.tags.map((tag) => (
@@ -168,7 +168,7 @@ function Summary({ data }: { data: PoolHealthResponse }) {
 			<div className="border-border flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-3 text-xs">
 				<span className="text-text-faint">Catalog refreshed {ago(data.lastRefreshedAt)}</span>
 				{data.stale ? (
-					<Badge variant="warning">stale — refreshes on next read</Badge>
+					<Badge variant="warning">stale, refreshes on next read</Badge>
 				) : (
 					<Badge variant="success">fresh</Badge>
 				)}
@@ -187,7 +187,7 @@ export function PoolHealthPanel() {
 				<CardTitle>Model Pool health</CardTitle>
 				<CardDescription>
 					The live registry the chat route and agents select from. Free-tier models are probed with
-					a real test call at boot — verified-serving, gated (403/402) and unprobed are measured
+					a real test call at boot. Verified-serving, gated (403/402) and unprobed are measured
 					counts, never assumed. Premium models sit behind the credit wall on an unfunded key.
 				</CardDescription>
 			</CardHeader>
@@ -210,7 +210,7 @@ export function PoolHealthPanel() {
 					<EmptyState
 						illustrate={false}
 						title="Catalog not loaded yet"
-						body="The pool discovers models from the NanoGPT catalogue on first read and warms its cache at boot — reload in a moment."
+						body="The pool discovers models from the NanoGPT catalogue on first read and warms its cache at boot. Reload in a moment."
 						className="py-8"
 					/>
 				)}

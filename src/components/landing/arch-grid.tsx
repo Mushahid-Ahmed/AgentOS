@@ -22,13 +22,13 @@ const ARCH = [
 	{
 		d: 'D2',
 		title: 'Evidence RAG hub',
-		body: 'Workers and critics read and write the same structured hub — claims, sources, status.',
+		body: 'Workers and critics read and write the same structured hub: claims, sources, status.',
 		glyph: 'M4 8l8-4 8 4-8 4-8-4Zm0 4 8 4 8-4m-16 4 8 4 8-4'
 	},
 	{
 		d: 'D3',
 		title: 'Orchestra → MCP',
-		body: 'Agents execute through MCP tools — research, repo, browser — with every call evented.',
+		body: 'Agents execute through MCP tools (research, repo, browser), with every call evented.',
 		glyph:
 			'M12 4v4m0 0H6v4m6-4h6v4M6 12v4h5m7-4v4h-5m-2-8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM9 20a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z'
 	},
@@ -42,13 +42,13 @@ const ARCH = [
 	{
 		d: 'D5',
 		title: 'Replan loop',
-		body: 'A failing gate can spawn new agents mid-run — the delta team closes the gap and feeds back in.',
+		body: 'A failing gate can spawn new agents mid-run. The delta team closes the gap and feeds back in.',
 		glyph: 'M18 8a6 6 0 1 0 1 4m-1-4h4m-4 0V4'
 	},
 	{
 		d: 'D6',
 		title: 'Run view + replay',
-		body: 'One terminal shows team, events, evidence, spend and gates live — and replays any finished run.',
+		body: 'One terminal shows team, events, evidence, spend and gates live, and replays any finished run.',
 		glyph: 'M4 6h16v12H4zM8 10l3 2-3 2m6 0h3'
 	}
 ] as const
@@ -80,7 +80,10 @@ export function ArchGrid() {
 							strokeWidth="1.3"
 							strokeLinecap="round"
 							strokeLinejoin="round"
-							className={cn('arch-glyph h-8 w-full', lit ? 'text-accent arch-lit' : 'text-accent/70')}
+							className={cn(
+								'arch-glyph h-8 w-full',
+								lit ? 'text-accent arch-lit' : 'text-accent/70'
+							)}
 						>
 							<path d={a.glyph} {...drawProps(q)} />
 						</svg>

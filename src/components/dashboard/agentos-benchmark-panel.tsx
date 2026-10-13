@@ -32,18 +32,18 @@ import { SPEND_QUERY_KEY } from './use-spend'
 // number, and the "where AgentOS did NOT win" section is shown deliberately, not hidden.
 
 function fmtUsdMicro(micro: number | null): string {
-	if (micro == null || !Number.isFinite(micro)) return '—'
+	if (micro == null || !Number.isFinite(micro)) return 'n/a'
 	return `$${(micro / 1_000_000).toFixed(4)}`
 }
 
 function fmtMs(value: number | null): string {
-	if (value == null || !Number.isFinite(value)) return '—'
+	if (value == null || !Number.isFinite(value)) return 'n/a'
 	if (value < 1000) return `${Math.round(value)}ms`
 	return `${(value / 1000).toFixed(1)}s`
 }
 
 function fmtNum(value: number | null, digits = 1): string {
-	if (value == null || !Number.isFinite(value)) return '—'
+	if (value == null || !Number.isFinite(value)) return 'n/a'
 	return value.toFixed(digits)
 }
 
@@ -205,15 +205,15 @@ function WinnersList({ report }: { report: AgentosBenchmarkReport }) {
 
 const METHODOLOGY = [
 	'All four setups run the SAME tasks. A = one gemini-2.5-flash call, no retrieval. B = research-sonar retrieval, then one gemini-2.5-flash call over it. C = a FIXED researcher→critic→synthesizer DAG on the real Orchestra engine, all gemini, no Jev routing / gates / replan. AgentOS = the full production pipeline (Jev planning, dynamic team, per-agent model routing, MCP tools, RAG evidence hub, D4 gates, D5 replan), consumed in-process and folded through the same reducer the run view uses.',
-	'Every answer is graded by a gpt-4.1 rubric judge — a different model family from the gemini generator — against each task\'s fixed rubric. "Unsup. claims" is the JUDGE\'S ESTIMATE of claims with no supporting evidence, not a ground-truth count.',
+	'Every answer is graded by a gpt-4.1 rubric judge, a different model family from the gemini generator, against each task\'s fixed rubric. "Unsup. claims" is the JUDGE\'S ESTIMATE of claims with no supporting evidence, not a ground-truth count.',
 	'Cost, latency, model/tool calls and replans are measured per run, never estimated. Spend is capped (§12): a run stops honestly at the benchmark cap or the nightly cap rather than overspending.'
 ]
 
 const LIMITATIONS = [
-	'A pilot is only 3 tasks — directional, not statistically strong. Run the full 24 for a firmer picture.',
+	'A pilot is only 3 tasks, so it is directional rather than statistically strong. Run the full 24 for a firmer picture.',
 	'Baselines A/B/C all run on one gemini generator, so the comparison isolates scaffolding, not model quality.',
 	"The very first call of a run bears a one-time connection cold start that slightly inflates baseline A's mean latency; it washes out over more tasks.",
-	'AgentOS does more work per task (planning, gates, possible replans), so it usually costs more — the table shows that real cost rather than hiding it.'
+	'AgentOS does more work per task (planning, gates, possible replans), so it usually costs more than a single-model setup.'
 ]
 
 export function AgentosBenchmarkPanel() {
@@ -236,6 +236,8 @@ export function AgentosBenchmarkPanel() {
 	const run = useAgentosBenchmarkRun({ onDone: handleDone })
 
 	const runs = runsQuery.data?.runs ?? []
+	// V14 M3: the server states whose runs this list is, so the panel can label it.
+	const visibility = runsQuery.data?.visibility ?? 'own'
 	const latestRunId = runs[0]?.id ?? null
 	const effectiveRunId = selectedRunId ?? latestRunId
 	const reportQuery = useAgentosRunReport(effectiveRunId)
@@ -352,7 +354,7 @@ export function AgentosBenchmarkPanel() {
 								<AlertIcon size={16} className="mt-0.5 shrink-0" />
 								<span className="break-words">
 									{run.errorCode === 'nightly_cap'
-										? `Nightly spend cap reached — ${run.error}`
+										? `Nightly spend cap reached. ${run.error}`
 										: run.error}
 								</span>
 							</div>
@@ -381,7 +383,7 @@ export function AgentosBenchmarkPanel() {
 						</div>
 						<div className="border-border border-t pt-3">
 							<p className="text-text-muted mb-1 text-xs font-medium tracking-wide uppercase">
-								Limitations (stated honestly)
+								Limitations
 							</p>
 							<ul className="text-text-faint flex list-disc flex-col gap-1.5 pl-5 text-sm">
 								{LIMITATIONS.map((line) => (
@@ -416,8 +418,7 @@ export function AgentosBenchmarkPanel() {
 					) : (
 						<p className="text-text-faint text-sm">
 							No AgentOS benchmark runs yet. Run a pilot to compare the full pipeline against the
-							single-LLM, RAG and fixed-multi-agent baselines — every figure here is measured, never
-							assumed.
+							single-LLM, RAG and fixed-multi-agent baselines. Every figure here is measured.
 						</p>
 					)}
 				</CardContent>
@@ -426,16 +427,27 @@ export function AgentosBenchmarkPanel() {
 			{/* Run history */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Benchmark run history</CardTitle>
+					<div className="flex flex-wrap items-center gap-2">
+						<CardTitle>Benchmark run history</CardTitle>
+						<Badge variant={visibility === 'all' ? 'warning' : 'secondary'}>
+							{visibility === 'all' ? 'Staff: every account' : 'This account only'}
+						</Badge>
+					</div>
 					<CardDescription>
-						Stored four-setup runs, newest first. Select one to load its report above.
+						{visibility === 'all'
+							? 'Stored four-setup runs across the deployment, newest first. Select one to load its report above.'
+							: 'Stored four-setup runs launched by this account, newest first. Select one to load its report above.'}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{runsQuery.isLoading ? (
 						<SkeletonBlock lines={5} label="Loading runs…" />
 					) : runs.length === 0 ? (
-						<p className="text-text-faint text-sm">No runs stored yet.</p>
+						<p className="text-text-faint text-sm">
+							{visibility === 'all'
+								? 'No runs stored yet.'
+								: 'No runs from this account yet. A run launched here is yours alone.'}
+						</p>
 					) : (
 						<ul className="flex flex-col gap-1">
 							{runs.map((entry) => {

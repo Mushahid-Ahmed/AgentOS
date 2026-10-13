@@ -24,6 +24,12 @@
 model AgentosBenchmarkRun {
 	id          BigInt    @id @default(autoincrement())
 	label       String
+	// V14 M3: the account that launched this run, so its scores belong to that user
+	// and to nobody else. A plain @db.Uuid column with no @relation (the
+	// agent_runs/threads precedent) and nullable: rows written before per-user
+	// scoping — and CLI runs, which have no session — stay NULL, and a NULL owner
+	// resolves to "visible to staff only", never to "visible to everyone".
+	userId      String?   @map("user_id") @db.Uuid
 	startedAt   DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
 	finishedAt  DateTime? @map("finished_at") @db.Timestamptz(3)
 	// running | completed | budget_stopped | failed (String, matching the small-
@@ -46,6 +52,7 @@ model AgentosBenchmarkRun {
 	verdicts    AgentosBenchmarkVerdict[]
 
 	@@index([startedAt])
+	@@index([userId, startedAt])
 	@@map("agentos_benchmark_runs")
 }
 

@@ -89,7 +89,9 @@ export function AnalyticsDemoClient() {
 			<Card className="card-lift panel-in" style={{ '--i': 2 } as React.CSSProperties}>
 				<CardHeader>
 					<CardTitle>field_changed</CardTitle>
-					<CardDescription>Fires once per edit — records the field, not its value.</CardDescription>
+					<CardDescription>
+						Fires once per edit and records the field, not its value.
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-2">
 					<Label htmlFor="display_name">Display name</Label>

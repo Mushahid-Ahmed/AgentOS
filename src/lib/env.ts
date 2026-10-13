@@ -78,7 +78,7 @@ function loadEnv(): Env {
 	const parsed = envSchema.safeParse(process.env)
 	if (!parsed.success) {
 		console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors)
-		throw new Error('Invalid environment variables — see console output above')
+		throw new Error('Invalid environment variables: see console output above')
 	}
 	return parsed.data
 }

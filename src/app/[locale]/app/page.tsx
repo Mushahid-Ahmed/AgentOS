@@ -5,7 +5,7 @@ import { ChatWorkspace } from '@/components/chat/chat-workspace'
 // chat workspace lives here; proxy.ts redirects signed-in visitors from `/`
 // straight to this route.
 export const metadata: Metadata = {
-	title: 'Chat — AgentOS'
+	title: 'Chat | AgentOS'
 }
 
 export default function AppPage() {

@@ -95,7 +95,7 @@ export function refineResearchQuery(input: { query: string; rows: readonly Evide
 		seen.add(claim)
 		covered.push(claim)
 	}
-	return `${base} — the first pass covered: ${covered.join('; ')}. Find ADDITIONAL authoritative sources that fill the gaps, corroborate or correct these claims, and address anything left unanswered.`
+	return `${base}. The first pass covered: ${covered.join('; ')}. Find ADDITIONAL authoritative sources that fill the gaps, corroborate or correct these claims, and address anything left unanswered.`
 }
 
 // ---- D5 plan-delta builders ------------------------------------------------

@@ -202,7 +202,7 @@ test('a very_hard run with a gate + replan drives the JEV DECISION panel', () =>
 	])
 	assert.equal(s.latestGate?.kind, 'evidence_sufficiency')
 	assert.equal(s.latestGate?.decidedBy, 'jev')
-	assert.equal(renderGateQuote(s.latestGate), 'Enough evidence? NO — only two primary sources')
+	assert.equal(renderGateQuote(s.latestGate), 'Enough evidence? NO: only two primary sources')
 	const action = renderDecisionAction(s)
 	assert.match(action, /spawn researcher_r1, synthesizer_r1/)
 	assert.equal(s.phase, 'complete')
@@ -260,7 +260,7 @@ test('format helpers are honest about zero / null', () => {
 	assert.equal(formatMicroUsd(0), '$0')
 	assert.equal(formatMicroUsd(43300), '$0.0433')
 	assert.equal(formatMicroUsd(-5), '$0')
-	assert.equal(formatMs(null), '—')
+	assert.equal(formatMs(null), 'n/a')
 	assert.equal(formatMs(500), '500ms')
 	assert.equal(formatMs(3200), '3.2s')
 })
@@ -270,7 +270,7 @@ test('modelBadge uses the registry short name for known labels, raw text otherwi
 	assert.ok(modelBadge('claude').color) // a brand colour
 	assert.equal(modelBadge('mistral-large').label, 'mistral-large')
 	assert.equal(modelBadge('mistral-large').color, null)
-	assert.equal(modelBadge('').label, '—')
+	assert.equal(modelBadge('').label, 'n/a')
 })
 
 // applyTerminalStatus reconciles a replayed view with the stored run row.

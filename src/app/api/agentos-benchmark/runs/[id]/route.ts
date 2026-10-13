@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
 import { getAgentosRunReport } from '@/server/agentos-benchmark/engine'
+import { resolveReadScope } from '@/server/api/read-scope'
 
 // A single stored AgentOS benchmark run's recomputed report. createApiRoute parses
 // input from the query/body, not the path, so this dynamic segment validates the `id`
 // param itself and delegates to the engine — same pattern as the M4 benchmark
-// runs/[id] adapter, keeping logic out of route.ts.
+// runs/[id] adapter, keeping logic out of route.ts. The report is served only to the
+// account that launched the run (or a staff seat); anyone else gets a 404.
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
@@ -22,10 +24,11 @@ function toResponse(error: unknown): NextResponse {
 	return NextResponse.json({ error: userMessage }, { status })
 }
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
+export async function GET(req: NextRequest, ctx: Ctx) {
 	try {
 		const { id } = paramsSchema.parse(await ctx.params)
-		return NextResponse.json(await getAgentosRunReport(id))
+		const scope = await resolveReadScope(req)
+		return NextResponse.json(await getAgentosRunReport(id, scope))
 	} catch (error) {
 		return toResponse(error)
 	}

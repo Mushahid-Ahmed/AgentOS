@@ -102,7 +102,11 @@ function truncate(value: string, max: number): string {
  * URLs at all do we fall back to a single coarse record with a null source — the honest
  * "we retrieved this but have no source to attribute" case (§8). No URL is ever invented.
  */
-export function buildEvidence(text: string, citations: ResearchCitation[], agent: string): EvidenceInput[] {
+export function buildEvidence(
+	text: string,
+	citations: ResearchCitation[],
+	agent: string
+): EvidenceInput[] {
 	const inputs: EvidenceInput[] = []
 	const seen = new Set<string>()
 	const retrieved = text.trim()
@@ -114,7 +118,12 @@ export function buildEvidence(text: string, citations: ResearchCitation[], agent
 		const claim = span.trim()
 		if (claim.length === 0 || seen.has(claim)) continue
 		seen.add(claim)
-		inputs.push({ claim, source: citation.url, retrievedText: retrieved || claim, discoveredByAgent: agent })
+		inputs.push({
+			claim,
+			source: citation.url,
+			retrievedText: retrieved || claim,
+			discoveredByAgent: agent
+		})
 	}
 
 	if (inputs.length === 0 && retrieved.length > 0) {
@@ -127,7 +136,12 @@ export function buildEvidence(text: string, citations: ResearchCitation[], agent
 			const url = citation.url
 			if (typeof url !== 'string' || url.length === 0 || seenUrls.has(url)) continue
 			seenUrls.add(url)
-			inputs.push({ claim: coarseClaim, source: url, retrievedText: retrieved, discoveredByAgent: agent })
+			inputs.push({
+				claim: coarseClaim,
+				source: url,
+				retrievedText: retrieved,
+				discoveredByAgent: agent
+			})
 		}
 		// Genuinely no source to attribute: one honest coarse record with a null source.
 		if (inputs.length === 0) {
@@ -150,7 +164,7 @@ function buildFindings(text: string, citations: ResearchCitation[]): string {
 	const trimmed = text.trim()
 	if (trimmed.length === 0) return 'Research returned no content.'
 	if (citations.length === 0) return trimmed
-	const lines = citations.map((c, i) => `[${i + 1}] ${c.title ? `${c.title} — ` : ''}${c.url}`)
+	const lines = citations.map((c, i) => `[${i + 1}] ${c.title ? `(${c.title}) ` : ''}${c.url}`)
 	return `${trimmed}\n\nSources:\n${lines.join('\n')}`
 }
 

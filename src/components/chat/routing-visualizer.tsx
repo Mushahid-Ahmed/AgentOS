@@ -25,7 +25,7 @@ export function RoutingVisualizer({ route }: { route: RouteEventPayload }) {
 	const chosen = MODELS[route.label]
 
 	return (
-		<div className="border-border bg-surface animate-[fade-rise_var(--motion-base)_var(--ease-out-soft)_both] motion-reduce:animate-none mt-2 rounded-lg border p-3">
+		<div className="border-border bg-surface mt-2 animate-[fade-rise_var(--motion-base)_var(--ease-out-soft)_both] rounded-lg border p-3 motion-reduce:animate-none">
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div className="flex items-center gap-2">
 					<ModelDot
@@ -43,7 +43,7 @@ export function RoutingVisualizer({ route }: { route: RouteEventPayload }) {
 				<div className="text-warning mt-2 flex items-start gap-1.5 text-xs">
 					<AlertIcon size={14} className="mt-0.5 shrink-0" />
 					<span>
-						Jev was unavailable ({route.fallbackReason || 'unknown reason'}) — fell back to the
+						Jev was unavailable ({route.fallbackReason || 'unknown reason'}). Fell back to the
 						default model. Routing degraded for this turn; the answer still streamed.
 					</span>
 				</div>

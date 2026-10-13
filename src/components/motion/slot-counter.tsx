@@ -62,7 +62,7 @@ export function SlotNumber({
 			<span className="sr-only">
 				{to}
 				{suffix}
-				{label ? ` — ${label}` : ''}
+				{label ? ` ${label}` : ''}
 			</span>
 			<span
 				aria-hidden

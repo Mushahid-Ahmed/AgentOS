@@ -8,6 +8,7 @@ import { routeQueryMeasured } from '@/server/ai/jev'
 import { judgeRoute } from '@/server/ai/judge'
 import { buildReport, type BenchmarkResultRow } from './benchmark-stats'
 import { createRun, finishRun, loadRunForReport, persistPromptResults } from './benchmark-store'
+import type { ReadScope } from './read-scope'
 import type { BenchmarkReport, BenchmarkStreamEvent, RouterName } from '@/lib/benchmark'
 
 // The benchmark engine (milestone 4) — the proof the whole product exists to
@@ -54,7 +55,9 @@ const datasetSchema = z.object({
 	meta: z.unknown().optional(),
 	// The ≥50-prompt floor is enforced at load, so a truncated dataset fails the
 	// run loudly rather than quietly benchmarking a handful of prompts.
-	prompts: z.array(promptSchema).min(50, 'benchmark dataset must contain at least 50 labelled prompts')
+	prompts: z
+		.array(promptSchema)
+		.min(50, 'benchmark dataset must contain at least 50 labelled prompts')
 })
 
 type DatasetPrompt = z.infer<typeof promptSchema>
@@ -128,6 +131,9 @@ async function warmUp(): Promise<void> {
 }
 
 export type RunBenchmarkOptions = BenchmarkInput & {
+	// V14 M3: the account that launched this run, recorded on the row so its scores
+	// belong to that user. The CLI has no session and passes nothing.
+	userId?: string | null
 	onEvent?: (event: BenchmarkStreamEvent) => void
 	// Aborted when the SSE client disconnects (the dashboard's Cancel button, or
 	// navigating away). The loop checks it between prompts so a cancelled run
@@ -154,7 +160,8 @@ export async function runBenchmark(options: RunBenchmarkOptions = {}): Promise<B
 		label,
 		concurrency: BENCHMARK_CONCURRENCY,
 		judgeModel,
-		notes: options.notes ?? null
+		notes: options.notes ?? null,
+		userId: options.userId ?? null
 	})
 
 	emit({
@@ -256,7 +263,9 @@ function encodeEvent(event: BenchmarkStreamEvent): string {
  * start -> (wait|progress)* -> done, or error. Mirrors chatStreamResponse: the
  * route file stays a thin adapter and never rejects the caller mid-stream.
  */
-export function benchmarkStreamResponse(input: BenchmarkInput): Response {
+export function benchmarkStreamResponse(
+	input: BenchmarkInput & { userId?: string | null }
+): Response {
 	// Aborted by the stream's cancel() when the client disconnects (the dashboard
 	// Cancel button, or navigating away). Threaded into runBenchmark so the loop
 	// stops at the next prompt boundary instead of running a 54-prompt benchmark
@@ -307,8 +316,8 @@ export function benchmarkStreamResponse(input: BenchmarkInput): Response {
  * truth) — the historical read the dashboard's run-history uses. Only the judge
  * routing cost is read from the run itself, since the rows can't express it.
  */
-export async function getRunReport(runId: string): Promise<BenchmarkReport> {
-	const { meta, rows } = await loadRunForReport(runId)
+export async function getRunReport(runId: string, scope: ReadScope): Promise<BenchmarkReport> {
+	const { meta, rows } = await loadRunForReport(runId, scope)
 	const jevRows = rows.filter((row) => row.router === 'jev')
 	const judgeRows = rows.filter((row) => row.router === 'judge')
 	const judgeRoutingCostUsd =

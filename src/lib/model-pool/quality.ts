@@ -140,11 +140,11 @@ export function crossCheckVerdicts(
 
 	let reason: string
 	if (!agree) {
-		reason = `models disagree (${a.modelSlug}=${aNorm} vs ${b.modelSlug}=${bNorm}) — contested`
+		reason = `models disagree (${a.modelSlug}=${aNorm} vs ${b.modelSlug}=${bNorm}): contested`
 	} else if (!bothGrounded) {
-		reason = `models agree (${aNorm}) but not both evidence-grounded — verification not trusted`
+		reason = `models agree (${aNorm}) but not both evidence-grounded: verification not trusted`
 	} else {
-		reason = `models agree (${aNorm}) and both cite real evidence — cross-check passed`
+		reason = `models agree (${aNorm}) and both cite evidence: cross-check passed`
 	}
 
 	return {

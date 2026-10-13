@@ -1,6 +1,7 @@
 import 'server-only'
 import { db } from '@/server/db/client'
 import { AppError } from '@/lib/errors/app-error'
+import type { ReadScope } from '@/server/api/read-scope'
 import type { ListAgentosBenchmarkRunsResponse } from '@/lib/agentos-benchmark/wire'
 import type { AgentosSetup, JudgeVerdict, SetupTaskResult } from '@/lib/agentos-benchmark/stats'
 
@@ -45,6 +46,9 @@ export async function createRun(input: {
 	taskCount: number
 	pilot: boolean
 	notes?: string | null
+	// The account that launched the run (V14 M3). NULL only for a launch with no
+	// session, i.e. the CLI, whose runs stay staff-visible.
+	userId?: string | null
 }): Promise<bigint> {
 	const run = await db.agentosBenchmarkRun.create({
 		data: {
@@ -53,7 +57,8 @@ export async function createRun(input: {
 			generatorModel: input.generatorModel,
 			taskCount: input.taskCount,
 			pilot: input.pilot,
-			notes: input.notes ?? null
+			notes: input.notes ?? null,
+			userId: input.userId ?? null
 		},
 		select: { id: true }
 	})
@@ -104,7 +109,12 @@ export async function persistVerdict(runId: bigint, verdict: JudgeVerdict): Prom
 // (a capped run finishes fewer than it planned).
 export async function finishRun(
 	runId: bigint,
-	input: { status: string; judgeCostMicroUsd: bigint | null; taskCount: number; notes?: string | null }
+	input: {
+		status: string
+		judgeCostMicroUsd: bigint | null
+		taskCount: number
+		notes?: string | null
+	}
 ): Promise<void> {
 	await db.agentosBenchmarkRun.update({
 		where: { id: runId },
@@ -118,8 +128,10 @@ export async function finishRun(
 	})
 }
 
-export async function listRuns(): Promise<ListAgentosBenchmarkRunsResponse> {
+export async function listRuns(scope: ReadScope): Promise<ListAgentosBenchmarkRunsResponse> {
 	const rows = await db.agentosBenchmarkRun.findMany({
+		// Every read is scoped: a non-staff account only ever sees the runs it launched.
+		where: scope.all ? {} : { userId: scope.userId },
 		orderBy: { startedAt: 'desc' },
 		take: LIST_LIMIT,
 		select: {
@@ -136,6 +148,9 @@ export async function listRuns(): Promise<ListAgentosBenchmarkRunsResponse> {
 		}
 	})
 	return {
+		// The panel states its own scope, so a user is never shown somebody else's
+		// numbers and a staff member knows they are looking past ownership.
+		visibility: scope.all ? 'all' : 'own',
 		runs: rows.map((row) => ({
 			id: row.id.toString(),
 			label: row.label,
@@ -153,7 +168,10 @@ export async function listRuns(): Promise<ListAgentosBenchmarkRunsResponse> {
 
 // Load a stored run with its result + verdict rows, shaped for report recomputation
 // by the pure stats module (single source of truth = the rows).
-export async function loadRunForReport(runId: string): Promise<{
+export async function loadRunForReport(
+	runId: string,
+	scope: ReadScope
+): Promise<{
 	meta: AgentosBenchmarkRunMeta
 	results: SetupTaskResult[]
 	verdicts: JudgeVerdict[]
@@ -163,7 +181,11 @@ export async function loadRunForReport(runId: string): Promise<{
 		where: { id },
 		include: { results: true, verdicts: true }
 	})
-	if (!run) throw new AppError('AgentOS benchmark run not found', { status: 404 })
+	// A run the caller does not own answers 404, not 403: the id exists, and saying
+	// "forbidden" would confirm that much to an account that has no business knowing it.
+	if (!run || (!scope.all && run.userId !== scope.userId)) {
+		throw new AppError('AgentOS benchmark run not found', { status: 404 })
+	}
 
 	const results: SetupTaskResult[] = run.results.map((row) => ({
 		taskId: row.taskId,

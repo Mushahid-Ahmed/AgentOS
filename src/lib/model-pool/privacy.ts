@@ -41,7 +41,10 @@ const PATTERNS: Array<{ kind: SecretKind; re: RegExp }> = [
 	{ kind: 'private-key-block', re: /-----BEGIN [A-Z ]*PRIVATE KEY-----/g },
 	{ kind: 'anthropic-key', re: /\bsk-ant-[A-Za-z0-9_-]{10,}/g },
 	{ kind: 'openai-key', re: /\bsk-proj-[A-Za-z0-9_-]{10,}/g },
-	{ kind: 'github-token', re: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b|\bgithub_pat_[A-Za-z0-9_]{20,}/g },
+	{
+		kind: 'github-token',
+		re: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b|\bgithub_pat_[A-Za-z0-9_]{20,}/g
+	},
 	{ kind: 'slack-token', re: /\bxox[baprs]-[A-Za-z0-9-]{10,}/g },
 	{ kind: 'google-api-key', re: /\bAIza[0-9A-Za-z_-]{20,}/g },
 	{ kind: 'aws-access-key', re: /\b(?:AKIA|ASIA)[0-9A-Z]{12,}\b/g },
@@ -117,13 +120,14 @@ export function guardForTier(text: string, tier: ModelTier): GuardDecision {
 			allowed: false,
 			action: 'route-premium',
 			matches,
-			reason: `secret-shaped content (${kinds}) must not be sent to a free model — route to premium or refuse`
+			reason: `secret-shaped content (${kinds}) must not be sent to a free model. Route to premium or refuse.`
 		}
 	}
 	return {
 		allowed: true,
 		action: 'send',
 		matches,
-		reason: 'secret-shaped content present but tier is premium (not prompt-logged/trained per account policy)'
+		reason:
+			'secret-shaped content present but tier is premium (not prompt-logged/trained per account policy)'
 	}
 }

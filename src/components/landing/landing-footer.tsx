@@ -195,8 +195,7 @@ export function LandingFooter() {
 					</svg>
 				</div>
 				<div className="border-border text-text-faint mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-6 font-mono text-[11px]">
-					<span>© 2026 AgentOS — Jev-Swarm</span>
-					<span>No invented numbers on this page.</span>
+					<span>© 2026 AgentOS</span>
 				</div>
 			</div>
 		</footer>

@@ -20,6 +20,7 @@ import type {
 	AgentosBenchmarkStreamEvent
 } from '@/lib/agentos-benchmark/wire'
 import { runSetup, type BenchmarkTask } from './setups'
+import type { ReadScope } from '@/server/api/read-scope'
 import { createRun, finishRun, loadRunForReport, persistResult, persistVerdict } from './store'
 
 // The AgentOS four-setup benchmark engine (milestone 8, AGENTOS_UPGRADE_PROMPT §14).
@@ -79,6 +80,9 @@ function loadDataset(): Dataset {
 }
 
 export type RunAgentosBenchmarkOptions = AgentosBenchmarkInput & {
+	// V14 M3: the account that launched this run, recorded on the row so its scores
+	// belong to that user. The CLI has no session and passes nothing.
+	userId?: string | null
 	onEvent?: (event: AgentosBenchmarkStreamEvent) => void
 	// Aborted when the SSE client disconnects; checked between tasks so a cancelled
 	// run stops spending instead of running a benchmark nobody is watching.
@@ -125,7 +129,8 @@ export async function runAgentosBenchmark(
 		generatorModel: GENERATOR_MODEL,
 		taskCount: tasks.length,
 		pilot,
-		notes: options.notes ?? null
+		notes: options.notes ?? null,
+		userId: options.userId ?? null
 	})
 
 	emit({
@@ -312,7 +317,9 @@ function encodeEvent(event: AgentosBenchmarkStreamEvent): string {
  * start -> progress* -> done, or error. Mirrors benchmarkStreamResponse — the route file
  * stays a thin adapter and the stream never rejects the caller mid-flight.
  */
-export function agentosBenchmarkStreamResponse(input: AgentosBenchmarkInput): Response {
+export function agentosBenchmarkStreamResponse(
+	input: AgentosBenchmarkInput & { userId?: string | null }
+): Response {
 	const abort = new AbortController()
 	const stream = new ReadableStream<Uint8Array>({
 		async start(controller) {
@@ -363,8 +370,11 @@ export function agentosBenchmarkStreamResponse(input: AgentosBenchmarkInput): Re
  * the historical read the dashboard's run-history uses. The report is rebuilt by the
  * pure stats module, so a recomputed report can never drift from the measurements.
  */
-export async function getAgentosRunReport(runId: string): Promise<AgentosBenchmarkReport> {
-	const { meta, results, verdicts } = await loadRunForReport(runId)
+export async function getAgentosRunReport(
+	runId: string,
+	scope: ReadScope
+): Promise<AgentosBenchmarkReport> {
+	const { meta, results, verdicts } = await loadRunForReport(runId, scope)
 	return buildAgentosBenchmarkReport(
 		{
 			runId: meta.runId,

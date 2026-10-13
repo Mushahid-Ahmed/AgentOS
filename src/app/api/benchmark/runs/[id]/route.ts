@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
 import { getRunReport } from '@/server/api/benchmark'
+import { resolveReadScope } from '@/server/api/read-scope'
 
 // A single stored benchmark run's recomputed report. createApiRoute parses input
 // from the query/body, not the path, so this dynamic segment validates the `id`
@@ -22,10 +23,11 @@ function toResponse(error: unknown): NextResponse {
 	return NextResponse.json({ error: userMessage }, { status })
 }
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
+export async function GET(req: NextRequest, ctx: Ctx) {
 	try {
 		const { id } = paramsSchema.parse(await ctx.params)
-		return NextResponse.json(await getRunReport(id))
+		const scope = await resolveReadScope(req)
+		return NextResponse.json(await getRunReport(id, scope))
 	} catch (error) {
 		return toResponse(error)
 	}

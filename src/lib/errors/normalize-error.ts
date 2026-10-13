@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { AppError } from './app-error'
 
 const GENERIC_USER_MESSAGE =
-	"Something went wrong on our end. We've been notified — please try again in a moment."
+	"Something went wrong on our end. We've been notified. Please try again in a moment."
 
 export type NormalizedError = {
 	// Always safe to show a user as-is — never the raw error.
@@ -24,7 +24,7 @@ export function normalizeError(error: unknown): NormalizedError {
 	}
 	if (error instanceof z.ZodError) {
 		return {
-			userMessage: 'Invalid request — check what you submitted and try again.',
+			userMessage: 'Invalid request. Check what you submitted and try again.',
 			status: 400,
 			isExpected: true
 		}

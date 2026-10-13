@@ -201,7 +201,7 @@ const PANELS = [
 	{
 		tag: 'Chat',
 		title: 'One question, one assembled team',
-		body: 'Jev classifies the task, the orchestra builds a researcher–critic–synthesizer lineup for that run alone — never a fixed list — and the answer streams back with its citations.',
+		body: 'Jev classifies the task, the orchestra builds a researcher, critic and synthesizer lineup for that run alone rather than a fixed list, and the answer streams back with its citations.',
 		Mini: ChatMini
 	},
 	{
@@ -213,7 +213,7 @@ const PANELS = [
 	{
 		tag: 'Run view',
 		title: 'Every decision, on the record',
-		body: 'The live event stream shows the pipeline — plan, dynamic team, evidence, critics, judge — with each routing choice stamped decided_by: jev or policy.',
+		body: 'The live event stream shows the pipeline (plan, dynamic team, evidence, critics, judge) with each routing choice stamped decided_by: jev or policy.',
 		Mini: RunViewMini
 	},
 	{
@@ -320,9 +320,6 @@ export function HorizontalShowcase() {
 						</FadeUp>
 					))}
 				</div>
-				<p className="text-text-faint mt-4 font-mono text-[10px]">
-					Schematic illustrations drawn in code — not screenshots.
-				</p>
 			</section>
 		)
 	}
@@ -342,7 +339,10 @@ export function HorizontalShowcase() {
 			    it is the track's stacking order against the rest of the section, and the
 			    heading block still carries z-10 for the same layering. Changing it here
 			    would be an unmeasured visual edit to a protected animation. */}
-			<div ref={trackRef} className="relative z-[7] flex h-full w-max items-center will-change-transform">
+			<div
+				ref={trackRef}
+				className="relative z-[7] flex h-full w-max items-center will-change-transform"
+			>
 				<div className="w-[16vw] shrink-0" />
 				{PANELS.map((panel, i) => (
 					<div
@@ -353,8 +353,7 @@ export function HorizontalShowcase() {
 							// at full weight, its neighbours recede as it arrives.
 							opacity: i === active ? 1 : 0.4,
 							transform: `scale(${i === active ? 1 : 0.965})`,
-							transition:
-								'opacity 500ms var(--ease-expo), transform 500ms var(--ease-expo)'
+							transition: 'opacity 500ms var(--ease-expo), transform 500ms var(--ease-expo)'
 						}}
 					>
 						<ShowcasePanel index={i} className="w-[min(34vw,420px)] shrink-0">
@@ -381,10 +380,6 @@ export function HorizontalShowcase() {
 					/>
 				))}
 			</div>
-
-			<p className="text-text-faint absolute right-[4vw] bottom-4 font-mono text-[10px]">
-				Schematic illustrations drawn in code — not screenshots.
-			</p>
 		</section>
 	)
 }

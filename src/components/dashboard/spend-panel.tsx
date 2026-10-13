@@ -118,7 +118,7 @@ function SpendBody({ spend }: { spend: SpendView }) {
 						{usd(spend.totalCostMicroUsd)}
 					</p>
 					<p className="text-text-faint mt-1 text-xs">
-						Sum of every priced ai_usage ledger row — the single source of truth.
+						Sum of every priced ai_usage ledger row. This is the single source of truth.
 					</p>
 				</div>
 				<div className="flex flex-wrap items-center gap-2">
@@ -132,7 +132,7 @@ function SpendBody({ spend }: { spend: SpendView }) {
 
 			{spend.unpricedRows > 0 ? (
 				<p className="text-text-faint text-xs">
-					{spend.unpricedRows} ledger row(s) hit a model with no published USD price —{' '}
+					{spend.unpricedRows} ledger row(s) hit a model with no published USD price.{' '}
 					<span className="text-text-muted font-mono">{tokens(spend.unpricedTokens)}</span> tokens
 					consumed, USD marked <span className="text-text-muted">unknown</span> (never $0).
 				</p>
@@ -204,7 +204,7 @@ function SpendBody({ spend }: { spend: SpendView }) {
 						<Table className="min-w-[640px]">
 							<TableCaption>
 								Newest AgentOS runs first. Cost is the run&apos;s own persisted spend, a subset of
-								the ledger total above — not added to it.
+								the ledger total above, not added to it.
 							</TableCaption>
 							<TableHeader>
 								<TableRow className="border-border uppercase">
@@ -319,9 +319,9 @@ export function SpendPanel({
 			<CardHeader>
 				<CardTitle>Spend</CardTitle>
 				<CardDescription>
-					Real cumulative spend from the funded NanoGPT key — total, per-family, per-run, over time,
-					and each cap&apos;s utilization. Summed from the ai_usage ledger; an unpublished price
-					shows tokens with USD &ldquo;unknown&rdquo;, never a fabricated number.
+					Cumulative spend from the funded NanoGPT key: total, per-family, per-run, over time, and
+					each cap&apos;s utilization. Summed from the ai_usage ledger; an unpublished price shows
+					tokens with USD &ldquo;unknown&rdquo;, never a fabricated number.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>

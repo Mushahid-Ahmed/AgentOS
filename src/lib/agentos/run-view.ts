@@ -237,10 +237,7 @@ export function isReplanStepId(stepId: string): boolean {
 	return /_r\d+$/.test(stepId)
 }
 
-function deriveEvidence(
-	rows: Record<string, EvidenceRow>,
-	contradictions: number
-): EvidenceGraph {
+function deriveEvidence(rows: Record<string, EvidenceRow>, contradictions: number): EvidenceGraph {
 	const graph: EvidenceGraph = {
 		claims: 0,
 		sources: 0,
@@ -263,11 +260,7 @@ function deriveEvidence(
 	return graph
 }
 
-function upsertRoster(
-	roster: RosterRow[],
-	stepId: string,
-	patch: Partial<RosterRow>
-): RosterRow[] {
+function upsertRoster(roster: RosterRow[], stepId: string, patch: Partial<RosterRow>): RosterRow[] {
 	const existing = roster.find((r) => r.stepId === stepId)
 	if (existing) {
 		return roster.map((r) => (r.stepId === stepId ? { ...r, ...patch } : r))
@@ -288,7 +281,10 @@ function upsertRoster(
 	]
 }
 
-function withElapsed(state: RunViewState, at: number | null): Pick<RunViewState, 'elapsedMs' | 'lastEventAt'> {
+function withElapsed(
+	state: RunViewState,
+	at: number | null
+): Pick<RunViewState, 'elapsedMs' | 'lastEventAt'> {
 	if (at == null) return { elapsedMs: state.elapsedMs, lastEventAt: state.lastEventAt }
 	const elapsedMs = state.startedAt != null ? Math.max(0, at - state.startedAt) : state.elapsedMs
 	return { elapsedMs, lastEventAt: at }
@@ -366,7 +362,9 @@ export function applyRunViewEvent(state: RunViewState, name: string, data: unkno
 				if (picked.length > 0) checklist = { ...checklist, agentsSelected: picked.length }
 			} else if (view.kind === 'model_selection') {
 				if (isRecord(view.output)) {
-					const models = Object.values(view.output).filter((v): v is string => typeof v === 'string')
+					const models = Object.values(view.output).filter(
+						(v): v is string => typeof v === 'string'
+					)
 					if (models.length > 0) checklist = { ...checklist, modelRouting: new Set(models).size }
 				}
 			}
@@ -423,7 +421,12 @@ export function applyRunViewEvent(state: RunViewState, name: string, data: unkno
 							: state.phase === 'idle'
 								? 'streaming'
 								: state.phase
-			return { ...state, status: status ?? state.status, phase, ...withElapsed(state, num(data.at)) }
+			return {
+				...state,
+				status: status ?? state.status,
+				phase,
+				...withElapsed(state, num(data.at))
+			}
 		}
 
 		case 'model_selected': {
@@ -499,9 +502,18 @@ export function applyRunViewEvent(state: RunViewState, name: string, data: unkno
 			const at = num(data.at)
 			const raw = str(data.status)
 			const status: RosterStatus =
-				raw === 'succeeded' ? 'complete' : raw === 'failed' ? 'failed' : raw === 'skipped' ? 'skipped' : 'complete'
+				raw === 'succeeded'
+					? 'complete'
+					: raw === 'failed'
+						? 'failed'
+						: raw === 'skipped'
+							? 'skipped'
+							: 'complete'
 			const row = state.roster.find((r) => r.stepId === stepId)
-			const latencyMs = row?.startedAt != null && at != null ? Math.max(0, at - row.startedAt) : row?.latencyMs ?? null
+			const latencyMs =
+				row?.startedAt != null && at != null
+					? Math.max(0, at - row.startedAt)
+					: (row?.latencyMs ?? null)
 			return {
 				...state,
 				roster: upsertRoster(state.roster, stepId, { status, finishedAt: at, latencyMs }),
@@ -665,7 +677,7 @@ export function applyTerminalStatus(
 // plus its rationale. Never invents text — a missing rationale just omits the tail.
 export function renderGateQuote(decision: DecisionView | null): string | null {
 	if (!decision) return null
-	const tail = decision.rationale ? ` — ${decision.rationale}` : ''
+	const tail = decision.rationale ? `: ${decision.rationale}` : ''
 	switch (decision.kind) {
 		case 'evidence_sufficiency': {
 			const enough = isRecord(decision.output) ? decision.output.enough === true : false
@@ -693,12 +705,13 @@ export function renderGateQuote(decision: DecisionView | null): string | null {
 export function renderDecisionAction(state: RunViewState): string {
 	const lastReplan = state.replans[state.replans.length - 1]
 	if (lastReplan) {
-		const steps = lastReplan.addedSteps.length > 0 ? ` → spawn ${lastReplan.addedSteps.join(', ')}` : ''
+		const steps =
+			lastReplan.addedSteps.length > 0 ? ` → spawn ${lastReplan.addedSteps.join(', ')}` : ''
 		return `${lastReplan.reason}${steps}`
 	}
-	if (state.latestGate) return 'Gates passed — finalizing on the gathered evidence.'
+	if (state.latestGate) return 'Gates passed. Finalizing on the gathered evidence.'
 	if (state.tier && state.tier !== 'hard' && state.tier !== 'very_hard') {
-		return `No verification gate fired — tier "${state.tier}" is below hard (§12 escalation).`
+		return `No verification gate fired. Tier "${state.tier}" is below hard (§12 escalation).`
 	}
 	return 'No verification decision recorded.'
 }
@@ -711,7 +724,7 @@ export function formatMicroUsd(microUsd: number): string {
 }
 
 export function formatMs(ms: number | null): string {
-	if (ms == null || !Number.isFinite(ms)) return '—'
+	if (ms == null || !Number.isFinite(ms)) return 'n/a'
 	if (ms < 1000) return `${Math.round(ms)}ms`
 	return `${(ms / 1000).toFixed(1)}s`
 }
@@ -723,5 +736,5 @@ export function modelBadge(model: string): { label: string; color: string | null
 		const info = MODELS[model]
 		return { label: info.shortName, color: info.color }
 	}
-	return { label: model.trim() || '—', color: null }
+	return { label: model.trim() || 'n/a', color: null }
 }

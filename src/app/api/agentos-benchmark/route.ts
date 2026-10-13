@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { captureError } from '@/lib/observability/capture-error'
 import { guardResponse, guardStream } from '@/server/api/stream-guard'
-import { agentosBenchmarkInputSchema, agentosBenchmarkStreamResponse } from '@/server/agentos-benchmark/engine'
+import {
+	agentosBenchmarkInputSchema,
+	agentosBenchmarkStreamResponse
+} from '@/server/agentos-benchmark/engine'
 
 // Streaming endpoint (a full 24×4 run takes minutes), so it bypasses createApiRoute —
 // which buffers JSON — but keeps the same thin-adapter contract: validation happens
@@ -13,20 +16,30 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
 	let input: z.infer<typeof agentosBenchmarkInputSchema>
+	let userId: string | null = null
 	try {
 		// Budget + session before the body is read or a token is spent.
-		await guardStream(req, { scope: 'launch', requireUser: true, auditAction: 'benchmark_run' })
+		;({ userId } = await guardStream(req, {
+			scope: 'launch',
+			requireUser: true,
+			auditAction: 'benchmark_run'
+		}))
 		const raw = await req.json().catch(() => ({}))
 		input = agentosBenchmarkInputSchema.parse(raw)
 	} catch (error) {
 		const guarded = guardResponse(error)
 		if (guarded) return guarded
 		if (error instanceof z.ZodError) {
-			return NextResponse.json({ error: 'Invalid request', issues: error.flatten() }, { status: 400 })
+			return NextResponse.json(
+				{ error: 'Invalid request', issues: error.flatten() },
+				{ status: 400 }
+			)
 		}
 		const { userMessage, status } = captureError(error)
 		return NextResponse.json({ error: userMessage }, { status })
 	}
 
-	return agentosBenchmarkStreamResponse(input)
+	// The session's id is written onto the run row (V14 M3), so the scores this stream
+	// produces belong to the account that paid for them and to nobody else.
+	return agentosBenchmarkStreamResponse({ ...input, userId })
 }

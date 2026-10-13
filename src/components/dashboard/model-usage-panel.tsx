@@ -200,8 +200,7 @@ function UsageBody({ usage }: { usage: ModelUsageView }) {
 						</ul>
 						<p className="text-text-faint text-[11px]">
 							NanoGPT has no free tier, so a &ldquo;fallback&rdquo; is Jev erroring or timing out
-							and the default label answering — counted from persisted route_events, never
-							estimated.
+							and the default label answering, counted from persisted route_events. estimated.
 						</p>
 					</div>
 				)}
@@ -224,7 +223,7 @@ export function ModelUsagePanel({
 			<CardHeader>
 				<CardTitle>Model usage</CardTitle>
 				<CardDescription>
-					Which models actually answered — per family, per model and per feature — plus chat routing
+					Which models actually answered, per family, per model and per feature, plus chat routing
 					telemetry. Counted from the persisted ledger and route_events; unpriced models show their
 					tokens with USD &ldquo;unknown&rdquo;.
 				</CardDescription>

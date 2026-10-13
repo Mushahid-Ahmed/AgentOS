@@ -151,15 +151,19 @@ export function summarizeSetup(
 // Build the full report. Per-task winners consider only setups that were both
 // successful and judged for that task; a task with no judged successful row
 // contributes no winner.
-export function buildAgentosBenchmarkReport(meta: {
-	runId: string
-	label: string
-	judgeModel: string
-	generatorModel: string
-	startedAt: string
-	finishedAt: string
-	taskCount: number
-}, results: ReadonlyArray<SetupTaskResult>, verdicts: ReadonlyArray<JudgeVerdict>): AgentosBenchmarkReport {
+export function buildAgentosBenchmarkReport(
+	meta: {
+		runId: string
+		label: string
+		judgeModel: string
+		generatorModel: string
+		startedAt: string
+		finishedAt: string
+		taskCount: number
+	},
+	results: ReadonlyArray<SetupTaskResult>,
+	verdicts: ReadonlyArray<JudgeVerdict>
+): AgentosBenchmarkReport {
 	const setups = AGENTOS_BENCHMARK_SETUPS.map((s) => summarizeSetup(s, results, verdicts))
 
 	const taskIds = [...new Set(results.map((r) => r.taskId))]
@@ -194,11 +198,11 @@ export function buildAgentosBenchmarkReport(meta: {
 
 // Display helpers — honest formatting, never inventing precision.
 export function formatScore(score: number | null): string {
-	if (score == null || !Number.isFinite(score)) return '—'
+	if (score == null || !Number.isFinite(score)) return 'n/a'
 	return score.toFixed(2)
 }
 
 export function formatRate(fraction: number | null): string {
-	if (fraction == null || !Number.isFinite(fraction)) return '—'
+	if (fraction == null || !Number.isFinite(fraction)) return 'n/a'
 	return `${Math.round(fraction * 100)}%`
 }

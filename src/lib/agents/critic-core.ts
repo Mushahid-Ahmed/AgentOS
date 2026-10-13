@@ -39,7 +39,10 @@ export type CriticModelCompletion = {
 // Injected so the core never imports the server-only NanoGPT/trackAiCall path.
 // Throws on a failed call, carrying an optional HTTP `status` so runCriticStep can
 // decide retryability — the same contract the code/generating agents rely on.
-export type CriticCompleter = (messages: CriticMessage[], maxTokens: number) => Promise<CriticModelCompletion>
+export type CriticCompleter = (
+	messages: CriticMessage[],
+	maxTokens: number
+) => Promise<CriticModelCompletion>
 
 export type CriticStepDeps = {
 	// The model the Decision Bus routed to this step (ctx.model); validated with
@@ -60,7 +63,7 @@ export const CRITIC_SYSTEM_PROMPT =
 	'"refuted" when it is contradicted by the evidence; ' +
 	'"unverified" when you cannot tell. ' +
 	'Also name any pair of claims that cannot both be true. ' +
-	'Refer to claims ONLY by the ids given — never invent an id. ' +
+	'Refer to claims ONLY by the ids given; never invent an id. ' +
 	'Output ONLY compact JSON, no prose and no code fence, of exactly this shape: ' +
 	'{"verdicts":[{"id":"<id>","status":"verified|contested|refuted|unverified","reason":"<short>"}],' +
 	'"contradictions":[{"claimId":"<id>","againstId":"<id>","reason":"<short>"}]}'
@@ -98,7 +101,11 @@ export type CriticVerdict = {
 // Pull the first JSON object out of a model reply that may wrap it in a code fence or
 // surrounding prose. Returns null when there is no parseable object.
 function extractJsonObject(text: string): unknown | null {
-	const trimmed = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+	const trimmed = text
+		.trim()
+		.replace(/^```(?:json)?\s*/i, '')
+		.replace(/```\s*$/, '')
+		.trim()
 	const tryParse = (s: string): unknown | null => {
 		try {
 			return JSON.parse(s) as unknown
@@ -133,7 +140,11 @@ export function parseCriticVerdict(text: string): CriticVerdict {
 	for (const raw of envelope.data.verdicts ?? []) {
 		const el = verdictElementSchema.safeParse(raw)
 		if (!el.success) continue
-		verdicts.push({ id: el.data.id, status: el.data.status, ...(el.data.reason ? { reason: el.data.reason } : {}) })
+		verdicts.push({
+			id: el.data.id,
+			status: el.data.status,
+			...(el.data.reason ? { reason: el.data.reason } : {})
+		})
 	}
 
 	const contradictions: CriticVerdict['contradictions'] = []
@@ -180,7 +191,12 @@ export async function runCriticStep(deps: CriticStepDeps): Promise<StepResult> {
 	if (rows.length === 0) {
 		return {
 			ok: true,
-			output: { text: 'No evidence was gathered, so there was nothing to fact-check.', checked: 0, verdictsApplied: 0, contradictions: 0 },
+			output: {
+				text: 'No evidence was gathered, so there was nothing to fact-check.',
+				checked: 0,
+				verdictsApplied: 0,
+				contradictions: 0
+			},
 			notes: deps.notes ?? 'critic: no evidence to check',
 			tokens: { input: 0, output: 0 }
 		}
@@ -213,7 +229,7 @@ export async function runCriticStep(deps: CriticStepDeps): Promise<StepResult> {
 		if (!row) continue
 		await deps.evidence.markVerification(v.id, v.status)
 		verdictsApplied++
-		summary.push(`#${v.id} ${v.status}${v.reason ? ` — ${v.reason}` : ''}`)
+		summary.push(`#${v.id} ${v.status}${v.reason ? `: ${v.reason}` : ''}`)
 	}
 
 	let contradictions = 0
@@ -234,14 +250,19 @@ export async function runCriticStep(deps: CriticStepDeps): Promise<StepResult> {
 		await deps.evidence.markVerification(claimRow.id, 'contested')
 		await deps.evidence.markVerification(againstRow.id, 'contested')
 		contradictions++
-		summary.push(`contradiction: #${c.claimId} vs #${c.againstId}${c.reason ? ` — ${c.reason}` : ''}`)
+		summary.push(
+			`contradiction: #${c.claimId} vs #${c.againstId}${c.reason ? `: ${c.reason}` : ''}`
+		)
 	}
 
-	const text = summary.length > 0 ? summary.join('\n') : 'Fact-check produced no applicable verdicts.'
+	const text =
+		summary.length > 0 ? summary.join('\n') : 'Fact-check produced no applicable verdicts.'
 	return {
 		ok: true,
 		output: { text, checked: rows.length, verdictsApplied, contradictions },
-		notes: deps.notes ?? `critic checked ${rows.length} claim(s): ${verdictsApplied} verdict(s), ${contradictions} contradiction(s)`,
+		notes:
+			deps.notes ??
+			`critic checked ${rows.length} claim(s): ${verdictsApplied} verdict(s), ${contradictions} contradiction(s)`,
 		tokens: completion.tokens,
 		costMicroUsd: completion.costMicroUsd
 	}

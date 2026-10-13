@@ -46,7 +46,7 @@ function formatCost(cost: number | null, estimated: number): { value: string; ti
 	return {
 		value: `$${estimated.toFixed(6)}`,
 		title:
-			'Estimated from real token counts × the curated NanoGPT list price — NanoGPT returns no cost for this turn'
+			'Estimated from token counts × the curated NanoGPT list price, because NanoGPT returns no cost for this turn'
 	}
 }
 
@@ -58,7 +58,7 @@ export function TelemetryChips({ telemetry }: { telemetry: DoneEventPayload }) {
 		<div className="mt-2 flex flex-wrap gap-1.5">
 			{telemetry.degraded ? (
 				<span
-					title="Jev's routed model was unavailable (rate limit, error or circuit open), so the Model Pool failed over to the next healthy candidate — a cheaper paid sibling, then the cheapest reliable paid floor (NanoGPT has no free tier). The `model` chip shows what actually answered."
+					title="Jev's routed model was unavailable (rate limit, error or circuit open), so the Model Pool failed over to the next healthy candidate: a cheaper paid sibling, then the cheapest reliable paid floor (NanoGPT has no free tier). The `model` chip shows what actually answered."
 					className="border-warning/40 bg-warning/10 text-warning inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
 				>
 					pool failover

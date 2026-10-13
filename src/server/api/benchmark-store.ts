@@ -1,6 +1,7 @@
 import 'server-only'
 import { db } from '@/server/db/client'
 import { AppError } from '@/lib/errors/app-error'
+import type { ReadScope } from '@/server/api/read-scope'
 import type { ListRunsResponse, RouterName, RunSummary } from '@/lib/benchmark'
 import type { BenchmarkResultRow } from './benchmark-stats'
 
@@ -19,13 +20,16 @@ export async function createRun(input: {
 	concurrency: number
 	judgeModel: string
 	notes?: string | null
+	// V14 M3: the session that launched the run; NULL for a CLI run (staff-visible).
+	userId?: string | null
 }): Promise<bigint> {
 	const run = await db.benchmarkRun.create({
 		data: {
 			label: input.label,
 			concurrency: input.concurrency,
 			judgeModel: input.judgeModel,
-			notes: input.notes ?? null
+			notes: input.notes ?? null,
+			userId: input.userId ?? null
 		},
 		select: { id: true }
 	})
@@ -63,8 +67,10 @@ export async function finishRun(runId: bigint, judgeCostMicroUsd: bigint | null)
 	})
 }
 
-export async function listRuns(): Promise<ListRunsResponse> {
+export async function listRuns(scope: ReadScope): Promise<ListRunsResponse> {
 	const rows = await db.benchmarkRun.findMany({
+		// Every read is scoped: a non-staff account only ever sees the runs it launched.
+		where: scope.all ? {} : { userId: scope.userId },
 		orderBy: { startedAt: 'desc' },
 		take: LIST_LIMIT,
 		select: {
@@ -78,6 +84,7 @@ export async function listRuns(): Promise<ListRunsResponse> {
 		}
 	})
 	return {
+		visibility: scope.all ? 'all' : 'own',
 		runs: rows.map((row) => ({
 			id: row.id.toString(),
 			label: row.label,
@@ -94,7 +101,10 @@ export async function listRuns(): Promise<ListRunsResponse> {
 // report is rebuilt from the rows (single source of truth) by benchmark-stats,
 // not stored as a blob — only the judge cost, which the rows can't express, is
 // read back from the run itself.
-export async function loadRunForReport(runId: string): Promise<{
+export async function loadRunForReport(
+	runId: string,
+	scope: ReadScope
+): Promise<{
 	meta: {
 		runId: string
 		label: string
@@ -110,7 +120,11 @@ export async function loadRunForReport(runId: string): Promise<{
 		where: { id: BigInt(runId) },
 		include: { results: true }
 	})
-	if (!run) throw new AppError('Benchmark run not found', { status: 404 })
+	// A run the caller does not own answers 404, not 403 — saying "forbidden" would
+	// confirm the id exists to an account that has no business knowing it.
+	if (!run || (!scope.all && run.userId !== scope.userId)) {
+		throw new AppError('Benchmark run not found', { status: 404 })
+	}
 
 	return {
 		meta: {

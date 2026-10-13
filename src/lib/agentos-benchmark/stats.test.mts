@@ -10,7 +10,9 @@ import {
 	type SetupTaskResult
 } from './stats'
 
-function result(over: Partial<SetupTaskResult> & { taskId: string; setup: SetupTaskResult['setup'] }): SetupTaskResult {
+function result(
+	over: Partial<SetupTaskResult> & { taskId: string; setup: SetupTaskResult['setup'] }
+): SetupTaskResult {
 	return {
 		ok: true,
 		answer: 'a',
@@ -28,7 +30,12 @@ function result(over: Partial<SetupTaskResult> & { taskId: string; setup: SetupT
 	}
 }
 
-function verdict(taskId: string, setup: JudgeVerdict['setup'], score: number, unsupported = 0): JudgeVerdict {
+function verdict(
+	taskId: string,
+	setup: JudgeVerdict['setup'],
+	score: number,
+	unsupported = 0
+): JudgeVerdict {
 	return { taskId, setup, score, unsupportedClaims: unsupported, notes: '', judgeModel: 'gpt-4.1' }
 }
 
@@ -45,7 +52,14 @@ const META = {
 test('summarizeSetup computes success rate over attempted rows', () => {
 	const rows = [
 		result({ taskId: 't1', setup: 'agentos', ok: true, costMicroUsd: 100, latencyMs: 10 }),
-		result({ taskId: 't2', setup: 'agentos', ok: false, error: 'boom', costMicroUsd: 0, latencyMs: 0 })
+		result({
+			taskId: 't2',
+			setup: 'agentos',
+			ok: false,
+			error: 'boom',
+			costMicroUsd: 0,
+			latencyMs: 0
+		})
 	]
 	const s = summarizeSetup('agentos', rows, [])
 	assert.equal(s.attempted, 2)
@@ -72,8 +86,22 @@ test('summarizeSetup averages judge scores only for judged successful rows', () 
 
 test('summarizeSetup sums replans and averages citations', () => {
 	const rows = [
-		result({ taskId: 't1', setup: 'agentos', citations: 4, verifiedClaims: 2, contestedClaims: 1, replans: 1 }),
-		result({ taskId: 't2', setup: 'agentos', citations: 2, verifiedClaims: 0, contestedClaims: 0, replans: 2 })
+		result({
+			taskId: 't1',
+			setup: 'agentos',
+			citations: 4,
+			verifiedClaims: 2,
+			contestedClaims: 1,
+			replans: 1
+		}),
+		result({
+			taskId: 't2',
+			setup: 'agentos',
+			citations: 2,
+			verifiedClaims: 0,
+			contestedClaims: 0,
+			replans: 2
+		})
 	]
 	const s = summarizeSetup('agentos', rows, [])
 	assert.equal(s.totalReplans, 3)
@@ -135,8 +163,8 @@ test('buildAgentosBenchmarkReport skips tasks with no judged successful row', ()
 })
 
 test('format helpers are honest about null', () => {
-	assert.equal(formatScore(null), '—')
+	assert.equal(formatScore(null), 'n/a')
 	assert.equal(formatScore(0.8333), '0.83')
-	assert.equal(formatRate(null), '—')
+	assert.equal(formatRate(null), 'n/a')
 	assert.equal(formatRate(0.5), '50%')
 })

@@ -60,10 +60,10 @@ export type BenchmarkTask = {
 type SetupOutcome = Omit<SetupTaskResult, 'taskId' | 'setup' | 'latencyMs'>
 
 const ANSWERER_SYSTEM =
-	'You are a helpful assistant. Answer the task directly and concisely. Use Markdown; put code in fenced blocks with a language. Do not invent facts — if you are unsure, say so.'
+	'You are a helpful assistant. Answer the task directly and concisely. Use Markdown; put code in fenced blocks with a language. Do not invent facts; if you are unsure, say so.'
 
 const RAG_SYSTEM =
-	'You are a helpful assistant with access to retrieved research. Answer the task using ONLY the provided research plus your own clearly-marked general knowledge. Cite the source URLs inline where you rely on them. Do not invent facts or sources — if the research does not cover something, say it is unverified.'
+	'You are a helpful assistant with access to retrieved research. Answer the task using ONLY the provided research plus your own clearly-marked general knowledge. Cite the source URLs inline where you rely on them. Do not invent facts or sources; if the research does not cover something, say it is unverified.'
 
 function outcome(partial: Partial<SetupOutcome> & { ok: boolean }): SetupOutcome {
 	return {

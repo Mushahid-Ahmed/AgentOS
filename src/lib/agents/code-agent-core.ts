@@ -24,7 +24,7 @@ import type { StepResult, ToolResult } from '@/lib/orchestra/types'
 export const EXPRESSION_SYSTEM_PROMPT =
 	'You are the Code/Data agent inside AgentOS, an adaptive multi-agent system. ' +
 	'Your ONLY job is to turn the user request into a single exact arithmetic expression that a calculator will evaluate. ' +
-	'Output ONLY the expression itself — no words, no explanation, no equals sign, no code fences, no units. ' +
+	'Output ONLY the expression itself, no words, no explanation, no equals sign, no code fences, no units. ' +
 	'Use only digits, decimal points, and the operators + - * / % (modulo) ^ (power), with parentheses where needed. ' +
 	'Write percentages as decimals: "15% of 240" becomes 240*0.15. ' +
 	'If the request needs no calculation, or cannot be expressed as pure arithmetic, output exactly: NONE'

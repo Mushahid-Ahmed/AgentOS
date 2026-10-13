@@ -13,9 +13,14 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
 	let input: z.infer<typeof benchmarkInputSchema>
+	let userId: string | null = null
 	try {
 		// Budget + session before the body is read or a token is spent.
-		await guardStream(req, { scope: 'launch', requireUser: true, auditAction: 'benchmark_run' })
+		;({ userId } = await guardStream(req, {
+			scope: 'launch',
+			requireUser: true,
+			auditAction: 'benchmark_run'
+		}))
 		const raw = await req.json().catch(() => ({}))
 		input = benchmarkInputSchema.parse(raw)
 	} catch (error) {
@@ -31,5 +36,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: userMessage }, { status })
 	}
 
-	return benchmarkStreamResponse(input)
+	// The session's id is written onto the run row (V14 M3), so the scores this stream
+	// produces belong to the account that paid for them and to nobody else.
+	return benchmarkStreamResponse({ ...input, userId })
 }

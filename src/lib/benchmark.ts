@@ -82,6 +82,9 @@ export type RunSummary = {
 
 export type ListRunsResponse = {
 	runs: RunSummary[]
+	// V14 M3: whether this list is the caller's own runs or, for a staff seat, every
+	// run in the deployment. The dashboard labels the history with it.
+	visibility: 'own' | 'all'
 }
 
 // --- SSE progress events (POST /api/benchmark streams these) ---

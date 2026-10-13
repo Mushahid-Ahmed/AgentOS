@@ -55,7 +55,7 @@ export function ChatInput({
 				ref={ref}
 				rows={1}
 				value={value}
-				placeholder="Ask anything — Jev picks the model…"
+				placeholder="Ask anything. Jev picks the model…"
 				aria-label="Message"
 				onChange={(e) => {
 					setValue(e.target.value)
@@ -70,7 +70,13 @@ export function ChatInput({
 				style={{ overflowY: 'hidden' }}
 			/>
 			{disabled ? (
-				<Button variant="secondary" size="sm" className="max-md:h-11" onClick={onStop} aria-label="Stop generating">
+				<Button
+					variant="secondary"
+					size="sm"
+					className="max-md:h-11"
+					onClick={onStop}
+					aria-label="Stop generating"
+				>
 					Stop
 				</Button>
 			) : (

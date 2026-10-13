@@ -152,8 +152,8 @@ test('assessDegradation: empty steps with no signals is L0', () => {
 })
 
 test('degradationLabel: every level has a human label', () => {
-	assert.equal(degradationLabel(0), 'L0 — preferred models available')
-	assert.equal(degradationLabel(5), 'L5 — honest failure')
+	assert.equal(degradationLabel(0), 'L0: preferred models available')
+	assert.equal(degradationLabel(5), 'L5: failure with the reason stated')
 })
 
 test('isDegraded: L0 is clean, L1+ is degraded', () => {

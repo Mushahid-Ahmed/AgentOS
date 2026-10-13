@@ -65,7 +65,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
 							Something went wrong
 						</h1>
 						<p style={{ fontSize: '0.875rem', color: '#b9b9c2', margin: 0 }}>
-							We hit a snag loading the app. We&apos;ve been notified — reloading usually fixes it.
+							We hit a snag loading the app. We&apos;ve been notified. Reloading usually fixes it.
 						</p>
 						<button
 							onClick={() => window.location.reload()}

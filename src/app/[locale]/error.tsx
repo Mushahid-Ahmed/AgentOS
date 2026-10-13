@@ -38,7 +38,7 @@ export default function Error({
 			// status, and inventing a "500" here would be a fabricated number.
 			kicker="Render error"
 			title="Something went wrong"
-			description="We hit a snag loading this page. We've been notified — try again in a moment."
+			description="We hit a snag loading this page. We've been notified. Try again in a moment."
 			digest={error.digest}
 			action={<Button onClick={reset}>Try again</Button>}
 		/>

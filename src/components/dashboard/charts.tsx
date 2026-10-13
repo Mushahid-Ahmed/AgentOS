@@ -90,7 +90,7 @@ export function LatencyGauge({ valueMs, maxMs, label, className }: LatencyGaugeP
 			</svg>
 			<div className="-mt-6 text-center">
 				<span className="text-text font-numeric text-3xl font-semibold">
-					{hasValue ? valueMs : '—'}
+					{hasValue ? valueMs : 'n/a'}
 				</span>
 				<span className="text-text-muted ml-1 text-sm">ms</span>
 			</div>

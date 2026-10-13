@@ -161,7 +161,7 @@ function HeaderPanel({ view }: { view: RunViewState }) {
 			<div className="flex min-w-0 items-baseline gap-2">
 				<span className="text-text font-mono text-sm font-bold tracking-[0.12em]">AGENTOS</span>
 				<span className="text-text-faint hidden font-mono text-[11px] tracking-wide sm:inline">
-					— Adaptive Multi-Agent Intelligence
+					| Adaptive Multi-Agent Intelligence
 				</span>
 			</div>
 			<div className="ml-auto flex flex-wrap items-center gap-2">
@@ -213,7 +213,7 @@ function UserPanel({ query, i }: { query: string | null; i: number }) {
 				</blockquote>
 			) : (
 				<p className="text-text-faint font-mono text-sm">
-					No query yet — enter one below to start a run.
+					No query yet. Enter one below to start a run.
 				</p>
 			)}
 		</Panel>
@@ -222,23 +222,23 @@ function UserPanel({ query, i }: { query: string | null; i: number }) {
 
 function DecisionBusPanel({ view, i }: { view: RunViewState; i: number }) {
 	const c = view.checklist
-	const pct = (n: number | null) => (n == null ? '—' : `${Math.round(n * 100)}%`)
+	const pct = (n: number | null) => (n == null ? 'n/a' : `${Math.round(n * 100)}%`)
 	return (
 		<Panel title="Jev Decision Bus" i={i}>
 			<div className="flex flex-col gap-0.5">
-				<ChecklistRow label="Task classified" value={c.taskType ?? '—'} />
+				<ChecklistRow label="Task classified" value={c.taskType ?? 'n/a'} />
 				<ChecklistRow
 					label="Complexity"
 					value={
 						c.complexityConfidence != null
 							? `${c.complexityConfidence.toFixed(2)}${c.tier ? ` · ${c.tier}` : ''}`
-							: (c.tier ?? '—')
+							: (c.tier ?? 'n/a')
 					}
 				/>
-				<ChecklistRow label="Agents selected" value={c.agentsSelected || '—'} />
+				<ChecklistRow label="Agents selected" value={c.agentsSelected || 'n/a'} />
 				<ChecklistRow
 					label="Model routing"
-					value={c.modelRouting ? `${c.modelRouting} models` : '—'}
+					value={c.modelRouting ? `${c.modelRouting} models` : 'n/a'}
 				/>
 			</div>
 			{view.deferred.length > 0 ? (
@@ -247,7 +247,7 @@ function DecisionBusPanel({ view, i }: { view: RunViewState; i: number }) {
 				</p>
 			) : null}
 			<p className="text-text-faint mt-1 font-mono text-[11px]">
-				<Tick value={pct(c.complexityConfidence)} /> confidence · {view.executionMode ?? '—'} mode
+				<Tick value={pct(c.complexityConfidence)} /> confidence · {view.executionMode ?? 'n/a'} mode
 			</p>
 		</Panel>
 	)
@@ -321,7 +321,7 @@ function PoolFailoverLine({ marker, index }: { marker: PoolEventMarker; index: n
 			>
 				<span className="tracking-wide">FAILOVER{marker.stepId ? ` · ${marker.stepId}` : ''}:</span>{' '}
 				<span className="break-all">
-					{marker.fromSlug || '—'} → {marker.toSlug || '—'}
+					{marker.fromSlug || 'n/a'} → {marker.toSlug || 'n/a'}
 				</span>
 				<span className="text-text-faint">
 					{' '}
@@ -337,7 +337,7 @@ function PoolFailoverLine({ marker, index }: { marker: PoolEventMarker; index: n
 			style={{ '--i': Math.min(index, 8) } as React.CSSProperties}
 		>
 			<span className="tracking-wide">CIRCUIT {marker.circuit.toUpperCase()}:</span>{' '}
-			<span className="break-all">{marker.slug || '—'}</span>
+			<span className="break-all">{marker.slug || 'n/a'}</span>
 			<span className="text-text-faint">
 				{' '}
 				after {marker.consecutiveFailures} consecutive failures
@@ -403,8 +403,8 @@ function EvidencePanel({ view, i }: { view: RunViewState; i: number }) {
 							className="border-danger/40 bg-danger/10 text-danger row-in border-l-2 pl-2 font-mono text-[11px]"
 							style={{ '--i': Math.min(index, 8) } as React.CSSProperties}
 						>
-							<span className="tracking-wide">CONTRADICTION:</span> {m.claim || '—'} ⟷{' '}
-							{m.againstClaim || '—'}
+							<span className="tracking-wide">CONTRADICTION:</span> {m.claim || 'n/a'} ⟷{' '}
+							{m.againstClaim || 'n/a'}
 						</li>
 					))}
 				</ul>

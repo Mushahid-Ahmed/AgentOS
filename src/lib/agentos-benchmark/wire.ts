@@ -105,4 +105,7 @@ export type AgentosBenchmarkRunSummary = {
 
 export type ListAgentosBenchmarkRunsResponse = {
 	runs: AgentosBenchmarkRunSummary[]
+	// V14 M3: whether this list is the caller's own runs or, for a staff seat, every
+	// run in the deployment. The panel labels the table with it.
+	visibility: 'own' | 'all'
 }

@@ -3,8 +3,8 @@
 import { scrubSlice, useScrub } from '@/lib/motion/use-scrub'
 import { cn } from '@/lib/cn'
 
-// Animated benchmark chart (brief §6.2-10): the four setups from run #6's
-// 24-task comparison drawn as bars that grow on scroll. Every number is the
+// Animated benchmark chart (brief §6.2-10): the four setups of the stored
+// benchmark run drawn as bars that grow on scroll. Every number is the
 // measured one — the chart is a second reading of the table below it, not a
 // nicer story. Each metric scales to its own best, so the gaps are the real
 // ratios, and the winner of each metric is the accent bar (higher score wins;

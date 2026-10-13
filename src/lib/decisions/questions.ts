@@ -25,22 +25,28 @@ export const PLAN_QUESTION = {
 } as const
 
 const TASK_TYPE_CRITERIA: Record<(typeof TASK_TYPES)[number], string> = {
-	research: 'Open-ended investigation that needs external facts, sources, or synthesis across material the model was not given.',
-	comparison: 'Weighing two or more options, models, tools, or approaches against criteria to reach a recommendation.',
-	coding: 'Writing, debugging, reviewing, or explaining code; a defect to fix or a program to build.',
+	research:
+		'Open-ended investigation that needs external facts, sources, or synthesis across material the model was not given.',
+	comparison:
+		'Weighing two or more options, models, tools, or approaches against criteria to reach a recommendation.',
+	coding:
+		'Writing, debugging, reviewing, or explaining code; a defect to fix or a program to build.',
 	data: 'Arithmetic, units, aggregation, statistics, or a numeric/calculation-heavy question.',
-	document_qa: 'Answering strictly from a specific document, passage, or context the user supplied.',
-	simple: 'A trivially simple factual or one-line question needing a single model and no extra agents.'
+	document_qa:
+		'Answering strictly from a specific document, passage, or context the user supplied.',
+	simple:
+		'A trivially simple factual or one-line question needing a single model and no extra agents.'
 }
 
 const COMPLEXITY_CRITERIA: Record<(typeof COMPLEXITY_TIERS)[number], string> = {
 	simple: 'One cheap/fast model can finish confidently in a single step.',
 	medium: 'A small team plus retrieval and one verification pass is warranted.',
 	hard: 'Multiple agents, tools, a critic, and a sufficiency check with possible replan.',
-	very_hard: 'Several strong models in parallel with cross-critique, evidence verification, and a judging pass.'
+	very_hard:
+		'Several strong models in parallel with cross-critique, evidence verification, and a judging pass.'
 }
 
-const YES_NO = { yes: 'Yes — this task needs it.', no: 'No — this task does not need it.' }
+const YES_NO = { yes: 'Yes, this task needs it.', no: 'No, this task does not need it.' }
 
 // The single batched planning call: task type, complexity tier, the three
 // needs_* team signals, and the lead model. Six questions, one hop.
@@ -68,7 +74,8 @@ export function planningQuestions(): JevQuestionsSpec {
 		},
 		[PLAN_QUESTION.needsCritic]: {
 			type: 'choice',
-			instructions: 'Is the claim load-bearing enough to warrant an adversarial critic/skeptic pass?',
+			instructions:
+				'Is the claim load-bearing enough to warrant an adversarial critic/skeptic pass?',
 			criteria: YES_NO
 		},
 		[PLAN_QUESTION.bestModel]: {
@@ -85,7 +92,8 @@ export function sufficiencyQuestions(): JevQuestionsSpec {
 	return {
 		[SUFFICIENCY_QUESTION]: {
 			type: 'choice',
-			instructions: 'Given the evidence gathered so far in the state, is it enough to answer confidently?',
+			instructions:
+				'Given the evidence gathered so far in the state, is it enough to answer confidently?',
 			criteria: {
 				enough: 'The gathered evidence is sufficient to answer the query confidently now.',
 				insufficient: 'More research or another agent is needed before answering.'
@@ -100,7 +108,8 @@ export function validityQuestions(): JevQuestionsSpec {
 	return {
 		[VALIDITY_QUESTION]: {
 			type: 'choice',
-			instructions: 'After the critic pass in the state, is the evidence valid and non-contradictory?',
+			instructions:
+				'After the critic pass in the state, is the evidence valid and non-contradictory?',
 			criteria: {
 				valid: 'The evidence holds up; no unresolved contradiction blocks the answer.',
 				invalid: 'A contradiction or unsupported claim means the evidence needs rework.'

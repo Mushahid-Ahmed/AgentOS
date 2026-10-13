@@ -330,7 +330,7 @@ export function buildSpendView(raw: SpendRaw): SpendView {
 		balance: {
 			microUsd: null,
 			verifiable: false,
-			note: 'NanoGPT exposes no verified balance endpoint, so remaining credit is unknown — not guessed.'
+			note: 'NanoGPT exposes no verified balance endpoint, so remaining credit is unknown.'
 		}
 	}
 }

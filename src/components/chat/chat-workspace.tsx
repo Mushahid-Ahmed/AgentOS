@@ -32,9 +32,9 @@ function EmptyState({ onPick }: { onPick: (value: string) => void }) {
 				<p className="label-uppercase text-text-faint">Jev · multi-model routing</p>
 				<h2 className="hero-editorial text-text mt-2">Ask, and see who answers.</h2>
 				<p className="text-text-muted mt-2 text-sm leading-relaxed">
-					Send a message. Jev — a sub-second decision model — routes it to the best-fit among
-					Claude, GPT and Gemini, then that model streams the answer. Every turn shows the routing
-					decision and the real latency, token and cost telemetry.
+					Send a message. Jev, a sub-second decision model, routes it to the best-fit among Claude,
+					GPT and Gemini, then that model streams the answer. Every turn shows the routing decision
+					and the real latency, token and cost telemetry.
 				</p>
 			</div>
 			<div className="relative flex w-full flex-col gap-2">

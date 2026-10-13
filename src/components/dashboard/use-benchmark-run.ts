@@ -110,7 +110,7 @@ async function executeBenchmarkRun(
 					case 'wait': {
 						const seconds = Math.max(1, Math.round(event.waitMs / 1000))
 						onWait(
-							`Waiting ~${seconds}s — Jev free-tier rate limit (${event.router} on ${event.promptId}).`
+							`Waiting ~${seconds}s for the Jev free-tier rate limit (${event.router} on ${event.promptId}).`
 						)
 						break
 					}

@@ -76,12 +76,12 @@ function isStepDegraded(step: StepDegradation): boolean {
 }
 
 const LEVEL_LABELS: Record<DegradationLevel, string> = {
-	0: 'L0 — preferred models available',
-	1: 'L1 — same-tier failover',
-	2: 'L2 — free models replaced premium',
-	3: 'L3 — reduced team / verification',
-	4: 'L4 — partial answer with gaps',
-	5: 'L5 — honest failure'
+	0: 'L0: preferred models available',
+	1: 'L1: same-tier failover',
+	2: 'L2: free models replaced premium',
+	3: 'L3: reduced team / verification',
+	4: 'L4: partial answer with gaps',
+	5: 'L5: failure with the reason stated'
 }
 
 export function degradationLabel(level: DegradationLevel): string {
@@ -106,7 +106,7 @@ export function assessDegradation(input: RunDegradationInput): DegradationAssess
 		const tried = input.tried && input.tried.length > 0 ? input.tried.join(', ') : 'no candidates'
 		return {
 			level: 5,
-			reason: `L5 — no trustworthy answer produced. Tried: ${tried}.`,
+			reason: `L5: no trustworthy answer produced. Tried: ${tried}.`,
 			steps: stepLevels,
 			mostlyDegraded: false
 		}
@@ -145,7 +145,7 @@ export function assessDegradation(input: RunDegradationInput): DegradationAssess
 	if (level === 0) {
 		return {
 			level: 0,
-			reason: 'L0 — every step served by its preferred model, no failover.',
+			reason: 'L0: every step served by its preferred model, no failover.',
 			steps: stepLevels,
 			mostlyDegraded: false
 		}
@@ -157,7 +157,7 @@ export function assessDegradation(input: RunDegradationInput): DegradationAssess
 	const suffix = mostlyDegraded ? ' Answer produced mostly by degraded (free) models.' : ''
 	return {
 		level,
-		reason: `${LEVEL_LABELS[level]} — ${unique.join('; ')}.${suffix}`,
+		reason: `${LEVEL_LABELS[level]}: ${unique.join('; ')}.${suffix}`,
 		steps: stepLevels,
 		mostlyDegraded
 	}
@@ -172,13 +172,19 @@ export function uncertaintyNote(assessment: DegradationAssessment): string {
 	}
 	const parts: string[] = [`Degradation ${LEVEL_LABELS[assessment.level]}.`]
 	if (assessment.mostlyDegraded) {
-		parts.push('Most of this answer was produced by weaker free models after premium models were unavailable or rate-limited, so treat it with extra scrutiny.')
+		parts.push(
+			'Most of this answer was produced by weaker free models after premium models were unavailable or rate-limited, so treat it with extra scrutiny.'
+		)
 	}
 	if (assessment.level === 4) {
-		parts.push('Some steps could not be served, so this answer has explicit gaps rather than being complete.')
+		parts.push(
+			'Some steps could not be served, so this answer has explicit gaps rather than being complete.'
+		)
 	}
 	if (assessment.level === 3) {
-		parts.push('The team and/or verification was reduced due to model limits, so cross-checking was weaker than normal.')
+		parts.push(
+			'The team and/or verification was reduced due to model limits, so cross-checking was weaker than normal.'
+		)
 	}
 	return parts.join(' ')
 }

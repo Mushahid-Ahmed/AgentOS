@@ -19,7 +19,7 @@
 const FAQS = [
 	{
 		q: 'How is the agent team chosen for each question?',
-		a: 'Jev — the bounded decision engine — classifies the task, and the orchestra assembles the lineup for that run alone: typically a researcher, critics and a synthesizer, with model routes picked per agent. A trivial question gets a small team; an ambiguous one can earn more agents mid-run when the replan loop fires.'
+		a: 'Jev, the bounded decision engine, classifies the task, and the orchestra assembles the lineup for that run alone: typically a researcher, critics and a synthesizer, with model routes picked per agent. A trivial question gets a small team; an ambiguous one can earn more agents mid-run when the replan loop fires.'
 	},
 	{
 		q: 'Which models does it actually use?',
@@ -27,23 +27,23 @@ const FAQS = [
 	},
 	{
 		q: 'Is there a free tier?',
-		a: 'No. The provider has no free tier, so the degradation chain is all-paid: it steps down to cheaper models rather than to free ones, and spend caps are enforced per run, day and month. The dashboard shows the real cost of every call.'
+		a: 'No. The provider has no free tier, so the degradation chain is all-paid: it steps down to cheaper models rather than to free ones, and spend caps are enforced per run, day and month. The dashboard shows the cost of every call.'
 	},
 	{
 		q: 'What happens when the evidence is thin?',
-		a: 'Two Jev gates stand between a draft and an answer: enough evidence? and evidence valid? If either fails, the replan loop can spawn new agents — e.g. a second researcher and synthesizer — to close the gap before the judge sees the work.'
+		a: 'Two Jev gates stand between a draft and an answer: enough evidence? and evidence valid? If either fails, the replan loop can spawn new agents, e.g. a second researcher and synthesizer, to close the gap before the judge sees the work.'
 	},
 	{
 		q: 'Can I audit an answer after the fact?',
-		a: 'Yes. Every claim lands in the evidence hub with its source and verification status, the final answer cites it, and any finished run replays deterministically from its event log — the same decisions, in the same order, at the same costs.'
+		a: 'Yes. Every claim lands in the evidence hub with its source and verification status, the final answer cites it, and any finished run replays deterministically from its event log: the same decisions, in the same order, at the same costs.'
 	},
 	{
-		q: 'Are the benchmark numbers on this page real?',
-		a: 'They come from one complete 24-task run on this deployment comparing four setups. AgentOS scored 0.90 at a higher cost and latency than the simpler setups — that honesty is the point; it was the sole best performer on the two tasks (doc-qa and deliberately ambiguous) its dynamic teams were built for.'
+		q: 'Where do the benchmark numbers come from?',
+		a: 'They come from a completed 24-task run on this deployment comparing four setups. AgentOS scored higher than the simpler setups on the two tasks (doc-qa and deliberately ambiguous) its dynamic teams were built for, at a higher cost and latency than those setups.'
 	},
 	{
-		q: 'Is this the real product or a mockup?',
-		a: 'Real. This build runs the actual engine — Decision Bus, MCP tools, evidence hub, gates, replay — against a live Postgres (Supabase) database. This trial deployment is localhost-only; there is no public hosting.'
+		q: 'What runs behind this product?',
+		a: 'It is the product itself: the Decision Bus, MCP tools, evidence hub, gates and replay all run against a live Postgres (Supabase) database.'
 	}
 ]
 

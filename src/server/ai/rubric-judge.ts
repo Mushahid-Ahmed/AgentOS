@@ -38,7 +38,7 @@ const RUBRIC_SYSTEM_PROMPT = [
 	'notes: one short sentence justifying the score.',
 	'',
 	'Be consistent and harsh on unsupported claims. Judge ONLY against the rubric; ignore length for its own sake.',
-	'Reply with EXACTLY one JSON object and nothing else — no prose, no code fences:',
+	'Reply with EXACTLY one JSON object and nothing else: no prose, no code fences:',
 	'{"score": <0..1>, "unsupportedClaims": <integer >= 0>, "notes": "<one sentence>"}'
 ].join('\n')
 

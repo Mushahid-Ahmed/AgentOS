@@ -27,7 +27,7 @@ const JUDGE_MAX_BACKOFF_MS = 15_000
 // ROUTE_CRITERIA so judge and Jev are choosing between the same meanings.
 const JUDGE_SYSTEM_PROMPT = [
 	'You are a routing classifier. Read the user query and choose the single model best suited to answer it.',
-	'Reply with EXACTLY one word — claude, gpt, or gemini — and nothing else. No punctuation, no explanation.',
+	'Reply with EXACTLY one word (claude, gpt, or gemini) and nothing else. No punctuation, no explanation.',
 	'',
 	'Model meanings:',
 	...MODEL_LABELS.map((label) => `- ${label}: ${ROUTE_CRITERIA[label]}`)

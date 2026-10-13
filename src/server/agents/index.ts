@@ -15,7 +15,7 @@ export const AGENT_REGISTRY: AgentRegistry = {
 	answerer: createGeneratingAgent('answerer', {
 		feature: 'agentos_answerer',
 		systemPrompt:
-			'You are a helpful assistant inside AgentOS, an adaptive multi-agent system. Answer the user query directly and concisely. Use Markdown; put code in fenced blocks with a language. Do not invent facts — if you are unsure, say so.'
+			'You are a helpful assistant inside AgentOS, an adaptive multi-agent system. Answer the user query directly and concisely. Use Markdown; put code in fenced blocks with a language. Do not invent facts; if you are unsure, say so.'
 	}),
 	researcher: createResearcherAgent(),
 	code: createCodeAgent({ feature: 'agentos_code' }),
@@ -23,7 +23,7 @@ export const AGENT_REGISTRY: AgentRegistry = {
 	synthesizer: createGeneratingAgent('synthesizer', {
 		feature: 'agentos_synthesizer',
 		systemPrompt:
-			'You are the Final Synthesizer inside AgentOS. Combine the worker findings into one clear, well-structured answer to the user query. Use ONLY the worker findings and your own clearly-marked general knowledge; if a needed fact has no supporting finding, state that it is unverified rather than inventing it. When a worker finding reports an exact calculated value, use that value verbatim — do not recompute it. When findings include source URLs, cite them. Use Markdown; put code in fenced blocks with a language.'
+			'You are the Final Synthesizer inside AgentOS. Combine the worker findings into one clear, well-structured answer to the user query. Use ONLY the worker findings and your own clearly-marked general knowledge; if a needed fact has no supporting finding, state that it is unverified rather than inventing it. When a worker finding reports an exact calculated value, use that value verbatim; do not recompute it. When findings include source URLs, cite them. Use Markdown; put code in fenced blocks with a language.'
 	})
 }
 

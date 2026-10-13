@@ -19,7 +19,7 @@ import { ModelRoutes } from '@/components/landing/model-routes'
 import { Faq } from '@/components/landing/faq'
 import { FadeUp, LineMaskReveal } from '@/components/motion/reveal'
 import { Tilt } from '@/components/motion/tilt'
-import { Typewriter, type TypeSeg } from '@/components/motion/typewriter'
+import { Typewriter } from '@/components/motion/typewriter'
 import { DriftMark, SweepReveal } from '@/components/motion/sweep-reveal'
 import { CurtainReveal } from '@/components/motion/curtain'
 import { DealStack } from '@/components/motion/deal-stack'
@@ -31,6 +31,7 @@ import { Magnetic } from '@/components/motion/magnetic'
 import { Parallax } from '@/components/motion/parallax'
 import { RippleLayer } from '@/components/motion/ripple'
 import { V5Layers } from '@/components/motion/v5-layers'
+import { readLandingPreview } from '@/server/landing/public-preview'
 
 // The content-rich, most-animated landing (brief §6.2): fifteen sections from
 // preloader to footer, all copy grounded in what this repo actually ships —
@@ -86,17 +87,17 @@ function SectionHead({
 const CAPABILITIES = [
 	{
 		name: 'Decision Bus',
-		body: 'Every routing and staffing choice is published as a recorded event — decided_by: jev or policy — so no decision is invisible.',
+		body: 'Every routing and staffing choice is published as a recorded event with decided_by: jev or policy, so no decision is invisible.',
 		icon: <path d="M3 12h18M8 12V6m8 6v6m-4-6V9m0 6v3" />
 	},
 	{
 		name: 'Dynamic teams',
-		body: 'Jev classifies the task and the orchestra assembles a researcher–critic–synthesizer lineup for that run alone, then retires it.',
+		body: 'Jev classifies the task and the orchestra assembles a researcher, critic and synthesizer lineup for that run alone, then retires it.',
 		icon: <path d="M12 4v5m0 0-6 7m6-7 6 7M4 16v4m8-4v4m8-4v4" />
 	},
 	{
 		name: 'MCP tools',
-		body: 'Agents work through real tool calls — research, repo, browser — over an MCP layer, not through prompt-time pretend.',
+		body: 'Agents work through real tool calls (research, repo, browser) over an MCP layer, not through prompt-time pretend.',
 		icon: <path d="M4 7h9m5 0h2M4 17h2m5 0h9M9 4v6m6 4v6" />
 	},
 	{
@@ -106,7 +107,7 @@ const CAPABILITIES = [
 	},
 	{
 		name: 'Per-agent routing',
-		body: 'Claude, GPT and Gemini via NanoGPT, picked agent by agent for cost and fit — with the cheap floor always one step away.',
+		body: 'Claude, GPT and Gemini via NanoGPT, picked agent by agent for cost and fit, with the cheap floor always one step away.',
 		icon: <path d="M4 12h6m0 0 6-6m-6 6 6 6m-6-6h8m4 0h2" />
 	},
 	{
@@ -121,7 +122,7 @@ const CAPABILITIES = [
 	},
 	{
 		name: 'Run replay',
-		body: 'Every finished run replays from its event log — the same decisions in the same order, scrubbed like a recording.',
+		body: 'Every finished run replays from its event log: the same decisions in the same order, scrubbed like a recording.',
 		icon: <path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5m4 3 4-2.5V16L8 13.5" />
 	}
 ]
@@ -135,38 +136,32 @@ const FAMILIES = [
 // The bottom of the degradation ladder: always paid, never free (D-44).
 const FLOOR = { family: 'floor', slug: 'meta-llama/llama-3.3-70b-instruct', dim: true }
 
-// Real run #6 numbers (full 24-task four-setup comparison), kept as data (not
-// pre-formatted strings) so the chart and the table render the same
-// measurements.
-const BENCH = [
-	{ setup: 'A · single LLM', score: 0.87, cost: 0.000783, latency: 8.4, pass: '100%' },
-	{ setup: 'B · + RAG', score: 0.9, cost: 0.00355, latency: 22.8, pass: '100%' },
-	{ setup: 'C · fixed multi-agent', score: 0.92, cost: 0.00343, latency: 26.7, pass: '95.8%' },
-	{ setup: 'D · full AgentOS', score: 0.9, cost: 0.008979, latency: 75.8, pass: '95.8%' }
-] as const
-
+// Real run numbers (the newest completed four-setup benchmark run) and the Decision Bus
+// log (the newest completed run's stored events) are read from the database on every
+// render — V14 M2 removed the literals these used to be, so nothing on this page is a
+// typed-in measurement. Data (not pre-formatted strings) so the chart and the table
+// render the same numbers.
 const fmtScore = (v: number) => v.toFixed(2)
 const fmtCost = (v: number) => `$${v.toFixed(6)}`
 const fmtLatency = (v: number) => `${v.toFixed(1)} s`
 
-// The Decision Bus log the terminal types in on scroll (§6.2-6): real event
-// shapes from a completed run, dim label · white payload · accent decision.
-const BUS: TypeSeg[][] = [
-	[{ t: '$ tail -f run-81.events', tone: 'dim' }],
-	[{ t: '  team.assemble  ' }, { t: 'researcher · critic · synthesizer', tone: 'text' }],
-	[{ t: '  d4.gate evidence_insufficient', tone: 'accent' }],
-	[
-		{ t: '  d5.replan      ' },
-		{ t: '+ researcher_r1 ', tone: 'text' },
-		{ t: '(gemini)', tone: 'accent' },
-		{ t: '  + synthesizer_r1 ' },
-		{ t: '(claude)', tone: 'text' }
-	],
-	[{ t: '  d4.gate passed', tone: 'accent' }],
-	[{ t: '  answer         ' }, { t: '3,254 chars · verified · $0.062626', tone: 'text' }]
-]
+export async function LandingPage() {
+	const { bench, bus } = await readLandingPreview()
 
-export function LandingPage() {
+	// Every claim in the benchmark heading is computed from the rows it summarises: the
+	// per-metric winner, not a remembered sentence about run #6.
+	const best = bench ? [...bench.rows].sort((a, b) => b.score - a.score)[0] : null
+	const cheapest = bench ? [...bench.rows].sort((a, b) => a.cost - b.cost)[0] : null
+	const fastest = bench ? [...bench.rows].sort((a, b) => a.latency - b.latency)[0] : null
+	const stats = [
+		{ to: 2, suffix: '', label: 'verification gates before the judge' },
+		{ to: 3, suffix: '', label: 'MCP tool families agents can call' },
+		...(bench
+			? [{ to: bench.taskCount, suffix: '', label: 'tasks in the stored live benchmark run' }]
+			: []),
+		{ to: 6, suffix: '', label: 'architecture layers, D1 through D6' }
+	]
+
 	return (
 		<main
 			id="main-content"
@@ -288,7 +283,7 @@ export function LandingPage() {
 								kicker="The pipeline"
 								title={PIPELINE_TITLE}
 								karaoke
-								body="The D1 pipeline runs the same way every time: Jev plans, the orchestra staffs a team, evidence is gathered, critics and two verification gates pressure-test it, and a judge returns PASS — or REWORK, which replans and spawns agents to close the gap."
+								body="The D1 pipeline runs the same way every time: Jev plans, the orchestra staffs a team, evidence is gathered, critics and two verification gates pressure-test it, and a judge returns PASS or REWORK, which replans and spawns agents to close the gap."
 							/>
 							<FadeUp delay={120}>
 								<div className="mt-12">
@@ -361,17 +356,23 @@ export function LandingPage() {
 								<SectionHead
 									kicker="The Decision Bus"
 									title="If it decided, it’s on the log"
-									body="Team assembly, model routes, gate outcomes, spend — each one is a structured event the run view renders live and replay plays back. This is run #81, streamed from this deployment."
+									body="Team assembly, model routes, gate outcomes and spend are each a structured event the run view renders live and replay plays back."
 								/>
 								{/* §5.4's curtain: the terminal is uncovered left→right instead of
 						    fading up. The panel is removed from the document as soon as it
 						    has left, so the reveal can never be the reason a line of the log
 						    is invisible. */}
 								<CurtainReveal className="min-w-0">
-									<Typewriter
-										lines={BUS}
-										className="border-border bg-surface text-text-muted max-w-full rounded-xl border p-5 text-[11.5px] leading-[1.9] sm:text-[12.5px]"
-									/>
+									{bus ? (
+										<Typewriter
+											lines={bus}
+											className="border-border bg-surface text-text-muted max-w-full rounded-xl border p-5 text-[11.5px] leading-[1.9] sm:text-[12.5px]"
+										/>
+									) : (
+										<p className="text-text-faint border-border bg-surface max-w-full rounded-xl border p-5 text-[12.5px]">
+											No stored run to log yet.
+										</p>
+									)}
 								</CurtainReveal>
 							</div>
 						</div>
@@ -391,12 +392,7 @@ export function LandingPage() {
 							    box with a grid patch, so the strip carries no ornament and no hairline
 							    at all — the numbers are separated by space, not by rules. */}
 							<div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
-								{[
-									{ to: 2, suffix: '', label: 'verification gates before the judge' },
-									{ to: 3, suffix: '', label: 'MCP tool families agents can call' },
-									{ to: 24, suffix: '', label: 'tasks in the completed live benchmark' },
-									{ to: 6, suffix: '', label: 'architecture layers, D1 through D6' }
-								].map((s) => (
+								{stats.map((s) => (
 									<div key={s.label}>
 										{/* V4 §4's slot-machine reels: the digits scroll past real digits, the leftmost
 									    column stops first, and the caption only drifts up once the last reel lands. */}
@@ -420,7 +416,7 @@ export function LandingPage() {
 							<SectionHead
 								kicker="Models & routing"
 								title="Three families, one cheap floor, zero free tier"
-								body="NanoGPT carries the traffic. Each family routes to its flagship; degradation walks down to a llama-3.3-70b floor and a policy fallback — cheaper, never free, because the provider has no free tier."
+								body="NanoGPT carries the traffic. Each family routes to its flagship; degradation walks down to a llama-3.3-70b floor and a policy fallback, cheaper and never free, because the provider has no free tier."
 							/>
 							<ModelRoutes rows={[...FAMILIES, FLOOR]} />
 							<div className="mt-8 flex flex-wrap gap-2">
@@ -453,63 +449,84 @@ export function LandingPage() {
 					</section>
 				</V7Page>
 
-				{/* 12 — BENCHMARK (real numbers, run #6) */}
-				{/* V6 Job 4: this is the darkest section and it carries the page's real
-			    numbers, so karma's cable bundle goes behind it. §7's stacking: the
-			    bundle is z-0 and the content wrapper below it is relative z-10 —
-			    nothing about the chart's bar-grow or the table's curtain changes. */}
+				{/* 12 — BENCHMARK (every figure read from the stored run) */}
+				{/* V6 Job 4: this is the darkest section and it carries the page's measured
+				    numbers, so karma's cable bundle goes behind it. §7's stacking: the bundle
+				    is z-0 and the content wrapper below it is relative z-10. The chart's
+				    bar-grow and the table's curtain are unchanged. */}
 				<V7Page id="cable">
 					<section id="benchmarks" className="relative scroll-mt-20 py-24 sm:py-28">
 						<CableBundle />
 						<div className={`${SECTION} relative z-10`}>
 							<SectionHead
-								kicker="Benchmarks — measured, not marketed"
-								title="One full 24-task run. All four setups."
+								kicker="Benchmarks"
+								title={
+									bench
+										? `One full ${bench.taskCount}-task run. ${bench.rows.length} setups.`
+										: 'No stored benchmark run yet'
+								}
 								karaoke
-								body="Judged by gpt-4.1 against a rubric, priced from real token usage. The honest finding: full AgentOS was the priciest and slowest setup — and the sole best performer on the two tasks dynamic teams exist for (document QA and deliberately ambiguous prompts)."
+								body={
+									bench && best && cheapest && fastest
+										? `Judged by ${bench.judgeModel} against a rubric, priced from real token usage. Highest mean score: ${best.setup} at ${fmtScore(best.score)}. Lowest cost per task: ${fmtCost(cheapest.cost)} (${cheapest.setup}). Fastest: ${fmtLatency(fastest.latency)} (${fastest.setup}).`
+										: 'The four-setup comparison has not been run against this database, so this section shows no numbers. It fills in from the first completed run stored here.'
+								}
 							/>
-							<BenchChart rows={BENCH} />
-							{/* The table is the same measurement as the chart above it, so it gets
-					    §5.4's curtain from the top down rather than a second grow animation
-					    competing with the bars. */}
-							<CurtainReveal direction="down" threshold={0.12}>
-								<div className="border-border mt-6 overflow-x-auto rounded-xl border">
-									<table className="w-full min-w-[560px] border-collapse text-left">
-										<thead>
-											<tr className="border-border">
-												{['Setup', 'Avg score', 'Avg cost / task', 'Avg latency', 'Success'].map(
-													(h) => (
-														<th
-															key={h}
-															className="text-text-faint label-uppercase border-b border-[var(--border)] px-5 py-3"
+							{bench ? (
+								<>
+									<BenchChart rows={bench.rows} />
+									{/* The table is the same measurement as the chart above it, so it gets
+									    §5.4's curtain from the top down rather than a second grow animation
+									    competing with the bars. */}
+									<CurtainReveal direction="down" threshold={0.12}>
+										<div className="border-border mt-6 overflow-x-auto rounded-xl border">
+											<table className="w-full min-w-[560px] border-collapse text-left">
+												<thead>
+													<tr className="border-border">
+														{[
+															'Setup',
+															'Avg score',
+															'Avg cost / task',
+															'Avg latency',
+															'Success'
+														].map((h) => (
+															<th
+																key={h}
+																className="text-text-faint label-uppercase border-b border-[var(--border)] px-5 py-3"
+															>
+																{h}
+															</th>
+														))}
+													</tr>
+												</thead>
+												<tbody className="font-mono text-[13px]">
+													{bench.rows.map((r) => (
+														<tr
+															key={r.setup}
+															className="border-group border-border hover:bg-surface border-b last:border-b-0"
 														>
-															{h}
-														</th>
-													)
-												)}
-											</tr>
-										</thead>
-										<tbody className="font-mono text-[13px]">
-											{BENCH.map((r) => (
-												<tr
-													key={r.setup}
-													className="border-group border-border hover:bg-surface border-b last:border-b-0"
-												>
-													<td className="text-text px-5 py-4 font-sans font-medium">{r.setup}</td>
-													<td className="text-text-muted px-5 py-4">{fmtScore(r.score)}</td>
-													<td className="text-text-muted px-5 py-4">{fmtCost(r.cost)}</td>
-													<td className="text-text-muted px-5 py-4">{fmtLatency(r.latency)}</td>
-													<td className="text-text-muted px-5 py-4">{r.pass}</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</CurtainReveal>
-							<p className="text-text-faint mt-5 text-[12.5px]">
-								Whole-suite spend: $0.530901 · zero citation tasks by design (knowledge mode) ·
-								results live on the dashboard.
-							</p>
+															<td className="text-text px-5 py-4 font-sans font-medium">
+																{r.setup}
+															</td>
+															<td className="text-text-muted px-5 py-4">{fmtScore(r.score)}</td>
+															<td className="text-text-muted px-5 py-4">{fmtCost(r.cost)}</td>
+															<td className="text-text-muted px-5 py-4">{fmtLatency(r.latency)}</td>
+															<td className="text-text-muted px-5 py-4">{r.pass}</td>
+														</tr>
+													))}
+												</tbody>
+											</table>
+										</div>
+									</CurtainReveal>
+									<p className="text-text-faint mt-5 text-[12.5px]">
+										{`Whole-suite spend: ${fmtCost(bench.spendUsd)} · ${bench.taskCount} tasks x ${bench.rows.length} setups · results live on the dashboard.`}
+									</p>
+								</>
+							) : (
+								<p className="text-text-faint border-border mt-6 rounded-xl border p-5 text-[13px]">
+									No completed four-setup benchmark run is stored here yet.
+								</p>
+							)}
 						</div>
 					</section>
 				</V7Page>
