@@ -49,14 +49,17 @@ export const TYPE_SCALE = {
 } as const
 
 // Motion vocabulary. `door` backs the login/signup door swing on success;
-// `scene` is the long scroll-scene/reveal duration (the signature expo-out).
+// `doorFly` is V16's full fly-through of that doorway (leaf swing + camera dolly
+// + light bloom), which the auth form waits out before navigating; `scene` is the
+// long scroll-scene/reveal duration (the signature expo-out).
 // Every value here is neutralized under prefers-reduced-motion.
 export const MOTION_MS = {
 	fast: 120,
 	base: 220,
 	slow: 420,
 	scene: 1200,
-	door: 500
+	door: 500,
+	doorFly: 720
 } as const
 
 // Hairline weight for the illustration + dividers. Kept at 1 CSS px so

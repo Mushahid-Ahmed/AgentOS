@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Link, useRouter } from '@/i18n/routing'
 import { cn } from '@/lib/cn'
@@ -9,7 +9,8 @@ import { createBrowserSupabaseClient } from '@/lib/supabase/browser'
 import { provisionCurrentUser } from '@/server/auth/session-actions'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { DoorIllustration } from '@/components/marketing/door-illustration'
+import { DoorIllustration, PRESETS } from '@/components/marketing/door-illustration'
+import { DoorFlythrough, type DoorRect } from '@/components/marketing/door-flythrough'
 import { MarketingShell } from '@/components/marketing/marketing-shell'
 import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 import { RippleLayer } from '@/components/motion/ripple'
@@ -25,6 +26,14 @@ import { RippleLayer } from '@/components/motion/ripple'
 // side the user came from, focus glow + underline draw on the fields, a lifting
 // CTA with a click ripple, one short shake on a failed submit, and a checkmark
 // that draws itself while the door swings open. Auth logic is untouched.
+//
+// V16 replaces that last beat when Supabase accepts the credentials: rather than
+// the door swinging beside the form, the leaf turns on its hinge and the camera
+// goes through the doorway, and the route change fires at the peak so the app
+// arrives behind the light instead of as a cut. The flight is mounted over the
+// rect of the resting door (see marketing/door-flythrough), so it is one door
+// continuing to move rather than a second one appearing. Reduced motion keeps the
+// instant redirect; a failed submit still gets its shake and no flight.
 import {
 	loginFailureMessage,
 	safeNext,
@@ -89,6 +98,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
 	const [notice, setNotice] = useState<string | null>(null)
 	const [shake, setShake] = useState(false)
 
+	// V16: the resting door's viewport rect, captured at the moment auth succeeds
+	// and handed to the fly-through so its first frame lands on the door the
+	// visitor is already looking at. Null means no flight is running.
+	const [fly, setFly] = useState<DoorRect | null>(null)
+	const stageRef = useRef<HTMLDivElement>(null)
+
 	// The pair enters from opposite sides (§7.2-8), which is the only cue that
 	// distinguishes the two routes visually.
 	const dir = isSignup ? 22 : -22
@@ -116,6 +131,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
 		setError(null)
 		setNotice(null)
 		setSubmitting(true)
+		// Release the hover nudge now: the CTA is about to be disabled, and the
+		// fly-through measures this element's rect on success, which a rotated door
+		// would report too wide.
+		setDoor('closed')
 
 		const supabase = createBrowserSupabaseClient()
 		const { error: authError, data } = isSignup
@@ -152,13 +171,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
 			// Non-fatal: proceed to the redirect regardless.
 		}
 
-		// Small delight: the door swings open before we leave. Skipped entirely
-		// (instant redirect) for reduced-motion users, and never longer than the
-		// one swing.
+		// Small delight before the redirect: the door opens and the camera goes
+		// through it, and the route change lands at the peak of the dive. Reduced
+		// motion keeps the instant redirect, and if the illustration has no laid-out
+		// box there is nothing to fly through, so the Take 2 swing runs instead.
 		setSucceeded(true)
 		if (!reduced) {
-			setDoor('open')
-			await new Promise((resolve) => setTimeout(resolve, MOTION_MS.door))
+			const box = stageRef.current?.querySelector('svg')?.getBoundingClientRect()
+			if (box && box.width > 1) {
+				setFly({ top: box.top, left: box.left, width: box.width, height: box.height })
+				await new Promise((resolve) => setTimeout(resolve, MOTION_MS.doorFly))
+			} else {
+				setDoor('open')
+				await new Promise((resolve) => setTimeout(resolve, MOTION_MS.door))
+			}
 		}
 		router.replace(safeNext(searchParams.get('next')))
 		router.refresh()
@@ -194,13 +220,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
 				{/* §7.2-8: the pair slides in from opposite sides, so switching between
 				    them reads as one surface moving rather than a page swap. */}
 				<Rise step={0} x={dir}>
-					<div className="door-stage">
+					<div ref={stageRef} className="door-stage">
 						<DoorIllustration
 							open={isSignup ? 'wide' : 'ajar'}
 							className={cn(
 								'h-[150px] w-[170px] transition-transform ease-out',
 								door === 'nudge' && 'door-nudge duration-300',
-								door === 'open' && 'door-swing duration-500'
+								door === 'open' && 'door-swing duration-500',
+								// The flying twin holds the identical frame, so this one steps out.
+								fly && 'door-hidden'
 							)}
 						/>
 					</div>
@@ -408,6 +436,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
 					</p>
 				</Rise>
 			</div>
+
+			{/* V16: mounted only for the ~700ms of a successful sign-in, and it
+			    portals itself onto document.body so nothing on this surface can
+			    clip the scene as it outgrows the door. */}
+			{fly ? <DoorFlythrough rect={fly} preset={PRESETS[isSignup ? 'wide' : 'ajar']} /> : null}
 		</MarketingShell>
 	)
 }
