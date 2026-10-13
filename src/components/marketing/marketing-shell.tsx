@@ -2,9 +2,9 @@ import { cn } from '@/lib/cn'
 
 // The shared canvas for the auth surfaces (/login, /signup) on the ONE dark
 // system (UI/UX run M5): a near-black page holding one elevated panel with a
-// hairline edge, the paler edge of a card peeking behind it at the very top,
-// and a header row for the brand + the swapped top-right action. The landing
-// uses its own chrome but the same tokens, so all three read as one product.
+// hairline edge, and a header row for the brand + the swapped top-right action.
+// The landing uses its own chrome but the same tokens, so all three read as one
+// product.
 export function MarketingShell({
 	brand,
 	topRight,
@@ -27,11 +27,6 @@ export function MarketingShell({
 				{/* Animated background (brief §7.2-2): two accent gradient lobes on long
 				    transform loops. CSS-only on purpose — the auth routes stay WebGL-free. */}
 				<div aria-hidden="true" className="auth-aurora" />
-				{/* Paler edge of a card behind the panel, visible at the very top. */}
-				<div
-					aria-hidden="true"
-					className="bg-surface-hover pointer-events-none absolute inset-x-[5.5%] top-0 h-7 rounded-b-md"
-				/>
 				{/* One accent hairline: the electric-blue identity cue, centred so it
 				    fades out at both ends instead of reading as a border. */}
 				<div

@@ -736,30 +736,12 @@ details[open] .faq-answer::before {
 	}
 }
 
-/* Field focus (§7.2-3): the label lifts to primary text, an accent hairline
-   draws left→right under the control, and the ring glows. The input keeps its
-   own :focus-visible outline — this is additive, never a replacement for the
-   keyboard focus indicator. */
+/* Field focus (§7.2-3): the label lifts to primary text and the ring glows.
+   The input keeps its own :focus-visible outline — this is additive, never a
+   replacement for the keyboard focus indicator. V17: the accent hairline that
+   drew under the control is gone — the owner asked for the line out. */
 .field-shell:focus-within label {
 	color: var(--text);
-}
-
-.field-underline {
-	position: absolute;
-	bottom: 1px;
-	left: 14px;
-	right: 14px;
-	height: 1.5px;
-	border-radius: 999px;
-	background: var(--accent);
-	transform: scaleX(0);
-	transform-origin: left center;
-	transition: transform var(--motion-slow) var(--ease-expo);
-	pointer-events: none;
-}
-
-.field-shell:focus-within .field-underline {
-	transform: scaleX(1);
 }
 
 .field-shell:focus-within .field-input {

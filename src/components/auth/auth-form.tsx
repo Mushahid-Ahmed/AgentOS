@@ -23,9 +23,11 @@ import { RippleLayer } from '@/components/motion/ripple'
 // @/lib/auth-form-rules (unit-tested) — this file is paint + wiring only.
 //
 // Take 2 (§7.2) adds the motion: a staggered entrance that slides in from the
-// side the user came from, focus glow + underline draw on the fields, a lifting
-// CTA with a click ripple, one short shake on a failed submit, and a checkmark
-// that draws itself while the door swings open. Auth logic is untouched.
+// side the user came from, focus glow on the fields, a lifting CTA with a click
+// ripple, one short shake on a failed submit, and a checkmark that draws itself
+// while the door swings open. Auth logic is untouched. (V17: the owner asked for
+// the accent hairline that drew under each field, and the paler card edge that
+// sat at the top of the shell, to be gone — both are.)
 //
 // V16 replaces that last beat when Supabase accepts the credentials: rather than
 // the door swinging beside the form, the leaf turns on its hinge and the camera
@@ -282,7 +284,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
 									onBlur={() => setFieldErrors((f) => ({ ...f, email: validateEmail(email) }))}
 									placeholder="you@example.com"
 								/>
-								<span aria-hidden className="field-underline" />
 							</div>
 							{fieldErrors.email ? (
 								<p id="email-error" role="alert" className="text-danger text-[13px]">
@@ -325,7 +326,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
 											: 'Your password'
 									}
 								/>
-								<span aria-hidden className="field-underline" />
 								<button
 									type="button"
 									onClick={() => setShowPassword((v) => !v)}
