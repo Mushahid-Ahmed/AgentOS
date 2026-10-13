@@ -1,5 +1,7 @@
 import { db } from '@/server/db/client'
+import { env } from '@/lib/env'
 import type { TypeSeg } from '@/components/motion/typewriter'
+import type { LandingBuild } from '@/components/landing/landing-footer'
 import {
 	AGENTOS_BENCHMARK_SETUPS,
 	SETUP_LABELS,
@@ -41,6 +43,7 @@ export type LandingBench = {
 export type LandingPreview = {
 	bench: LandingBench | null
 	bus: TypeSeg[][] | null
+	build: LandingBuild
 }
 
 type Rec = Record<string, unknown>
@@ -222,6 +225,28 @@ async function readBus(): Promise<TypeSeg[][] | null> {
 	return lines
 }
 
+// What the deployment actually is, read from the config it boots with. V14 M2 deleted the
+// footer's typed-in build line, which claimed a development build and a localhost deployment
+// even while serving production.
+function readBuild(): LandingBuild {
+	const databaseHost = (() => {
+		try {
+			return new URL(env.DATABASE_URL).hostname
+		} catch {
+			return ''
+		}
+	})()
+	return {
+		environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
+		provider: env.NANOGPT_API_KEY ? 'NanoGPT' : null,
+		database: databaseHost
+			? databaseHost.includes('supabase')
+				? 'Supabase Postgres'
+				: databaseHost
+			: null
+	}
+}
+
 export async function readLandingPreview(): Promise<LandingPreview> {
 	// The landing must still render (and still be honest) if the read fails, so a DB error
 	// degrades to the empty state rather than to a 500 on the marketing page.
@@ -229,5 +254,5 @@ export async function readLandingPreview(): Promise<LandingPreview> {
 		readBench().catch(() => null),
 		readBus().catch(() => null)
 	])
-	return { bench, bus }
+	return { bench, bus, build: readBuild() }
 }

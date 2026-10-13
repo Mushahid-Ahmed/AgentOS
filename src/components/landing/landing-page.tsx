@@ -146,7 +146,7 @@ const fmtCost = (v: number) => `$${v.toFixed(6)}`
 const fmtLatency = (v: number) => `${v.toFixed(1)} s`
 
 export async function LandingPage() {
-	const { bench, bus } = await readLandingPreview()
+	const { bench, bus, build } = await readLandingPreview()
 
 	// Every claim in the benchmark heading is computed from the rows it summarises: the
 	// per-metric winner, not a remembered sentence about run #6.
@@ -584,7 +584,7 @@ export async function LandingPage() {
 				</V7Page>
 
 				{/* 15 — FOOTER */}
-				<LandingFooter />
+				<LandingFooter build={build} />
 			</V7Camera>
 		</main>
 	)

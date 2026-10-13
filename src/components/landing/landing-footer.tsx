@@ -37,6 +37,16 @@ const SECTION = 'mx-auto w-[89%] max-w-6xl'
 const LINK =
 	'text-text-muted hover:text-text link-center ease-expo inline-flex min-h-11 items-center text-[13px] no-underline transition-colors duration-200'
 
+// The footer's "Build" column states facts about the running deployment, so the server
+// hands it the values instead of the page carrying literals: an environment name, and the
+// two integrations that are actually configured (absent means unconfigured, and the chip is
+// not rendered rather than claimed).
+export type LandingBuild = {
+	environment: string
+	provider: string | null
+	database: string | null
+}
+
 function Cascade({
 	order,
 	shown,
@@ -67,7 +77,7 @@ function Cascade({
 	)
 }
 
-export function LandingFooter() {
+export function LandingFooter({ build }: { build: LandingBuild }) {
 	const reduced = useReducedMotion()
 	const [wordRef, p] = useScrub<HTMLDivElement>(1.2)
 	const [ref, inView] = useInView<HTMLDivElement>(0.12)
@@ -131,14 +141,18 @@ export function LandingFooter() {
 						<span className="label-uppercase text-text-faint">Build</span>
 						<ul className="mt-4 flex list-none flex-col gap-2.5 p-0">
 							<Cascade order={7} {...props} className="text-text-muted text-[13px]">
-								Development build · 8x Playmakers trial
+								{build.environment} build
 							</Cascade>
-							<Cascade order={8} {...props} className="text-text-muted text-[13px]">
-								Models via NanoGPT
-							</Cascade>
-							<Cascade order={9} {...props} className="text-text-muted text-[13px]">
-								Localhost deployment · Supabase Postgres
-							</Cascade>
+							{build.provider ? (
+								<Cascade order={8} {...props} className="text-text-muted text-[13px]">
+									Models via {build.provider}
+								</Cascade>
+							) : null}
+							{build.database ? (
+								<Cascade order={9} {...props} className="text-text-muted text-[13px]">
+									{build.database}
+								</Cascade>
+							) : null}
 						</ul>
 					</div>
 				</div>
