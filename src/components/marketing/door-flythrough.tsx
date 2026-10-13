@@ -9,7 +9,7 @@ import {
 } from '@/components/marketing/door-illustration'
 import { MOTION_MS } from '@/lib/design-tokens'
 import { createPortal } from 'react-dom'
-import type { CSSProperties } from 'react'
+import { useLayoutEffect, type CSSProperties } from 'react'
 
 // V16: the sign-in fly-through. When Supabase verifies the credentials, the door
 // leaf swings open on its hinge and the camera dollies forward through the
@@ -31,6 +31,11 @@ import type { CSSProperties } from 'react'
 //    already looking at, in the same place, at the same size — the transition
 //    reads as one object continuing to move, never as a second door appearing.
 //
+// And the scene is not the only thing that moves: mounting this puts the same
+// camera on `document.body`, so the heading, the fields and the door all expand
+// outward from the opening together. A zooming picture next to a still screen is
+// what a fly-through has to avoid looking like.
+//
 // The whole flight is CSS animation; the component holds no state and starts no
 // timer. The form owns the wait (MOTION_MS.doorFly, which the CSS reads back as
 // --dfs-ms so the two cannot drift) and reduced-motion users never mount this at
@@ -47,6 +52,35 @@ export function DoorFlythrough({ rect, preset }: { rect: DoorRect; preset: DoorP
 	const aim = `${a.aimXPercent}% ${a.aimYPercent}%`
 	const aimX = rect.left + (rect.width * a.aimXPercent) / 100
 	const aimY = rect.top + (rect.height * a.aimYPercent) / 100
+
+	// The visitor's own screen has to be the thing that travels. A door that zooms
+	// while the form beside it stands still reads as a picture being enlarged; put
+	// the same camera on the body and the heading, the fields and the door all rush
+	// outward past the edges together. It is the SAME camera, not a second one:
+	// 900px of perspective, the doorway as its perspective-origin, the same 780px
+	// of dolly on the same curve, so the projected scale of the page and of this
+	// scene agree at every frame and the flying door stays welded to the door it
+	// replaced. The scene box is measured in viewport pixels and the body's origin
+	// is its own border box, hence the subtraction.
+	//
+	// A layout effect, not a passive one: the overlay's own dive starts the moment
+	// it is inserted, so a class added after paint puts the page 16ms behind the
+	// door. At the start of a dive that is invisible; at the end, where 16ms of a
+	// 720ms flight is 17px of a depth the projection has already stretched to 7.5x,
+	// it is enough to tear the two apart.
+	useLayoutEffect(() => {
+		const body = document.body
+		const box = body.getBoundingClientRect()
+		body.classList.add('dfs-diving')
+		body.style.setProperty('--dfs-ms', `${MOTION_MS.doorFly}ms`)
+		body.style.setProperty('--dfs-page-px', `${(aimX - box.left).toFixed(1)}px`)
+		body.style.setProperty('--dfs-page-py', `${(aimY - box.top).toFixed(1)}px`)
+		return () => {
+			body.classList.remove('dfs-diving')
+			body.style.removeProperty('--dfs-page-px')
+			body.style.removeProperty('--dfs-page-py')
+		}
+	}, [aimX, aimY])
 
 	return createPortal(
 		<div

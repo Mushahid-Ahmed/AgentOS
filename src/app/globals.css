@@ -349,8 +349,11 @@ body {
 	}
 }
 
-/* Back-loaded on purpose: the scale factor is already convex in z, so a gently
-   eased z reads as lean-in, then dive. */
+/* Constant forward speed, on purpose. The projection already makes the apparent
+   scale convex in z (P/(P - z)), so an eased z double-accelerates and reads as a
+   long pause followed by a lurch; linear z is what a camera moving at one speed
+   through a doorway actually looks like. Both the door scene and the page share
+   this exact curve so the two stay locked to the pixel. */
 @keyframes dfs-dolly {
 	from {
 		transform: translate3d(0, 0, 0);
@@ -365,16 +368,22 @@ body {
 		opacity: 0;
 		transform: scale(0.12);
 	}
-	28% {
-		opacity: 0.55;
+	22% {
+		opacity: 0.5;
 	}
-	62% {
+	50% {
+		opacity: 0.95;
+		transform: scale(4);
+	}
+	/* The light keeps growing past the crest instead of shrinking away: by the end
+	   of the dive it is the whole frame, and `dfs-fade` is what puts it out. */
+	72% {
 		opacity: 1;
-		transform: scale(3.2);
+		transform: scale(12);
 	}
 	100% {
-		opacity: 0;
-		transform: scale(9);
+		opacity: 1;
+		transform: scale(26);
 	}
 }
 
@@ -409,7 +418,7 @@ body {
 	position: absolute;
 	inset: 0;
 	transform-style: preserve-3d;
-	animation: dfs-dolly var(--dfs-ms) cubic-bezier(0.42, 0, 0.78, 0.35) both;
+	animation: dfs-dolly var(--dfs-ms) linear both;
 }
 
 /* overflow-visible on the two svg layers: the leaf swings outside the viewBox it
@@ -440,12 +449,48 @@ body {
 		color-mix(in oklab, var(--accent) 34%, var(--bg)) 46%,
 		transparent 74%
 	);
-	animation: dfs-bloom var(--dfs-ms) var(--ease-in-out) both;
+	animation: dfs-bloom var(--dfs-ms) linear both;
 }
 
 /* The resting door steps out while its flying twin holds the identical frame. */
 .door-hidden {
 	opacity: 0;
+}
+
+/* V16: the page itself is what travels. The scene above is a door; this is the
+   visitor walking through it. The body takes the same 900px camera with the
+   doorway as its perspective-origin, and its children dolly the same 780px on
+   the same curve, so the heading, the fields and the door expand outward from
+   the opening together instead of the door sliding away from a stationary form.
+   The fly-through root is excluded because it carries its own identical camera —
+   applying both would double the push-in. The page dissolves over the back half of
+   the dive, so the flight ends inside the light instead of freezing as an enlarged
+   screenshot of the form. */
+@keyframes dfs-page {
+	from {
+		transform: translate3d(0, 0, 0);
+		opacity: 1;
+	}
+	42% {
+		opacity: 1;
+	}
+	85% {
+		opacity: 0;
+	}
+	to {
+		transform: translate3d(0, 0, 780px);
+		opacity: 0;
+	}
+}
+
+body.dfs-diving {
+	perspective: 900px;
+	perspective-origin: var(--dfs-page-px) var(--dfs-page-py);
+}
+
+body.dfs-diving > *:not(.dfs-root) {
+	transform-style: preserve-3d;
+	animation: dfs-page var(--dfs-ms) linear both;
 }
 
 /* Loading skeleton: a moving specular band over a surface-hover base. */
