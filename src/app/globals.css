@@ -1730,7 +1730,10 @@ a:focus-visible .nav-wave > span {
 
 /* §4.5 energy pulse — hover sonar on ::before, click shockwave on ::after. The
    shared Button owns no pseudo-element, so these cannot collide with it.
-   `.auth-cta` is the auth form's own class; it opts in without that file changing. */
+   `.auth-cta` is the auth form's own class; it opts in without that file changing.
+   V19: the auth buttons are excepted from the hover sonar on the owner's word — the
+   expanding accent ring read as a highlight bleeding off the button. Their click
+   shockwave and lift stay, and the landing's `.energy` buttons are unchanged. */
 .energy,
 .auth-cta {
 	position: relative;
@@ -1749,8 +1752,7 @@ a:focus-visible .nav-wave > span {
 	pointer-events: none;
 }
 
-.energy:hover::before,
-.auth-cta:hover::before {
+.energy:hover::before {
 	animation: v5-pulse 1.5s var(--ease-out-soft) infinite;
 }
 
