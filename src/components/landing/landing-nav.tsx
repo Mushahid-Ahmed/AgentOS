@@ -10,9 +10,12 @@ import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 // Fixed marketing nav (brief §6.2-2, then V4 §5.1): transparent over the hero, solid
 // once scrolled, and while solid it shrinks, gets a backdrop-blur, hides on a
 // scroll-down past the threshold and slides back in on the first pixel of scroll-up.
-// The logo draws its own mark and springs in after the preloader leaves, the desktop
-// links run a character wave on hover, and the active section gets an underline that
-// TRAVELS from the previous link to the new one.
+// The logo draws its own mark and springs in after the preloader leaves, and the desktop
+// links run a character wave on hover.
+//
+// Owner ruling 2026-10-13 (V15): the reading position is marked by the word alone. The
+// travelling accent underline that used to sit under the active link is removed on every
+// surface, so a page name is highlighted, never ruled.
 //
 // What §5.1 asks for and what §6.2 allows are not the same gesture. "Nav bar shrinks
 // smoothly (height transition)" would animate `height` on a fixed header, which is a
@@ -65,8 +68,6 @@ export function LandingNav() {
 	const [open, setOpen] = useState(false)
 	const [active, setActive] = useState(-1)
 	const navRef = useRef<HTMLElement>(null)
-	const rowRef = useRef<HTMLSpanElement>(null)
-	const linkRefs = useRef<Array<HTMLAnchorElement | null>>([])
 
 	// Hide/show and the active index are deliberately *not* React state on every
 	// frame: `hidden` is written straight to the header's transform, and only the
@@ -149,25 +150,6 @@ export function LandingNav() {
 		if (el && !reduced) el.style.transform = 'translateY(0)'
 	}, [open, reduced])
 
-	// The travelling underline: one element, positioned by transform only. A 1px-wide
-	// bar translated to the link's left edge and scaled on X to the link's width is
-	// the same visual result as animating `width`, without the layout.
-	useEffect(() => {
-		const bar = rowRef.current
-		if (!bar) return
-		const place = () => {
-			const link = linkRefs.current[active]
-			if (!link) {
-				bar.style.transform = 'translateX(0) scaleX(0)'
-				return
-			}
-			bar.style.transform = `translateX(${link.offsetLeft}px) scaleX(${link.offsetWidth})`
-		}
-		place()
-		window.addEventListener('resize', place)
-		return () => window.removeEventListener('resize', place)
-	}, [active])
-
 	return (
 		<>
 			<header
@@ -226,36 +208,23 @@ export function LandingNav() {
 						</span>
 					</a>
 
-					<div className="relative hidden items-center gap-7 md:flex">
+					<div className="hidden items-center gap-7 md:flex">
 						{ANCHORS.map((a, i) => (
 							<a
 								key={a.href}
 								href={a.href}
 								data-t4="nav-link"
-								ref={(el) => {
-									linkRefs.current[i] = el
-								}}
 								aria-current={active === i ? 'true' : undefined}
 								className={cn(
 									'text-text-muted hover:text-text ease-expo inline-flex min-h-11 items-center px-1 text-[13px] no-underline transition-colors duration-200',
 									// Owner ruling 2026-10-13: the section the visitor is reading is marked in
-									// the nav itself, so the active word carries weight, not just colour. The
-									// underline marker is placed from the link's measured box after this class
-									// lands, so it tracks the wider word.
+									// the nav itself by weight and colour only, never by a rule under the word.
 									active === i && 'text-text font-bold'
 								)}
 							>
 								<WaveLabel label={a.label} />
 							</a>
 						))}
-						{/* The active marker lives in the link row, so offsetLeft is already
-						  relative to it and the bar travels between links. */}
-						<span
-							ref={rowRef}
-							aria-hidden
-							data-t4="nav-marker"
-							className="bg-accent ease-gather pointer-events-none absolute bottom-4 left-0 h-[2px] w-px origin-left rounded-full opacity-70 transition-transform duration-[640ms]"
-						/>
 					</div>
 
 					<div className="hidden items-center gap-2.5 md:flex">
