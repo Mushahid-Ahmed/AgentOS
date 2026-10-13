@@ -27,8 +27,7 @@ const PROJECTS_DIR = path.join(HOME, '.qoder', 'projects')
 
 // ---- configuration (all overridable via env so the hook config stays portable) ----
 const REPO_ROOT = process.env.AGENT_REPO_ROOT || findRepoRoot(process.cwd())
-const LOGS_DIR =
-	process.env.AGENT_LOGS_DIR || path.join(REPO_ROOT || process.cwd(), '.agent-logs')
+const LOGS_DIR = process.env.AGENT_LOGS_DIR || path.join(REPO_ROOT || process.cwd(), '.agent-logs')
 const AUTHOR = process.env.AGENT_AUTHOR || 'your-github-handle'
 const PROJECT = process.env.AGENT_PROJECT || (REPO_ROOT ? path.basename(REPO_ROOT) : 'unknown')
 const TOOL = process.env.AGENT_TOOL || 'qoder'
@@ -83,9 +82,7 @@ function resolveTargetSession(stdin) {
 		if (hit) return [hit]
 	}
 	// Prefer sessions recorded under our workspace, newest first.
-	const scored = files
-		.map((f) => ({ f, m: fs.statSync(f).mtimeMs }))
-		.sort((a, b) => b.m - a.m)
+	const scored = files.map((f) => ({ f, m: fs.statSync(f).mtimeMs })).sort((a, b) => b.m - a.m)
 	return scored.map((s) => s.f).slice(0, 1)
 }
 
@@ -137,7 +134,7 @@ function parseTranscript(file) {
 				promptTime: o.timestamp || new Date().toISOString(),
 				model: o.message?.model || model,
 				responseParts: [],
-				responseTime: o.timestamp || new Date().toISOString(),
+				responseTime: o.timestamp || new Date().toISOString()
 			}
 			turns.push(current)
 			continue
@@ -173,8 +170,8 @@ function fmtFileDate(iso) {
 	return {
 		date: `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}`,
 		filestamp: `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}_${p(
-			d.getUTCHours(),
-		)}-${p(d.getUTCMinutes())}-${p(d.getUTCSeconds())}`,
+			d.getUTCHours()
+		)}-${p(d.getUTCMinutes())}-${p(d.getUTCSeconds())}`
 	}
 }
 
@@ -192,13 +189,30 @@ const SECRET_PATTERNS = [
 	// password backtracks to the LAST '@', so passwords containing '@'
 	// (a real Supabase password did) are masked whole rather than leaving a
 	// trailing fragment exposed. The lookbehind keeps the scheme prefix.
-	/(?<=\/\/)[^/\s:@]+:[^/\s]+@/g,
+	/(?<=\/\/)[^/\s:@]+:[^/\s]+@/g
 ]
 function redactSecrets(s) {
 	if (typeof s !== 'string') return s
 	let out = s
 	for (const re of SECRET_PATTERNS) out = out.replace(re, '[REDACTED_SECRET]')
+	// Patterns miss what they were not written for: a project URL is not shaped
+	// like a key and prose can quote a password. Match the real values instead.
+	for (const v of SECRET_VALUES) out = out.split(v).join('[REDACTED_SECRET]')
 	return out
+}
+
+const SECRET_VALUES = loadSecretValues()
+function loadSecretValues() {
+	if (!REPO_ROOT) return []
+	const p = path.join(REPO_ROOT, '.env.local')
+	if (!fs.existsSync(p)) return []
+	const vals = fs
+		.readFileSync(p, 'utf8')
+		.split(/\r?\n/)
+		.map((l) => (/^[A-Z0-9_+=.-]+?=/.test(l) ? l.slice(l.indexOf('=') + 1).trim() : ''))
+		.filter((v) => v.length >= 6)
+	// Longest first, so a value that contains another is masked whole.
+	return [...new Set(vals)].sort((a, b) => b.length - a.length)
 }
 
 function renderLog(t) {
