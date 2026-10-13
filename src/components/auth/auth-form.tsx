@@ -282,7 +282,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 										if (fieldErrors.email) setFieldErrors((f) => ({ ...f, email: undefined }))
 									}}
 									onBlur={() => setFieldErrors((f) => ({ ...f, email: validateEmail(email) }))}
-									placeholder="you@example.com"
+									placeholder="Your email"
 								/>
 							</div>
 							{fieldErrors.email ? (
