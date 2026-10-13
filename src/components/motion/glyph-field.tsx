@@ -23,19 +23,23 @@ import { useReducedMotion } from '@/lib/motion/use-reduced-motion'
 // IntersectionObserver so the loop stops and the surface clears when the CTA scrolls away; glyphs
 // pooled once per layout and never re-allocated per frame. Every mark is still drawn every frame —
 // the marks breathe continuously, so nothing can be skipped — but they are emitted into one path per
-// colour and alpha level instead of one path per mark, because the 420 separate strokes were the
-// frame cost: under a 4x CPU throttle the field's marginal per-frame cost — each arm paired against
-// its own hidden arm inside one run, so the number is a within-run difference and not a cross-run
-// fps comparison — fell from 74.8ms at rest and 84.6ms while pushed to 31.9ms and 35.5ms
-// (`_lh/v8j4-fps.mjs` run 1 against runs 5 and 6 of this artifact; the two later runs bracket the
-// machine rather than the field, their off-arm noise floors being 1.6-4.2fps and 5.8-17.8fps), which
-// leaves 8-9ms of real work per frame: frames under that artificial throttle, none at 1x. Drawing the
-// marks as pre-rendered sprites instead of paths measured worse still (`_lh/v8j4-drawbench.mjs`:
-// 31.6ms vs 6.9ms per frame). `_lh/v8j4-paintparity.mjs` proves the two renderers put the same pixels
-// down: every mark lands within 0.018px of where it used to and 2.8% of its own pixels differ by more
-// than 8/255, against 37% for a control renderer that really moved them. At 1x — the machine a reader
-// actually uses — the field costs nothing measurable: 60fps with the pointer pushing it (p50 16.7ms,
-// p95 16.8ms, no frame longer than two vsyncs) against 60fps without it.
+// colour and alpha level instead of one path per mark, because the separate strokes were the frame
+// cost: under a 4x CPU throttle the field's marginal per-frame cost — each arm paired against its own
+// hidden arm inside one run, so the number is a within-run difference and not a cross-run fps
+// comparison — fell from 74.8ms at rest and 84.6ms while pushed to 31.9ms and 35.5ms at the original
+// 420-mark ceiling (`_lh/v8j4-fps.mjs` run 1 against runs 5 and 6; the two later runs bracket the
+// machine rather than the field, their off-arm noise floors being 1.6-4.2fps and 5.8-17.8fps).
+// Drawing the marks as pre-rendered sprites instead of paths measured worse still
+// (`_lh/v8j4-drawbench.mjs`: 31.6ms vs 6.9ms per frame). `_lh/v8j4-paintparity.mjs` proves the two
+// renderers put the same pixels down: every mark lands within 0.018px of where it used to and 2.8% of
+// its own pixels differ by more than 8/255, against 37% for a control renderer that really moved them.
+// Doubling the marks is not free and the density ceiling is the measured reason it is 780: the frame
+// cost is the rasterization of the ink, not the JS — `_lh/v13-countbench.mjs` prices the component's
+// own loop at 0.7-4.9ms of path building for any count from 280 to 1200 marks, while the frame gap
+// climbs from 16.6ms at 280 to 29.7-33.5ms at 888 and 33.7-38.5ms at 1200, with a clear-only floor at
+// 16.7ms throughout. At 1x the shipped density holds the hero at 60fps with the pointer pushing it;
+// the density this file first shipped at 1x read 36.4fps, p50 33.2ms, 18.4% of frames longer than two
+// vsyncs, which is what the ceiling exists to prevent.
 // `prefers-reduced-motion` renders no canvas at all rather than a paused one.
 //
 // The pointer arrives on `window`, not on the host. The host is `pointer-events-none` so the field
@@ -68,9 +72,32 @@ const TRI = 4
 // and two cornered marks (TRI here, the square in `mark`'s default arm). Dots are the only filled
 // shape, which keeps the field light.
 
-const PER_PX2 = 1 / 2600
-const MIN_GLYPHS = 110
-const MAX_GLYPHS = 420
+// Density is area-driven, then clamped. Owner ruling 2026-10-13: "quantity is too low, there should
+// be many in the animation" — the field went from one mark per 2600px² to one per 1300px² and the
+// ceiling from 420 to 780, so a 1440-wide CTA carries roughly 615 marks instead of ~307 and a
+// 1920-wide one is no longer capped. Nothing else moved: same six shapes drawn in the same
+// proportions (+, ×, ○, •, △, □ all gain marks), same sizes, same elliptical void around the
+// heading, same spring, push, breath, alpha batching and reduced-motion path. This is more marks,
+// not a different field, and the marks it adds are the ones the owner named.
+//
+// Why 1300 and not the 900 that was tried first: `_lh/v13-countbench.mjs` priced the frame cost
+// against mark count on the component's own loop (its bake()/frame() copied verbatim, the product
+// host hidden and restored, both instruments recorded). The JS side is flat — 0.7-4.9ms of path
+// building whether the field has 280 marks or 1200 — while the frame gap climbs with the ink: the
+// clearRect-only floor reads 16.7ms at any count, ~450 marks fit a vsync, 888 measured 29.7-33.5ms
+// and 1200 33.7-38.5ms. So the cost is rasterizing the marks, not building them, and one per 900px²
+// broke the hero's 60fps at 1x (36.4fps, p50 33.2ms, 18.4% of frames over two vsyncs).
+//
+// MIN_GLYPHS is the floor for narrow viewports, where the heading's void eats most of the host, and
+// it is 150 rather than the old 110 because the owner's ask is for marks at every width: at 375 the
+// area term alone only asks 122, which is within sampling noise of what the retired build already
+// drew there. Measured, not guessed — a floor of 250 left only ~420px² per mark at 375 and 29% of the
+// marks merged into their neighbours' ink, while the shipped 900px² term merges 16-18% and keeps ink
+// coverage at 2.9-3.4% of the host (`_lh/v13-glyphs.mjs`, legibility gate), so 150 is inside the
+// airiness the field still has and outside the wash.
+const PER_PX2 = 1 / 1300
+const MIN_GLYPHS = 150
+const MAX_GLYPHS = 780
 const RADIUS = 165
 const PUSH = 5.4
 const SPRING = 0.016
@@ -202,8 +229,8 @@ export function GlyphField({ className = '' }: { className?: string }) {
 				p.arc(X, Y, s * 0.62, 0, Math.PI * 2)
 				return
 			}
-			// PLUS and RING sit upright; the rest carry their own angle, which is what makes a
-			// lattice of 400 marks read as confetti rather than as a grid.
+			// PLUS and RING sit upright; the rest carry their own angle, which is what makes a lattice of
+			// six hundred marks read as confetti rather than as a grid.
 			const ang = g.shape === PLUS ? 0 : g.shape === CROSS ? g.rot + Math.PI / 4 : g.rot
 			const co = Math.cos(ang)
 			const si = Math.sin(ang)
@@ -260,8 +287,8 @@ export function GlyphField({ className = '' }: { className?: string }) {
 			}
 
 			// Four batches, drawn in the order the per-glyph version drew them: resting strokes,
-			// resting dots, pushed strokes, pushed dots. The field is 400+ marks, and one stroke()
-			// per mark was the frame — measured, not assumed: with this same loop painting into a
+			// resting dots, pushed strokes, pushed dots. The field is six hundred-odd marks, and one
+			// stroke() per mark was the frame — measured, not assumed: with this same loop painting into a
 			// surface that is suppressed from the screen (opacity:0, its backing store still holding
 			// 13.6k painted px) the page runs at exactly the visible loop's cadence, while the same
 			// page with the loop stopped runs faster. Alpha is quantised to 1/ALPHA_STEPS, which is at
