@@ -10,6 +10,7 @@ import { PipelineDiagram } from '@/components/landing/pipeline'
 import { PipelineStage } from '@/components/landing/pipeline-stage'
 import { V7Camera, V7Page } from '@/components/landing/v7-camera'
 import { CableBundle } from '@/components/landing/cable-bundle'
+import { RoutingStrike } from '@/components/landing/routing-strike'
 import { BlueprintCorners, BlueprintFrame } from '@/components/landing/blueprint-marks'
 import { KaraokeFill } from '@/components/landing/karaoke-fill'
 import { ArchGrid } from '@/components/landing/arch-grid'
@@ -457,7 +458,10 @@ export async function LandingPage() {
 				<V7Page id="cable">
 					<section id="benchmarks" className="relative scroll-mt-20 py-24 sm:py-28">
 						<CableBundle />
-						<div className={`${SECTION} relative z-10`}>
+						{/* V21: the two impacts land behind the numbers (z-5), and the content
+						    wrapper below is the sibling that takes the thud. */}
+						<RoutingStrike />
+						<div className={`${SECTION} v21-thud relative z-10`}>
 							<SectionHead
 								kicker="Benchmarks"
 								title={
