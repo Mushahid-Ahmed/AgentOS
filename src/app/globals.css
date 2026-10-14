@@ -1975,210 +1975,288 @@ a:focus-visible .nav-wave > span {
 	}
 }
 
-/* ── V21 routing strike ──────────────────────────────────────────────────────
-   The benchmark section's arrival, learned from the Playground's stomp sequence
-   but drawn in this product's language: a task token falls, the impact fans out
-   along routing-shaped legs, a second heavier strike follows. Only transform,
-   opacity and stroke-dashoffset animate, and the layer sits at z-5 behind the
-   numbers, so it can never sit over a figure.
-   `.v21-thud` is the section's own content wrapper — a later sibling of the
-   overlay, which is why the selector below is a sibling combinator. At rest it
-   carries no transform, so the V7 camera and the card tilts are untouched. */
-.v21-strike {
+/* ── V22 proof gate ──────────────────────────────────────────────────────────
+   The evidence section's arrival, and its headline made physical: a run pill
+   slides down the gate line, the two D4 jaws slam shut on it, the impact blooms
+   and thuds through the figures, and the shut gate flares to the full page width
+   before it dissolves. Scrolling is held while it plays.
+
+   `.v22-gate` is exactly the section's own bottom padding (sm:py-28 = 7rem) and it
+   clips, so a mark cannot reach a number at any viewport width — the guarantee is
+   the geometry, not a value tuned for one screenshot. The overlay is a z-5 sibling
+   that sits behind the content wrapper (`.v22-thud`, z-10), which is why the thud
+   selector below is a sibling combinator. At rest the wrapper carries no transform
+   (the thud fills backwards, never forwards), so the V7 camera and the card tilts
+   are untouched. Only transform and opacity animate. */
+.v22-gate {
 	position: absolute;
-	inset: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 7rem;
 	z-index: 5;
 	overflow: hidden;
 	pointer-events: none;
 }
 
-.v21-fan {
+.v22-svg {
 	position: absolute;
 	inset: 0;
 	width: 100%;
 	height: 100%;
 }
 
-.v21-crack {
-	stroke: var(--accent);
-	stroke-width: 1.5;
-	stroke-opacity: 0.8;
-	stroke-linecap: round;
-	stroke-linejoin: round;
-	stroke-dasharray: 1;
-	stroke-dashoffset: 1;
+/* Everything is invisible until the sequence is keyed on [data-v22="playing"]. */
+.v22-claim,
+.v22-jaw,
+.v22-seal,
+.v22-spark,
+.v22-flash,
+.v22-ring {
 	opacity: 0;
 }
 
-/* The second fan is the heavier strike, so its legs are drawn thicker. */
-.v21-crack-b {
-	stroke-width: 2;
-}
-
-.v21-token {
+.v22-claim,
+.v22-seal,
+.v22-flash {
 	fill: var(--accent);
-	opacity: 0;
 	transform-box: fill-box;
 	transform-origin: center;
 }
 
-.v21-ring {
+.v22-flash {
+	fill: url(#v22-bloom);
+}
+
+.v22-jaw {
+	fill: var(--accent);
+}
+
+/* The flare widens the shut gate about the gate's own centre, so both jaws open
+   outward together instead of sliding. */
+.v22-jaws {
+	transform-box: view-box;
+	transform-origin: 720px 56px;
+}
+
+.v22-ring {
 	stroke: var(--accent);
 	stroke-width: 1.5;
-	opacity: 0;
 	transform-box: fill-box;
 	transform-origin: center;
 }
 
-.v21-flash {
-	opacity: 0;
+.v22-spark {
+	fill: var(--accent);
 	transform-box: fill-box;
-	transform-origin: center;
+	transform-origin: 0 50%;
 }
 
-.v21-strike[data-v21='playing'] .v21-token-a {
-	animation: v21-strike-drop 0.55s var(--ease-in-out) 0.15s both;
+/* The claim arrives (0.67s), the jaws shut on it (0.76s), the impact carries the
+   show to 1.62s and the flare finishes it at 1.82s. */
+.v22-gate[data-v22='playing'] .v22-run {
+	animation: v22-run 0.62s linear 0.05s both;
 }
 
-.v21-strike[data-v21='playing'] .v21-ring-a {
-	animation: v21-ring 0.7s var(--ease-out-soft) 0.66s both;
+.v22-gate[data-v22='playing'] .v22-claim {
+	animation: v22-land 0.9s var(--ease-out-soft) 0.05s both;
 }
 
-/* The flash is the impact itself: it blooms just as the token touches down, then the
-   ring and the fracture carry the energy outward. */
-.v21-strike[data-v21='playing'] .v21-flash-a {
-	animation: v21-flash 0.62s var(--ease-out-soft) 0.62s both;
+.v22-gate[data-v22='playing'] .v22-jaw {
+	animation: v22-slam 0.66s linear 0.1s both;
 }
 
-.v21-strike[data-v21='playing'] .v21-flash-b {
-	animation: v21-flash 0.8s var(--ease-out-soft) 1.78s both;
+.v22-gate[data-v22='playing'] .v22-jaws {
+	animation: v22-flare 0.72s var(--ease-out-soft) 1.1s both;
 }
 
-.v21-strike[data-v21='playing'] .v21-crack-a {
-	animation: v21-draw 1.5s var(--ease-out-soft) calc(0.66s + var(--step) * 26ms) both;
+.v22-gate[data-v22='playing'] .v22-flash {
+	animation: v22-bloom 0.66s var(--ease-out-soft) 0.74s both;
 }
 
-.v21-strike[data-v21='playing'] .v21-token-b {
-	animation: v21-strike-drop 0.62s var(--ease-in-out) 1.3s both;
+.v22-gate[data-v22='playing'] .v22-ring {
+	animation: v22-ring 0.8s var(--ease-out-soft) 0.78s both;
 }
 
-.v21-strike[data-v21='playing'] .v21-ring-b {
-	animation: v21-ring 0.9s var(--ease-out-soft) 1.86s both;
+.v22-gate[data-v22='playing'] .v22-seal {
+	animation: v22-seal 0.56s var(--ease-out-soft) 0.78s both;
 }
 
-/* The second fan is wider, so its legs are staggered tighter and draw longer. */
-.v21-strike[data-v21='playing'] .v21-crack-b {
-	animation: v21-draw 2.1s var(--ease-out-soft) calc(1.86s + var(--step) * 20ms) both;
+/* Four sparks, each a beat behind the last, so the energy leaves the gate in a
+   fan rather than all at once. */
+.v22-gate[data-v22='playing'] .v22-spark {
+	animation: v22-spark 0.7s var(--ease-out-soft) calc(0.78s + var(--step) * 45ms) both;
 }
 
-.v21-strike[data-v21='playing'] ~ .v21-thud {
-	animation:
-		v21-thud 0.34s var(--ease-out-soft) 0.66s both,
-		v21-shake 0.55s var(--ease-in-out) 1.86s both;
+/* ONE animation carries the dip and the damped wobble: a second animation on the
+   same element would win the composite for the whole duration, filling the wrapper
+   with its own from-value and quietly cancelling the first. */
+.v22-gate[data-v22='playing'] ~ .v22-thud {
+	animation: v22-thud 0.72s var(--ease-out-soft) 0.74s backwards;
 }
 
-@keyframes v21-strike-drop {
+@keyframes v22-run {
+	0% {
+		transform: translateX(-800px);
+	}
+	50% {
+		transform: translateX(-140px);
+	}
+	75% {
+		transform: translateX(-40px);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+/* The pill is caught by the gate: it hits, squashes, recovers and is absorbed into
+   the bloom. */
+@keyframes v22-land {
 	0% {
 		opacity: 0;
-		transform: translateY(-1150px);
 	}
-	14% {
+	8% {
 		opacity: 1;
 	}
 	62% {
 		opacity: 1;
-		transform: translateY(0) scale(1.2, 0.78);
+		transform: scale(1, 1);
 	}
-	78% {
-		transform: translateY(0) scale(0.92, 1.08);
+	70% {
+		transform: scale(1.26, 0.7);
+	}
+	84% {
+		transform: scale(0.92, 1.08);
 	}
 	100% {
 		opacity: 0;
-		transform: translateY(0) scale(1.6);
+		transform: scale(1.5);
 	}
 }
 
-@keyframes v21-ring {
+/* Eased by hand, not by a curve: the jaws gather, then cover the last stretch fast
+   enough that the stop reads as a slam. --v22-dir is -1 on the left jaw and 1 on the
+   right, so one keyframe set closes both. */
+@keyframes v22-slam {
 	0% {
-		opacity: 0.85;
+		opacity: 0;
+		transform: translateX(calc(var(--v22-dir) * 760px));
+	}
+	12% {
+		opacity: 1;
+	}
+	20% {
+		transform: translateX(calc(var(--v22-dir) * 700px));
+	}
+	58% {
+		transform: translateX(calc(var(--v22-dir) * 210px));
+	}
+	80% {
+		transform: translateX(calc(var(--v22-dir) * 44px));
+	}
+	92% {
+		transform: translateX(calc(var(--v22-dir) * -6px));
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes v22-flare {
+	0% {
+		opacity: 1;
+		transform: scaleX(1);
+	}
+	22% {
+		opacity: 0.95;
+	}
+	100% {
+		opacity: 0;
+		transform: scaleX(1.85);
+	}
+}
+
+@keyframes v22-bloom {
+	0% {
+		opacity: 0;
 		transform: scale(0.25);
 	}
+	16% {
+		opacity: 1;
+	}
 	100% {
 		opacity: 0;
-		transform: scale(3.4);
+		transform: scale(1.12);
 	}
 }
 
-/* The bloom has to last long enough to be seen: a 12% peak on a 0.62s flash is a
-   74ms blink, which reads as a glitch rather than an impact. */
-@keyframes v21-flash {
+@keyframes v22-ring {
+	0% {
+		opacity: 0.8;
+		transform: scale(0.3);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2.15);
+	}
+}
+
+@keyframes v22-seal {
 	0% {
 		opacity: 0;
-		transform: scale(0.15);
+		transform: scale(0.2);
 	}
-	10% {
+	22% {
 		opacity: 1;
+		transform: scale(1.1);
 	}
-	42% {
-		opacity: 0.62;
+	55% {
+		opacity: 0.75;
+		transform: scale(1);
 	}
 	100% {
 		opacity: 0;
-		transform: scale(1.05);
+		transform: scale(2.6);
 	}
 }
 
-/* dashoffset 1 → 0 draws the leg outward, 0 → -1 sends it travelling on past the
-   tip, which is what makes the fracture read as energy rather than a static crack. */
-@keyframes v21-draw {
+@keyframes v22-spark {
 	0% {
-		opacity: 1;
-		stroke-dashoffset: 1;
+		opacity: 0;
+		transform: translateX(0) scaleX(0.4);
 	}
-	18% {
-		stroke-dashoffset: 0;
-	}
-	62% {
-		opacity: 1;
-		stroke-dashoffset: 0;
+	14% {
+		opacity: 0.9;
 	}
 	100% {
 		opacity: 0;
-		stroke-dashoffset: -1;
+		transform: translateX(130px) scaleX(1);
 	}
 }
 
-@keyframes v21-thud {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	34% {
-		transform: translateY(5px);
-	}
-	66% {
-		transform: translateY(-2px);
-	}
-}
-
-@keyframes v21-shake {
+@keyframes v22-thud {
 	0%,
 	100% {
 		transform: translate(0, 0);
 	}
-	14% {
-		transform: translate(-7px, 5px);
+	12% {
+		transform: translate(0, 3px);
 	}
-	30% {
-		transform: translate(6px, -4px);
+	26% {
+		transform: translate(0, 7px);
 	}
-	48% {
+	40% {
 		transform: translate(-4px, 3px);
 	}
-	68% {
-		transform: translate(3px, -2px);
+	54% {
+		transform: translate(3px, 4px);
 	}
-	86% {
-		transform: translate(-1px, 1px);
+	68% {
+		transform: translate(-2px, 1px);
+	}
+	82% {
+		transform: translate(1px, 2px);
 	}
 }
