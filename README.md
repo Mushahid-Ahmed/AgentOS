@@ -60,6 +60,54 @@ database** — no Docker, no local Postgres, no Supabase CLI.
 
 ---
 
+## Run it on your own machine
+
+The repo is public, so anyone can pull it and run the whole app on localhost. You supply
+your own three free/cheap services (Supabase, NanoGPT, BeatAPI) — there is **no shared demo
+database or demo key** in the repo, which is why the only step that cannot be scripted is
+provisioning them (§1).
+
+```bash
+# 1 · Get the code
+git clone https://github.com/Mushahid-Ahmed/AgentOS.git
+cd AgentOS
+
+# 2 · Toolchain + dependencies (Node >= 22.18.0; pnpm is pinned by package.json)
+corepack enable
+pnpm install          # also runs `prisma generate` and wires the git hooks
+
+# 3 · Provision Supabase + NanoGPT + BeatAPI, then fill in .env.local
+cp .env.example .env.local          # the 6 required vars are listed in §3;
+                                    # the app fails fast at boot if any is empty
+
+# 4 · Apply the committed migrations to YOUR database
+node --env-file=.env.local node_modules/prisma/build/index.js migrate deploy
+
+# 5 · Run it
+pnpm dev                            # → http://localhost:3000
+```
+
+Open **http://localhost:3000/signup** and create your first account — the app is gated behind
+sign-in, and the app itself provisions your user row (§4). Then `pnpm check:standards` proves
+the repo's own gates are wired, and `pnpm build` gives you a production build.
+
+Full walkthrough with the click-path for each service: [Prerequisites](#prerequisites) →
+[§1 Provision](#1--provision-the-services-do-this-once) → [§3 Configure env](#3--configure-env--apply-migrations).
+
+**Pulling updates later**
+
+```bash
+git pull
+pnpm install                        # deps or the Prisma client may have moved
+node --env-file=.env.local node_modules/prisma/build/index.js migrate deploy
+```
+
+Works the same on macOS, Linux and Windows (Git Bash or PowerShell). Port 3000 busy?
+`pnpm dev -- -p 3001`. Don't run `pnpm build` and `pnpm dev` against the same `.next`
+directory — see §5.
+
+---
+
 ## Prerequisites
 
 - **Node >= 22.18.0** (`package.json` `engines`). Node's built-in `--env-file` flag is
